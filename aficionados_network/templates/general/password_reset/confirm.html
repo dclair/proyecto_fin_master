@@ -1,0 +1,38 @@
+{% extends "general/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}Hubs&Clicks / Nueva contraseña{% endblock head_title %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white text-center py-3">
+                    <h1 class="h4 mb-0">
+                        <i class="bi bi-shield-lock me-2"></i>Nueva contraseña
+                    </h1>
+                </div>
+                <div class="card-body p-4">
+                    {% if validlink %}
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <div class="d-grid gap-2 mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    Guardar contraseña
+                                </button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <p class="text-muted">
+                            Este enlace no es válido o ya ha sido utilizado. Solicita uno nuevo para recuperar el acceso.
+                        </p>
+                        <a href="{% url 'password_reset' %}" class="btn btn-primary">Solicitar nuevo enlace</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

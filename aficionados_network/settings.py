@@ -198,15 +198,15 @@ LOGIN_URL = "/login/"
 # Después de cerrar sesión, el usuario irá a la página de inicio
 LOGOUT_REDIRECT_URL = "/"
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", os.getenv("EMAIL_USER", ""))
-CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", os.getenv("EMAIL_USER", ""))
-SERVER_EMAIL = os.getenv("SERVER_EMAIL", os.getenv("EMAIL_USER", ""))
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
-EMAIL_HOST_USER = os.getenv("EMAIL_USER", "")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASS", "")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", os.getenv("EMAIL_USER", ""))
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", os.getenv("EMAIL_PASS", ""))
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", EMAIL_HOST_USER)
+SERVER_EMAIL = os.getenv("SERVER_EMAIL", EMAIL_HOST_USER)
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
