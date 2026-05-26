@@ -1,0 +1,12 @@
+{% autoescape off %}
+Hola {{ user.get_username }},
+
+Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Hubs&Clicks.
+
+Puedes crear una nueva contraseña en este enlace:
+{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+
+Si no has solicitado este cambio, puedes ignorar este correo.
+
+El equipo de Hubs&Clicks
+{% endautoescape %}

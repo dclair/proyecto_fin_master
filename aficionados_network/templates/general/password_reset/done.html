@@ -1,0 +1,25 @@
+{% extends "general/layout.html" %}
+
+{% block head_title %}Hubs&Clicks / Email enviado{% endblock head_title %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 text-center">
+                    <i class="bi bi-envelope-check display-5 text-primary"></i>
+                    <h1 class="h4 mt-3">Revisa tu correo</h1>
+                    <p class="text-muted">
+                        Si existe una cuenta con ese email, recibirás un enlace para restablecer tu contraseña.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                        <a href="{% url 'home' %}" class="btn btn-primary btn-sm">Ir al inicio</a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-sm">Volver al login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
