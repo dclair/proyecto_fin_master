@@ -1,0 +1,267 @@
+{% extends "general/layout.html" %}
+{% load static %}
+
+{% block page_title %}
+<h1 class="fw-bold text-hubs mb-0">Detalle del evento</h1>
+{% endblock page_title %}
+
+{% block content %}
+
+{# 1. BOTÓN VOLVER #}
+<a href="{% url 'posts:event_list' %}" class="btn btn-link text-decoration-none mb-3 p-0 text-hubs fw-bold">
+    <i class="bi bi-arrow-left"></i> Volver al listado
+</a>
+
+{# 2. INFORMACIÓN DE NIVEL #}
+<div class="mb-4">
+    <h5 class="fw-bold mb-3">Información de nivel</h5>
+    
+    <div class="d-flex align-items-center gap-2 mb-3">
+        {# Etiqueta de nivel del evento #}
+        {% if object.level == 'all' %}
+            <span class="badge bg-all-levels badge-level-text"><i class="bi bi-people-fill me-1"></i>Todos los niveles</span>
+        {% elif object.level == 'beginner' %}
+            <span class="badge bg-success-subtle text-success border border-success-subtle badge-level-text"><i class="bi bi-reception-1 me-1"></i>Principiante</span>
+        {% elif object.level == 'intermediate' %}
+            <span class="badge bg-warning-subtle text-warning border border-warning-subtle badge-level-text"><i class="bi bi-reception-2 me-1"></i>Intermedio</span>
+        {% elif object.level == 'advanced' %}
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle badge-level-text"><i class="bi bi-reception-3 me-1"></i>Avanzado</span>
+        {% elif object.level == 'expert' %}
+            <span class="badge bg-dark text-white border border-dark badge-level-text"><i class="bi bi-reception-4 me-1"></i>Experto</span>
+        {% endif %}
+    </div>
+
+    {% if request.user.is_authenticated %}
+        {% if is_match %}
+            {# MENSAJE DE ÉXITO SI HAY MATCH #}
+            <div class="alert alert-info border-0 shadow-sm d-flex align-items-center" role="alert">
+                <i class="bi bi-stars fs-4 me-3"></i>
+                <div>
+                    <div class="fw-bold">¡Esta quedada es para ti!</div>
+                    <div class="small">Tu nivel de <strong>{{ user_level_label }}</strong> coincide con el plan.</div>
+                </div>
+            </div>
+        {% elif is_mentor %}
+            {# BANNER DE MENTOR/EXPERTO (Nivel superior al del evento) #}
+            <div class="mentor-banner shadow-sm d-flex align-items-center p-3">
+                <div class="mentor-icon-container me-3">
+                    <i class="bi bi-mortarboard-fill fs-2"></i>
+                </div>
+                <div>
+                    <div class="fw-bold small">¡Eres un referente!</div>
+                    <div class="extra-small opacity-75">Tu nivel es superior. ¡Anímate a ir para compartir tus trucos con los demás!</div>
+                </div>
+            </div>
+        {% else %}
+            {# INFO SI NO HAY MATCH NI MENTORÍA #}
+            <div class="p-3 bg-light rounded border-start border-3 border-secondary">
+                <div class="small text-muted">
+                    <i class="bi bi-person-badge me-1"></i>
+                    Tu nivel en {{ object.hobby.name }}: <strong>{{ user_level_label }}</strong>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+{# 3. ALERTA DE CANCELACIÓN O FINALIZACIÓN #}
+{% if event.is_canceled %}
+<div class="alert alert-danger border-0 shadow-sm d-flex flex-column p-4 mb-4 rounded-4">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-exclamation-octagon-fill fs-1 me-3"></i>
+        <div>
+            <h4 class="alert-heading fw-bold mb-1">PLAN CANCELADO</h4>
+            <p class="mb-0">Este evento ha sido cancelado por el organizador.</p>
+        </div>
+    </div>
+    {% if request.user == event.organizer %}
+        <hr>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <span class="small text-muted italic">¿Has cambiado de opinión? Puedes volver a activarlo:</span>
+            <form action="{% url 'posts:event_reactivate' event.id %}" method="POST" class="js-form-loading">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-sm px-4 shadow-sm">
+                    <span class="spinner-border spinner-border-sm btn-spinner d-none"></span>
+                    <span class="btn-text"><i class="bi bi-play-circle-fill me-2"></i>Reactivar ahora</span>
+                </button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+{% elif event.is_past %}
+<div class="alert alert-secondary border-0 shadow-sm d-flex align-items-center p-3 mb-4 rounded-4">
+    <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+    <p class="mb-0 fw-bold">Este evento ya se celebró el {{ event.event_date|date:"d/m/Y" }}.</p>
+</div>
+{% endif %}
+
+{# 4. HERO DEL EVENTO #}
+<div class="card border-0 shadow-sm overflow-hidden mb-4 card-hubs {% if event.is_canceled or event.is_past %}opacity-75{% endif %}">
+    <div class="row g-0">
+        <div class="col-lg-8">
+            <div class="detail-banner-wrapper">
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" class="detail-banner-img" alt="{{ event.title }}">
+                {% else %}
+                    <img src="{% static 'img/default_event.png' %}" class="detail-banner-img" alt="Evento">
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-4 bg-white border-start d-flex align-items-center">
+            <div class="p-4 w-100">
+                <span class="badge badge-hubs mb-2">{{ event.hobby.name }}</span>
+                <h2 class="fw-bold text-hubs mb-3 {% if event.is_canceled %}text-decoration-line-through text-muted{% endif %}">
+                    {{ event.title }}
+                </h2>
+
+                <div class="bg-light p-3 rounded-4 border-start border-4 border-hubs">
+                    <div class="mb-2 d-flex align-items-center">
+                        <i class="bi bi-calendar3 me-2 text-hubs"></i>
+                        <strong>{{ event.event_date|date:"l, d F" }}</strong>
+                    </div>
+                    <div class="mb-2 d-flex align-items-center">
+                        <i class="bi bi-clock me-2 text-hubs"></i>
+                        {{ event.event_date|date:"H:i" }} h
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-geo-alt-fill me-2 text-danger"></i>
+                        <strong>{{ event.location }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# 5. CUERPO PRINCIPAL #}
+<div class="row mt-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm p-4 mb-4 card-hubs">
+            <h4 class="fw-bold text-hubs mb-3">
+                <i class="bi bi-info-circle me-2"></i>Sobre esta quedada
+            </h4>
+            <div class="text-secondary" style="white-space: pre-line;">
+                {{ event.description }}
+            </div>
+            <div class="mt-4 pt-3 border-top text-muted">
+                <i class="bi bi-person-badge me-2"></i>
+                Organizado por <strong>@{{ event.organizer.username }}</strong>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <h4 class="fw-bold text-hubs mb-4">
+                <i class="bi bi-chat-left-text me-2"></i>Comunidad
+            </h4>
+
+            {% if not event.is_canceled and not event.is_past %}
+            <div class="card border-0 shadow-sm mb-4 card-hubs">
+                <div class="card-body">
+                    <form action="{% url 'posts:add_event_comment' event.id %}" method="POST" class="js-form-loading">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ comment_form.content }}
+                        </div>
+                        <div class="text-end">
+                           <button type="submit" class="btn btn-hubs">
+                                <span class="spinner-border spinner-border-sm btn-spinner d-none" role="status" aria-hidden="true"></span>
+                                <span class="btn-text">Publicar comentario</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            {% for comment in event.comments.all %}
+            <div class="d-flex mb-3">
+                <img src="{% if comment.user.profile.profile_picture %}{{ comment.user.profile.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ comment.user.username }}&background=0b5961&color=fff{% endif %}"
+                     class="rounded-circle border shadow-sm" style="width:45px;height:45px;object-fit:cover;">
+                <div class="ms-3 bg-white p-3 rounded-4 shadow-sm flex-grow-1">
+                    <div class="d-flex justify-content-between mb-1">
+                        <strong class="text-hubs">@{{ comment.user.username }}</strong>
+                        <small class="text-muted">{{ comment.created_at|timesince }}</small>
+                    </div>
+                    <p class="mb-0">{{ comment.content|linebreaksbr }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted text-center py-4">Nadie ha comentado todavía.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="sticky-top pt-3" style="top: 140px;">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0 mb-3">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-alert="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="card border-0 shadow-sm p-4 card-hubs">
+                <h5 class="fw-bold text-hubs mb-2">
+                    <i class="bi bi-people me-2"></i>Asistentes
+                    <span class="badge bg-light text-hubs border ms-1">
+                        {{ event.participants.count }}/{{ event.max_participants }}
+                    </span>
+                </h5>
+
+                {# BARRA DE PROGRESO VISUAL #}
+                <div class="progress mb-4" style="height: 8px; background-color: var(--hubs-primary-subtle);">
+                    <div class="progress-bar {% if event.participants.count >= event.max_participants %}bg-danger{% else %}bg-hubs{% endif %}"
+                         role="progressbar"
+                         style="width: {% widthratio event.participants.count event.max_participants 100 %}%">
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    {% for participant in event.participants.all %}
+                    <div class="position-relative">
+                        <img src="{% if participant.profile.profile_picture %}{{ participant.profile.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ participant.username }}&background=random{% endif %}"
+                             class="rounded-circle border shadow-sm"
+                             style="width:48px;height:48px;object-fit:cover;"
+                             title="{{ participant.username }}">
+                        {% if participant == event.organizer %}
+                        <span class="badge-organizer"><i class="bi bi-star-fill"></i></span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if event.is_past %}
+                    <div class="text-center p-3 bg-light rounded-4 text-muted border shadow-sm">
+                        <i class="bi bi-calendar-check-fill me-2 text-secondary"></i>
+                        <span class="fw-bold">Evento finalizado</span>
+                    </div>
+                {% elif not event.is_canceled %}
+                    {% if request.user == event.organizer %}
+                        <a href="{% url 'posts:event_update' event.id %}" class="btn btn-hubs w-100 mb-2">
+                            <i class="bi bi-pencil-square me-2"></i>Editar evento
+                        </a>
+                    {% else %}
+                        <form action="{% url 'posts:toggle_attendance' event.id %}" method="POST" class="js-form-loading">
+                            {% csrf_token %}
+                            {% if request.user in event.participants.all %}
+                                <button type="submit" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center">
+                                    <span class="spinner-border spinner-border-sm btn-spinner d-none me-2" role="status" aria-hidden="true"></span>
+                                    <span class="btn-text"><i class="bi bi-person-dash-fill me-2"></i>No podré asistir</span>
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn btn-hubs w-100 d-flex align-items-center justify-content-center">
+                                    <span class="spinner-border spinner-border-sm btn-spinner d-none me-2" role="status" aria-hidden="true"></span>
+                                    <span class="btn-text"><i class="bi bi-person-plus-fill me-2"></i>Me apunto</span>
+                                </button>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

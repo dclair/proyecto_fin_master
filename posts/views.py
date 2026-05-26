@@ -1,0 +1,882 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    ListView,
+    UpdateView,
+    DeleteView,
+)
+from django.http import HttpResponse, HttpResponseForbidden
+from django.views import View
+from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from .models import Posts, Event, Hobby
+from .forms import PostCreateForm, CommentForm, EventForm, EventCommentForm
+from notifications.models import Notification
+from django.db.models import Q  # Importante para el buscador
+from django.db.models import Exists, OuterRef
+from itertools import chain
+from operator import attrgetter
+
+
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
+from django.views import View
+from django.urls import reverse
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+from email.mime.image import MIMEImage
+import os
+from profiles.models import Review
+from django.db.models import Count  # Importante para contar los posts
+
+# --- VISTA PARA CREAR POST ---
+# Añadimos LoginRequiredMixin para que no puedan crear si no están logueados
+from django.contrib.auth.models import User
+from django.shortcuts import render
+from django.utils.safestring import mark_safe
+from profiles.models import UserHobby, Hobby
+
+
+# Funcion Maestra para enviar correos con el diseño de Hubs&Clicks
+def send_hubs_email(subject, recipient, message_body, action_url):
+    """
+    Función universal para enviar correos con el diseño de Hubs&Clicks.
+    """
+    if not recipient.email:
+        return  # Si no hay email, no hacemos nada
+
+    context = {
+        "recipient_name": recipient.username,
+        "message_body": message_body,
+        "action_url": action_url,
+    }
+
+    # 1. Renderizar el HTML y el texto plano
+    html_content = render_to_string("general/emails/notification_email.html", context)
+    text_content = strip_tags(html_content)
+
+    # 2. Crear el objeto de email
+    email = EmailMultiAlternatives(
+        subject,
+        text_content,
+        settings.DEFAULT_FROM_EMAIL,
+        [recipient.email],
+    )
+    email.attach_alternative(html_content, "text/html")
+
+    # 3. Adjuntar el Logo físicamente
+    logo_path = os.path.join(settings.BASE_DIR, "static", "img", "logo_hubs_email.png")
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as f:
+            logo_data = f.read()
+            logo_image = MIMEImage(logo_data)
+            logo_image.add_header("Content-ID", "<logo_hubs_email>")
+            email.attach(logo_image)
+
+    # 4. Enviar
+    email.send(fail_silently=True)
+
+
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Posts
+    form_class = PostCreateForm
+    template_name = "posts/post_create.html"
+    success_url = reverse_lazy("home")
+    login_url = "login"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 1. Posts para el Feed Global (Descubrimiento)
+        context["global_posts"] = (
+            Posts.objects.all()
+            .select_related("user__profile", "category")
+            .order_by("-created_at")[:12]
+        )
+
+        # 2. Estadísticas para el Cuadro de Bienvenida
+        hoy = timezone.now().date()
+        context["stats"] = {
+            "posts_today": Posts.objects.filter(created_at__date=hoy).count(),
+            "total_members": User.objects.count(),
+            "new_this_week": Posts.objects.filter(
+                created_at__gte=timezone.now() - timezone.timedelta(days=7)
+            ).count(),
+        }
+        # 3. Lógica de Tendencias
+        # Contamos cuántos posts tiene cada categoría y traemos las 5 mejores
+        from posts.models import (
+            Hobby,
+        )  # Asegúrate de importar tu modelo de Categoría/Afición
+
+        context["trending_categories"] = (
+            Hobby.objects.annotate(num_posts=Count("posts"))
+            .filter(num_posts__gt=0)
+            .order_by("-num_posts")[:5]
+        )
+        return context
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+# --- VISTA DE DETALLE DEL POST ---
+# ¡CORRECCIÓN AQUÍ! LoginRequiredMixin debe ir ANTES que DetailView
+class PostDetailView(LoginRequiredMixin, DetailView):
+    model = Posts
+    template_name = "posts/post_detail.html"
+    context_object_name = "post"
+    login_url = "login"
+
+    # --- LO ÚNICO NECESARIO PARA EL MODAL ---
+    def get_template_names(self):
+        if self.request.GET.get("modal"):
+            return ["posts/partials/_post_modal_body.html"]
+        return [self.template_name]
+
+    # ----------------------------------------
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["comment_form"] = CommentForm()
+        return context
+
+
+# --- LÓGICA DE LIKES (Se mantiene igual, ya tiene el decorador) ---
+@login_required
+@require_POST
+def toggle_like(request, post_id):
+    # 1. Buscamos el post
+    post = get_object_or_404(Posts, id=post_id)
+    user = request.user
+
+    if user in post.likes.all():
+        post.likes.remove(user)
+        liked = False
+        # 2. IMPORTANTE: Cambiamos recipient=post.author por recipient=post.user
+        Notification.objects.filter(
+            sender=user,
+            recipient=post.user,  # <--- Corregido
+            post=post,
+            notification_type="like",
+        ).delete()
+    else:
+        post.likes.add(user)
+        liked = True
+
+        # 3. Solo notificamos si el dueño del post no es quien da el like
+        if post.user != user:  # <--- Corregido
+            Notification.objects.create(
+                sender=user,
+                recipient=post.user,  # <--- Corregido
+                post=post,
+                notification_type="like",
+            )
+
+    # 4. Devolvemos la respuesta que el JS espera
+    return JsonResponse({"liked": liked, "count": post.likes.count()})
+
+
+# --- LÓGICA DE COMENTARIOS ---
+@login_required
+def add_comment(request, post_id):
+    post = get_object_or_404(Posts, id=post_id)
+
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.user = request.user
+            comment.save()
+
+            # 1. PREPARAR LA URL PARA EL BOTÓN DEL EMAIL
+            action_url = request.build_absolute_uri(
+                reverse("posts:post_detail", args=[post.pk])
+            )
+
+            # --- LÓGICA DE NOTIFICACIONES (Mantener exactamente igual) ---
+            if post.user != request.user:
+                Notification.objects.create(
+                    sender=request.user,
+                    recipient=post.user,
+                    notification_type="comment",
+                    post=post,
+                )
+                send_hubs_email(
+                    subject=f"💬 Nuevo comentario de @{request.user.username}",
+                    recipient=post.user,
+                    message_body=f'¡Hola! @{request.user.username} ha comentado en tu publicación: "{post.caption[:50]}..."',
+                    action_url=action_url,
+                )
+            else:
+                participantes_ids = (
+                    post.comments.exclude(user=post.user)
+                    .values_list("user_id", flat=True)
+                    .distinct()
+                )
+                usuarios_a_notificar = User.objects.filter(id__in=participantes_ids)
+
+                for usuario in usuarios_a_notificar:
+                    Notification.objects.create(
+                        sender=request.user,
+                        recipient=usuario,
+                        notification_type="comment",
+                        post=post,
+                    )
+                    send_hubs_email(
+                        subject=f"📢 @{request.user.username} respondió en un post",
+                        recipient=usuario,
+                        message_body=f"El autor del post ha respondido en una conversación donde participaste.",
+                        action_url=action_url,
+                    )
+
+            # --- LA CLAVE PARA EL MODAL ---
+            # Si la petición es HTMX, devolvemos SOLO el fragmento del nuevo comentario
+            if request.headers.get("HX-Request"):
+                return render(
+                    request,
+                    "posts/partials/_comment_single.html",
+                    {"comment_obj": comment},
+                )
+
+    # Si no es HTMX o el formulario falló, redirigimos como siempre
+    return redirect("posts:post_detail", pk=post.pk)
+
+
+@login_required
+def toggle_hobby_membership(request, hobby_slug):
+    hobby = get_object_or_404(Hobby, slug=hobby_slug)
+    profile = request.user.profile  # Asumo que tu relación es User -> Profile
+
+    if hobby in profile.hobbies.all():
+        profile.hobbies.remove(hobby)
+        is_member = False
+    else:
+        profile.hobbies.add(hobby)
+        is_member = True
+
+    # Calculamos el total de miembros (ajusta 'profiles' según tu related_name)
+    member_count = hobby.profiles.count()
+
+    # Si es una petición HTMX, devolvemos solo el trozo del botón y el contador
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "posts/partials/_hobby_status.html",
+            {"hobby": hobby, "is_member": is_member, "member_count": member_count},
+        )
+
+    return redirect("posts:hobby_hub", hobby_slug=hobby_slug)
+
+
+# --- VISTA PARA EDITAR POST ---
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Posts
+    form_class = PostCreateForm
+    template_name = "posts/post_update.html"
+
+    def test_func(self):
+        # Solo el autor puede editar
+        post = self.get_object()
+        return self.request.user == post.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Obtenemos posts de todos los usuarios para "Descubrir"
+        # Usamos .order_by('?') para que sean aleatorios o '-created_at' para los últimos
+        context["discover_posts"] = Posts.objects.exclude(pk=self.object.pk).order_by(
+            "-created_at"
+        )[:5]
+
+        return context
+
+
+# --- VISTA PARA ELIMINAR POST ---
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Posts
+    template_name = "posts/post_confirm_delete.html"
+    success_url = reverse_lazy("home")  # O 'posts:post_list'
+
+    def test_func(self):
+        # Solo el autor puede borrar
+        post = self.get_object()
+        return self.request.user == post.user
+
+
+# Vista para CREAR la quedada
+class EventCreateView(LoginRequiredMixin, CreateView):
+    model = Event
+    form_class = EventForm
+    template_name = "posts/event_form.html"
+    success_url = reverse_lazy("posts:event_list")
+    login_url = "login"
+
+    def form_valid(self, form):
+        # 1. Asignamos al usuario como organizador
+        form.instance.organizer = self.request.user
+
+        # 2. Guardamos el objeto primero para que tenga un ID en la base de datos
+        response = super().form_valid(form)
+
+        # 3. ¡Aquí está el truco! Añadimos al creador como participante
+        self.object.participants.add(self.request.user)
+
+        return response
+
+
+# Función para APUNTARSE o DESAPUNTARSE
+@login_required
+def toggle_attendance(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+
+    # 🚨 VALIDACIÓN CRÍTICA: Bloqueo por fecha pasada
+    # Comparamos la fecha del evento con el momento actual
+    if event.event_date < timezone.now():
+        messages.error(
+            request,
+            "Este evento ya ha finalizado y no permite cambios en la asistencia.",
+        )
+        return redirect("posts:event_detail", pk=event.id)
+
+    if request.user == event.organizer:
+        messages.warning(request, "Como organizador, no puedes desapuntarte.")
+        return redirect("posts:event_detail", pk=event.id)
+
+    action_url = request.build_absolute_uri(
+        reverse("posts:event_detail", args=[event.id])
+    )
+
+    if request.user in event.participants.all():
+        event.participants.remove(request.user)
+        messages.info(request, "Ya no estás apuntado.")
+        # USAMOS LA FUNCIÓN MAESTRA
+        send_hubs_email(
+            f"🏃 Baja en tu evento: {event.title}",
+            event.organizer,
+            f"@{request.user.username} se ha desapuntado de tu evento '{event.title}'.",
+            action_url,
+        )
+    else:
+        if event.participants.count() < event.max_participants:
+            event.participants.add(request.user)
+            messages.success(request, "¡Te has apuntado!")
+            # USAMOS LA FUNCIÓN MAESTRA
+            send_hubs_email(
+                f"✅ ¡Alguien se ha unido!: {event.title}",
+                event.organizer,
+                f"¡Buenas noticias! @{request.user.username} se ha unido a '{event.title}'.",
+                action_url,
+            )
+        else:
+            messages.error(request, "Evento lleno.")
+
+    return redirect("posts:event_detail", pk=event.id)
+
+
+# Vista para VER la lista de quedadas
+class EventListView(LoginRequiredMixin, ListView):
+    model = Event
+    template_name = "posts/event_list.html"
+    context_object_name = "events"
+    login_url = "login"
+    paginate_by = 9
+
+    def get_queryset(self):
+        # 1. Base del queryset (añadimos .distinct() aquí al principio)
+        queryset = (
+            Event.objects.select_related("hobby", "organizer")
+            .filter(event_date__gte=timezone.now())
+            .distinct()  # <--- Lo movemos aquí
+            .order_by("event_date")
+        )
+
+        # 2. Captura de filtros
+        search_query = self.request.GET.get("q")
+        city_query = self.request.GET.get("city")
+        hobby_id = self.request.GET.get("hobby")
+        level_query = self.request.GET.get("level")
+
+        # 3. Aplicación de filtros
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query)
+                | Q(location__icontains=search_query)
+                | Q(description__icontains=search_query)
+            )
+        if city_query:
+            queryset = queryset.filter(location__icontains=city_query)
+        if hobby_id and hobby_id != "all":
+            queryset = queryset.filter(hobby_id=hobby_id)
+        if level_query and level_query != "all":
+            queryset = queryset.filter(level=level_query)
+
+        # 4. LÓGICA DE MATCH DE NIVEL
+        # Solo ejecutamos si el usuario está logueado para evitar errores
+        if self.request.user.is_authenticated:
+            # Filtramos a través de profile__user porque UserHobby apunta al Profile
+            user_levels_qs = UserHobby.objects.filter(
+                profile__user=self.request.user  # <--- CAMBIO AQUÍ
+            ).values("hobby_id", "level")
+
+            # Creamos el mapa: {id_del_hobby: 'nivel'}
+            levels_map = {item["hobby_id"]: item["level"] for item in user_levels_qs}
+
+            # Marcamos los eventos que coinciden
+            for event in queryset:
+                user_level_in_this_hobby = levels_map.get(event.hobby.id)
+
+                # Comparamos el nivel del evento con el del usuario
+                # También es match si el evento es para "todos" (all)
+                event.is_match = (event.level == "all") or (
+                    event.level == user_level_in_this_hobby
+                )
+        else:
+            for event in queryset:
+                event.is_match = False
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["hobbies"] = Hobby.objects.all()
+        context["current_q"] = self.request.GET.get("q", "")
+        context["current_city"] = self.request.GET.get("city", "")
+        context["current_hobby"] = self.request.GET.get("hobby", "all")
+        context["current_level"] = self.request.GET.get("level", "all")
+        return context
+
+
+class EventDetailView(LoginRequiredMixin, DetailView):
+    model = Event
+    template_name = "posts/event_detail.html"
+    context_object_name = "event"
+    login_url = "login"
+
+    def get_context_data(self, **kwargs):
+        # 1. Obtenemos el diccionario base de Django
+        context = super().get_context_data(**kwargs)
+
+        # 2. Obtenemos la lista de participantes
+        context["participants"] = self.object.participants.all()
+
+        # 3. Obtenemos la lista de comentarios
+        context["comment_form"] = EventCommentForm()
+
+        # 4. Lógica de match y mentoría
+        if self.request.user.is_authenticated:
+            user_hobby = UserHobby.objects.filter(
+                profile__user=self.request.user, hobby=self.object.hobby
+            ).first()
+
+            if user_hobby:
+                context["user_level_label"] = user_hobby.get_level_display()
+
+                # Definimos el orden de los niveles para comparar
+                level_order = {
+                    "beginner": 0,
+                    "intermediate": 1,
+                    "advanced": 2,
+                    "expert": 3,
+                }
+
+                # Obtenemos valores numéricos (si es 'all', le damos -1 para que todos sean superiores)
+                event_val = level_order.get(self.object.level, -1)
+                user_val = level_order.get(user_hobby.level, 0)
+
+                # Es match si son iguales o el evento es para todos
+                context["is_match"] = (
+                    self.object.level == "all" or self.object.level == user_hobby.level
+                )
+
+                # Eres mentor si tu nivel es estrictamente mayor al del evento
+                context["is_mentor"] = (
+                    user_val > event_val and self.object.level != "all"
+                )
+            else:
+                context["user_level_label"] = "No definido"
+                context["is_match"] = self.object.level == "all"
+                context["is_mentor"] = False
+
+        # 5. Devolvemos el contexto
+        return context
+
+
+# VISTA PARA EDITAR
+class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Event
+    form_class = EventForm  # Usamos el formulario con el que creamos el evento
+    template_name = "posts/event_form.html"  # Reutilizamos el mismo de crear
+
+    def test_func(self):
+        # Solo el organizador puede editar
+        return self.get_object().organizer == self.request.user
+
+
+# VISTA PARA (CANCELAR)
+class EventCancelView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        event = get_object_or_404(Event, pk=self.kwargs["pk"])
+        return event.organizer == self.request.user
+
+    def post(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+
+        if event.is_canceled:
+            messages.info(request, "Este evento ya ha sido cancelado anteriormente.")
+            return redirect("posts:event_detail", pk=event.pk)
+
+        # 1. MARCADO DEL EVENTO
+        event.is_canceled = True
+        event.save()
+
+        # 2. PREPARACIÓN DE DATOS PARA EL EMAIL
+        action_url = request.build_absolute_uri(
+            reverse("posts:event_detail", args=[event.pk])
+        )
+        subject = f"⚠️ Quedada cancelada: {event.title}"
+        message_body = f"Lamentamos informarte que el plan '{event.title}' ha sido cancelado por el organizador. ¡No te preocupes! Pronto habrá más eventos disponibles."
+
+        # 3. NOTIFICAR Y ENVIAR EMAILS A ASISTENTES
+        participants = event.participants.all()
+        for p in participants:
+            if p != request.user:
+                # Notificación visual (campanita roja)
+                Notification.objects.create(
+                    recipient=p,
+                    sender=request.user,
+                    notification_type="event",
+                    event=event,
+                )
+
+                # --- ¡AQUÍ ESTÁ EL CAMBIO! ---
+                # Usamos la función maestra que ya gestiona el LOGO y el HTML por dentro
+                send_hubs_email(subject, p, message_body, action_url)
+
+        messages.success(
+            request,
+            "El evento ha sido cancelado y los asistentes han sido notificados por email.",
+        )
+        return redirect("posts:event_detail", pk=event.pk)
+
+
+# --- VISTA PARA COMENTAR EN UN EVENTO ---
+@login_required
+def add_event_comment(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+
+    if request.method == "POST":
+        form = EventCommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.event = event
+            comment.user = request.user
+            comment.save()
+
+            # URL para el botón del email
+            action_url = request.build_absolute_uri(
+                reverse("posts:event_detail", args=[event.id])
+            )
+
+            # --- LÓGICA DE NOTIFICACIONES ---
+
+            if event.organizer != request.user:
+                # CASO 1: Un usuario comenta -> El organizador recibe el aviso
+                recipient = event.organizer
+
+                # 1. Notificación web
+                Notification.objects.create(
+                    recipient=recipient,
+                    sender=request.user,
+                    notification_type="comment",
+                    event=event,
+                )
+
+                # 2. EMAIL (USANDO LA FUNCIÓN MAESTRA)
+                send_hubs_email(
+                    f"💬 Nuevo comentario de {request.user.username}",
+                    recipient,
+                    f"{request.user.username} ha comentado en tu plan '{event.title}'.",
+                    action_url,
+                )
+
+            else:
+                # CASO 2: El organizador responde -> Todos los participantes reciben aviso
+                participantes = event.participants.exclude(id=request.user.id)
+
+                for pepe in participantes:
+                    # 1. Notificación web para cada uno
+                    Notification.objects.create(
+                        recipient=pepe,
+                        sender=request.user,
+                        notification_type="comment",
+                        event=event,
+                    )
+
+                    # 2. EMAIL (USANDO LA FUNCIÓN MAESTRA)
+                    send_hubs_email(
+                        f"📢 {request.user.username} ha respondido en: {event.title}",
+                        pepe,
+                        f"{request.user.username} (el organizador) ha puesto un comentario en el evento '{event.title}'.",
+                        action_url,
+                    )
+
+            messages.success(request, "Comentario publicado y avisos enviados.")
+
+    return redirect("posts:event_detail", pk=event.id)
+
+
+# -- VISTA PARA AGREGAR COMENTARIOS A POSTS (NO EVENTOS)
+@login_required
+def add_post_comment(request, post_id):
+    post = get_object_or_404(Posts, id=post_id)
+    if request.method == "POST":
+        texto = request.POST.get("comment")
+        if texto:
+            nuevo = Comment.objects.create(post=post, user=request.user, comment=texto)
+
+            # Si es HTMX, devolvemos SOLO el comentario nuevo
+            if request.headers.get("HX-Request"):
+                return render(
+                    request,
+                    "posts/partials/_comment_single.html",
+                    {"comment_obj": nuevo},
+                )
+
+    # Si algo falla, devolvemos un 204 (No Content) para que HTMX no haga nada
+    return HttpResponse(status=204)
+
+
+# --- VISTA PARA VER MIS EVENTOS, los que uno mismo ha creado ---
+class MyEventsListView(LoginRequiredMixin, ListView):
+    model = Event
+    template_name = "posts/my_events.html"
+    context_object_name = "my_events"
+    paginate_by = 10  # Por si el usuario es muy activo
+
+    def get_queryset(self):
+        # Traemos todos sus eventos, ordenados del más reciente al más antiguo
+        return Event.objects.filter(organizer=self.request.user).order_by("-event_date")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pasamos la fecha actual para comparar en el HTML
+        context["now"] = timezone.now()
+        return context
+
+
+# la siguiente clase es para reactivar un evento que se ha cancelado
+class EventReactivateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        # Solo el organizador puede reactivar su propio evento
+        event = get_object_or_404(Event, pk=self.kwargs["pk"])
+        return self.request.user == event.organizer
+
+    def post(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+        ahora = timezone.now()
+
+        # 1. VALIDACIÓN: ¿El evento ya pasó?
+        if event.event_date <= ahora:
+            messages.error(
+                request, "No puedes reactivar un evento cuya fecha ya ha pasado."
+            )
+            return redirect("posts:event_detail", pk=event.pk)
+
+        # 2. PROCESO DE REACTIVACIÓN
+        if event.is_canceled:
+            event.is_canceled = False
+            event.save()
+
+            # Preparar datos para las notificaciones
+            action_url = request.build_absolute_uri(
+                reverse("posts:event_detail", args=[event.id])
+            )
+            subject = f"✨ ¡Buenas noticias! Evento reactivado: {event.title}"
+            message_body = f"¡El plan '{event.title}' ha sido reactivado por el organizador! Tu plaza sigue reservada. ¡Te esperamos!"
+
+            # 3. NOTIFICAR A LOS PARTICIPANTES
+            participants = event.participants.all()
+            for p in participants:
+                if p != request.user:
+                    # A. Notificación en la web (campanita)
+                    Notification.objects.create(
+                        recipient=p,
+                        sender=request.user,
+                        notification_type="event",
+                        event=event,
+                    )
+
+                    # B. Email Corporativo (Usando tu FUNCIÓN MAESTRA)
+                    send_hubs_email(subject, p, message_body, action_url)
+
+            messages.success(
+                request, f"¡El evento '{event.title}' ha sido reactivado con éxito!"
+            )
+        else:
+            messages.info(request, "El evento ya se encontraba activo.")
+
+        return redirect("posts:event_detail", pk=event.id)
+
+
+# la clase siguiente es para duplicar un evento
+@login_required
+def duplicate_event(request, pk):
+    # 1. Buscamos el evento original (asegurándonos de que sea de el usuario que lo crea)
+    original_event = get_object_or_404(Event, pk=pk, organizer=request.user)
+
+    # 2. Creamos el nuevo evento copiando los campos
+    new_event = Event.objects.create(
+        title=f"COPIA: {original_event.title}",
+        description=original_event.description,
+        hobby=original_event.hobby,
+        max_participants=original_event.max_participants,
+        location=original_event.location,
+        organizer=request.user,
+        # Ponemos la misma fecha de momento, se cambiará en la edición
+        event_date=original_event.event_date,
+    )
+
+    messages.success(
+        request, f"Se ha duplicado el evento. ¡No olvides ajustar la fecha y el título!"
+    )
+
+    # 3. Redirigimos directamente al formulario de editar para los últimos ajustes
+    return redirect("posts:event_update", pk=new_event.pk)
+
+
+# clase para las vistas de los eventos en los que participo
+class MyParticipationsListView(LoginRequiredMixin, ListView):
+    model = Event
+    template_name = "posts/my_participations.html"
+    context_object_name = "participations"
+
+    def get_queryset(self):
+        # Buscamos eventos donde el usuario logueado está en la lista de participantes
+        # 1. Obtenemos los eventos donde participa el usuario
+        queryset = Event.objects.filter(participants=self.request.user).order_by(
+            "-event_date"
+        )
+        # 2. Creamos una "subconsulta" para buscar reviews de Pepe en esos eventos
+        user_reviews = Review.objects.filter(
+            event=OuterRef("pk"),
+            author=self.request.user,
+        )
+
+        # 3. "Anotamos" el queryset: añadimos el campo virtual 'has_reviewed' (True/False)
+        return queryset.annotate(has_reviewed=Exists(user_reviews))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["now"] = timezone.now()  # Para saber si el evento ya pasó
+        return context
+
+
+# aqui esta la funcion que muestra la galeria de clicks y scroll infinito
+def clicks_gallery(request):
+    # 1. Posts usa 'user'
+    posts_qs = (
+        Posts.objects.filter(image__isnull=False)
+        .exclude(image="")
+        .select_related("user")
+    )
+
+    # 2. Event usa 'organizer' (Cambiado de 'user' o 'author')
+    events_qs = (
+        Event.objects.filter(image__isnull=False)
+        .exclude(image="")
+        .select_related("organizer")
+    )
+
+    all_clicks = sorted(
+        chain(posts_qs, events_qs), key=attrgetter("created_at"), reverse=True
+    )
+
+    # El resto del código de paginación e HTMX se mantiene igual
+    paginator = Paginator(all_clicks, 12)
+    page_number = request.GET.get("page")
+    clicks_page = paginator.get_page(page_number)
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request, "posts/partials/click_items.html", {"clicks": clicks_page}
+        )
+
+    return render(request, "posts/clicks_list.html", {"clicks": clicks_page})
+
+
+# CON ESTO SE MUESTRA LA GALERIA DE LOS EVENTOS DE UNA AFICION O HOBBY
+# aficionados_network/views.py (o donde tengas hobby_hub)
+from django.utils import timezone
+from django.db.models import Q
+from profiles.models import UserHobby, Hobby  # Asegúrate de estas importaciones
+
+
+def hobby_hub(request, hobby_slug):
+    from posts.models import Posts  # Importación local para evitar errores
+
+    hobby = get_object_or_404(Hobby, slug=hobby_slug)
+    now = timezone.now()
+
+    # Comprobamos si el usuario ya es miembro
+    is_member = False
+    user = request.user
+    if user.is_authenticated:
+        is_member = hobby in user.profile.hobbies.all()
+
+        # --- 1. PERSISTENCIA DE LA SIDEBAR ---
+        # Calculamos los contadores para que no desaparezcan al navegar
+        my_hobbies = user.profile.hobbies.all()
+        user_levels = UserHobby.objects.filter(profile=user.profile).values(
+            "hobby_id", "level"
+        )
+        levels_map = {item["hobby_id"]: item["level"] for item in user_levels}
+
+        for h in my_hobbies:
+            u_level = levels_map.get(h.id)
+            h.match_count = (
+                Event.objects.filter(hobby=h, event_date__gte=now, is_canceled=False)
+                .filter(
+                    Q(level="all") | Q(level=u_level) if u_level else Q(level="all")
+                )
+                .count()
+            )
+    else:
+        my_hobbies = None
+
+    # --- 2. LÓGICA DE TAGS PARA LOS EVENTOS DEL HUB ---
+    events = Event.objects.filter(hobby=hobby, is_canceled=False).order_by("event_date")
+
+    if user.is_authenticated:
+        level_order = {"beginner": 0, "intermediate": 1, "advanced": 2, "expert": 3}
+        # Nivel del usuario para este hobby específico
+        u_level_code = levels_map.get(hobby.id)
+
+        for event in events:
+            # Match: mismo nivel o 'all'
+            event.is_match = (event.level == "all") or (event.level == u_level_code)
+            # Mentor: nivel usuario > nivel evento (y no es 'all')
+            if event.level != "all" and u_level_code:
+                event.is_mentor = level_order.get(u_level_code, 0) > level_order.get(
+                    event.level, -1
+                )
+
+    context = {
+        "hobby": hobby,
+        "is_member": is_member,
+        "member_count": hobby.profiles.count(),
+        "my_hobbies": my_hobbies,  # Añadimos esto para la sidebar
+        "events": events,
+        "clicks": Posts.objects.filter(category=hobby).order_by("-created_at")[:12],
+    }
+    return render(request, "posts/hobby_hub.html", context)

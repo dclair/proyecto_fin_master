@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.py[cod]
+db_full_backup.json
+*.sqlite3.backup
+
+env/
+staticfiles/
+media/

@@ -1,0 +1,333 @@
+{% extends "general/layout.html" %}
+{% load static %}
+
+{# 1. TÍTULO DE LA PESTAÑA #}
+{% block head_title %}
+    {% if user_profile %}
+        {{ user_profile.user.username }} | Hubs&Clicks
+    {% else %}
+        Perfil no encontrado | Hubs&Clicks
+    {% endif %}
+{% endblock head_title %}
+
+{# 2. CONTENIDO PRINCIPAL #}
+{% block content %}
+<div class="container py-4">
+    {% if not user_profile %}
+        {# Bloque: Perfil no existente #}
+        <div class="text-center py-5">
+            <div class="alert alert-info border-0 shadow-sm">
+                <h4>Perfil no encontrado</h4>
+                <p class="mb-4">Parece que aún no has creado tu perfil.</p>
+                <a href="{% url 'profiles:profile_edit' %}" class="btn btn-primary">Crear mi perfil</a>
+            </div>
+        </div>
+    {% else %}
+
+        <div class="row mb-4">
+            {# Foto de Perfil #}
+            <div class="col-md-3 text-center mb-3 mb-md-0">
+                <img src="{{ user_profile.profile_picture_url|default:'' }}" 
+                     class="rounded-circle img-thumbnail shadow-sm" 
+                     style="width: 160px; height: 160px; object-fit: cover;"
+                     onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+            </div>
+            
+            {# Datos del Usuario #}
+            <div class="col-md-9">
+                <div class="d-flex align-items-center mb-1 flex-wrap">
+                    <h2 class="mb-0 me-3 fw-bold">{{ user_profile.user.username }}</h2>
+                    
+                    {# Botones de Acción (Editar o Seguir) #}
+                    {% if user.is_authenticated %}
+                        {% if is_own_profile %}
+                            <a href="{% url 'profiles:profile_edit' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                <i class="bi bi-gear me-1"></i> Editar perfil
+                            </a>
+                        {% else %}
+                            <form method="post" action="{% url 'profiles:profile' user_profile.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="profile_pk" value="{{ user_profile.pk }}">
+                                {% if is_following %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">Dejar de seguir</button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Seguir</button>
+                                {% endif %}
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                {# Sistema de Estrellas (Media) #}
+                <div class="mb-3">
+                    {% if average_rating %}
+                        <span class="text-warning fw-bold">
+                            <i class="bi bi-star-fill"></i> {{ average_rating|stringformat:".1f" }}
+                        </span>
+                        <small class="text-muted ms-1">({{ total_reviews }} valoraciones)</small>
+                    {% else %}
+                        <small class="text-muted fst-italic">Sin valoraciones aún</small>
+                    {% endif %}
+                </div>
+                
+                {# Contadores con Enlaces #}
+                <div class="d-flex mb-4 flex-wrap gap-3 gap-md-4">
+                    <div><strong>{{ user_profile.user.posts.count }}</strong> <span class="text-muted small">publicaciones</span></div>
+                    
+                    <div style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#followersModal">
+                        <span class="text-primary-hover"><strong>{{ followers_count }}</strong> <span class="text-muted small">seguidores</span></span>
+                    </div>
+
+                    <div style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#followingModal">
+                        <span class="text-primary-hover"><strong>{{ following_count }}</strong> <span class="text-muted small">siguiendo</span></span>
+                    </div>
+
+                    <div class="border-start ps-3 d-none d-sm-block"></div>
+
+                    {# Link a Mis Planes #}
+                    <div>
+                        {% if is_own_profile %}
+                            <a href="{% url 'posts:my_events' %}" class="text-decoration-none text-dark text-primary-hover">
+                        {% endif %}
+                            <i class="bi bi-megaphone text-primary me-1"></i>
+                            <strong>{{ organized_count }}</strong> <span class="text-muted small">organizados</span>
+                        {% if is_own_profile %}</a>{% endif %}
+                    </div>
+
+                    {# Link a Mis Inscripciones #}
+                    <div>
+                        {% if is_own_profile %}
+                            <a href="{% url 'posts:my_participations' %}" class="text-decoration-none text-dark text-primary-hover">
+                        {% endif %}
+                            <i class="bi bi-check2-circle text-success me-1"></i>
+                            <strong>{{ participated_count }}</strong> <span class="text-muted small">participaciones</span>
+                        {% if is_own_profile %}</a>{% endif %}
+                    </div>
+                </div>
+                
+                {# Bio y Aficiones #}
+                <div class="bg-white p-3 border rounded shadow-sm mb-4">
+                    {% if user_profile.bio %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold small text-uppercase text-muted mb-1">Sobre mí</h6>
+                            <p class="mb-0 small">{{ user_profile.bio }}</p>
+                        </div>
+                    {% endif %}
+
+                    {# Lista de Hobbies #}
+                    <div class="mb-3">
+                        <h6 class="fw-bold small text-uppercase text-muted mb-2">Mis Aficiones</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for user_hobby in user_profile.userhobby_set.all %}
+                                <span class="badge border text-dark bg-light fw-normal p-2">
+                                    {{ user_hobby.hobby.name }}
+                                    {% if user_hobby.level == 'beginner' %}<span class="text-info ms-1">●</span>
+                                    {% elif user_hobby.level == 'intermediate' %}<span class="text-success ms-1">●●</span>
+                                    {% elif user_hobby.level == 'advanced' %}<span class="text-primary ms-1">●●●</span>
+                                    {% elif user_hobby.level == 'expert' %}<span class="text-warning ms-1">★</span>
+                                    {% endif %}
+                                </span>
+                            {% empty %}
+                                <small class="text-muted italic">Sin aficiones aún.</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {# Datos de Ubicación/Web #}
+                    <div class="row g-2 border-top pt-3">
+                        {% if user_profile.location %}
+                        <div class="col-sm-6 col-md-4 small text-muted">
+                            <i class="bi bi-geo-alt me-1 text-danger"></i> {{ user_profile.location }}
+                        </div>
+                        {% endif %}
+                        {% if user_profile.website %}
+                        <div class="col-sm-6 col-md-4 small">
+                            <i class="bi bi-link-45deg me-1"></i> <a href="{{ user_profile.website }}" target="_blank" class="text-decoration-none">{{ user_profile.website|truncatechars:20 }}</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="card-header bg-white py-3 border-0">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-calendar-event text-primary me-2"></i>Próximos Planes</h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="row g-3">
+                            {% for event in upcoming_activity %}
+                                <div class="col-md-4">
+                                    <a href="{% url 'posts:event_detail' event.pk %}" class="text-decoration-none">
+                                        <div class="p-3 border rounded h-100 bg-light-hover transition-all">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="bg-primary text-white rounded px-2 py-1 text-center me-3" style="min-width: 45px;">
+                                                    <div class="fw-bold small">{{ event.event_date|date:"d" }}</div>
+                                                    <div style="font-size: 0.6rem;">{{ event.event_date|date:"M"|upper }}</div>
+                                                </div>
+                                                <div class="text-dark fw-bold text-truncate">{{ event.title }}</div>
+                                            </div>
+                                            <small class="text-muted small"><i class="bi bi-person me-1"></i>Organiza: {{ event.organizer.username }}</small>
+                                        </div>
+                                    </a>
+                                </div>
+                            {% empty %}
+                                <div class="col-12 py-3 text-center">
+                                    <p class="text-muted small mb-0">No hay planes confirmados próximamente.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-chat-left-quote text-warning me-2"></i>Opiniones de la comunidad
+                        </h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        {% if received_reviews %}
+                            <div class="list-group list-group-flush">
+                                {% for review in received_reviews %}
+                                    <div class="list-group-item px-0 py-3 border-0 border-bottom">
+                                        <div class="d-flex align-items-start">
+                                            <img src="{{ review.author.profile.profile_picture_url|default:'' }}" 
+                                                 class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;"
+                                                 onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+                                            
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <h6 class="mb-0 fw-bold small text-primary">{{ review.author.username }}</h6>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">{{ review.created_at|date:"d M, Y" }}</small>
+                                                </div>
+                                                
+                                                {# Estrellas de la reseña #}
+                                                <div class="text-warning small mb-2" style="font-size: 0.8rem;">
+                                                    <i class="bi bi-star{% if review.rating >= 1 %}-fill{% endif %}"></i>
+                                                    <i class="bi bi-star{% if review.rating >= 2 %}-fill{% endif %}"></i>
+                                                    <i class="bi bi-star{% if review.rating >= 3 %}-fill{% endif %}"></i>
+                                                    <i class="bi bi-star{% if review.rating >= 4 %}-fill{% endif %}"></i>
+                                                    <i class="bi bi-star{% if review.rating >= 5 %}-fill{% endif %}"></i>
+                                                </div>
+
+                                                <p class="text-dark mb-0 small fst-italic">"{{ review.comment|default:'Sin comentarios.' }}"</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <p class="text-muted small mb-0">Todavía nadie ha dejado una opinión sobre este organizador.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Aqui va la sección de publicaciones -->
+        <h5 class="fw-bold mb-4 mt-5"><i class="bi bi-grid-3x3 me-2"></i>Publicaciones</h5>
+        <div class="row g-3">
+            {# Ordenamos por fecha para que lo más nuevo salga primero #}
+            {% for post in user_profile.user.posts.all|dictsortreversed:"created_at" %}
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card border-0 shadow-sm profile-post-card h-100">
+                        <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none">
+                            {# Imagen del Post (Cuadrada) #}
+                            <div class="ratio ratio-1x1 overflow-hidden rounded-top">
+                                {% if post.image %}
+                                    <img src="{{ post.image.url }}" class="object-fit-cover w-100 h-100" alt="{{ post.title }}">
+                                {% else %}
+                                    <div class="bg-secondary d-flex align-items-center justify-content-center text-white h-100">
+                                        <i class="bi bi-card-image fs-2"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            {# INFO DEL POST (Aquí es donde aparece el título) #}
+                            <div class="card-body p-2 bg-white rounded-bottom">
+                                <h6 class="text-truncate-custom mb-1" title="{{ post.title }}">
+                                    {{ post.title|default:"Sin título" }}
+                                </h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary-subtle text-primary extra-small">
+                                        {{ post.category.name }}
+                                    </span>
+                                    <small class="text-muted extra-small">
+                                        <i class="bi bi-heart-fill text-danger"></i> {{ post.likes.count }}
+                                    </small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <div class="p-4 bg-light rounded-4">
+                        <i class="bi bi-camera text-muted display-4"></i>
+                        <p class="text-muted mt-2">Aún no hay publicaciones para mostrar.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+    {% endif %}
+</div>
+
+{# Modal Seguidores #}
+<div class="modal fade" id="followersModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title w-100 text-center fw-bold small text-uppercase">Seguidores</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for follower in user_profile.followers.all %}
+                        <li class="list-group-item d-flex align-items-center px-3 border-0">
+                            <img src="{{ follower.profile_picture_url|default:'' }}" class="rounded-circle me-3" style="width: 35px; height: 35px; object-fit: cover;" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+                            <a href="{% url 'profiles:profile' follower.pk %}" class="text-decoration-none text-dark fw-bold small">{{ follower.user.username }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Modal Siguiendo #}
+<div class="modal fade" id="followingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title w-100 text-center fw-bold small text-uppercase">Siguiendo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for followed in user_profile.following.all %}
+                        <li class="list-group-item d-flex align-items-center px-3 border-0">
+                            <img src="{{ followed.profile_picture_url|default:'' }}" class="rounded-circle me-3" style="width: 35px; height: 35px; object-fit: cover;" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+                            <a href="{% url 'profiles:profile' followed.pk %}" class="text-decoration-none text-dark fw-bold small">{{ followed.user.username }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-light-hover:hover { background-color: #f8f9fa !important; border-color: #0d6efd !important; }
+    .transition-all { transition: all 0.2s ease-in-out; }
+    .text-primary-hover:hover { color: #0d6efd; text-decoration: underline; }
+</style>
+{% endblock content %}

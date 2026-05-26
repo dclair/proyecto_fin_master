@@ -1,0 +1,38 @@
+
+{% extends "general/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}
+Hubs&Clicks/Iniciar sesión
+{% endblock head_title %}
+
+{% block content %}
+{% block page_title %}
+{% endblock page_title %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">Iniciar sesión</h2>
+                    
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg mt-3">Iniciar sesión</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p class="mb-0">¿No tienes una cuenta? 
+                            <a href="{% url 'register' %}" class="text-decoration-none">Regístrate</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
