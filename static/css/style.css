@@ -1,0 +1,776 @@
+/* ============================================================
+   1. VARIABLES GLOBALES Y RESET
+   ============================================================ */
+:root {
+    --hubs-primary: #0b5961;
+    --hubs-primary-hover: #084349;
+    --hubs-primary-subtle: #e7eff0;
+    --hubs-dark: #333333;
+    --hubs-text-muted: #6c757d;
+    --hubs-light: #eef4f5; 
+    --hubs-border: #e0e0e0;
+    --hubs-success: #198754;
+    --hubs-danger: #dc3545;
+    --hubs-radius: 16px; /* REFINADO: Bordes un poco más curvos */
+    --hubs-shadow:  0 6px 18px rgba(11, 89, 97, 0.12);
+    --navbar-height: 90px;
+    --hubs-text-shadow-depth: 1px 2px 4px rgba(11, 89, 97, 0.15); 
+    --hubs-card-bg: #fdfefe;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--hubs-dark);
+    background-color: var(--hubs-light);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-top: calc(var(--navbar-height) + 20px) !important;
+}
+
+main, .container {
+    flex: 1 0 auto;
+}
+
+/* ============================================================
+   2. TIPOGRAFÍA Y BOTONES (AJUSTE DE VOLUMEN)
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--hubs-primary);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
+
+.text-hubs { color: var(--hubs-primary) !important; }
+
+.btn-hubs { 
+    /* REFINADO: Gradiente sutil para profundidad táctil */
+    background: linear-gradient(135deg, var(--hubs-primary) 0%, var(--hubs-primary-hover) 100%); 
+    color: white; 
+    border: none; 
+    border-radius: 50px;
+    padding: 0.6rem 1.6rem;
+    font-weight: 600; /* Texto más firme */
+    box-shadow: 0 4px 12px rgba(11, 89, 97, 0.25); /* Sombra con matiz Teal */
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.btn-hubs:hover { 
+    color: white; 
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(11, 89, 97, 0.35);
+}
+
+.extra-small {
+    font-size: 0.75rem !important;
+    font-weight: 600;
+}
+
+/* ============================================================
+   3. COMPONENTES DE IMAGEN (BANNERS Y CARDS)
+   ============================================================ */
+.object-fit-cover {
+    object-fit: cover !important;
+}
+
+.detail-banner-wrapper {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+    background-color: #dde8ea;
+    border-radius: var(--hubs-radius);
+    border-bottom: 1px solid rgba(11, 89, 97, 0.12);
+}
+
+
+
+.detail-banner-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+}
+
+@media (max-width: 768px) {
+    .detail-banner-wrapper { height: 250px; }
+}
+
+/* ============================================================
+   5. PERFIL DE USUARIO Y TARJETAS DE POSTS
+   ============================================================ */
+.profile-post-card,
+.post-card,
+.card-hubs,
+.card-click,
+.sidebar-group {
+    background-color: var(--hubs-card-bg) !important;
+}
+.profile-post-card, .post-card {
+    
+    border: 1px solid var(--hubs-border) !important;
+    border-radius: var(--hubs-radius) !important;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.profile-post-card:hover, .post-card:hover {
+    transform: translateY(-12px) !important;
+   box-shadow: 0 14px 30px rgba(11, 89, 97, 0.18);
+}
+
+.text-truncate-custom {
+    display: block !important;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--hubs-dark) !important;
+    font-weight: 700;
+}
+
+/* --- SIDEBAR BADGES & ANIMATIONS --- */
+
+.sidebar-badge {
+    font-size: 0.65rem !important;
+    padding: 0.4em 0.6em !important;
+    min-width: 1.5rem;
+}
+
+.sidebar-badge-mini {
+    font-size: 0.55rem !important;
+    padding: 0.25em 0.5em !important;
+    border: 2px solid #fff;
+}
+
+/* Animación de pulso para el contador de match */
+.match-pulse {
+    animation: sidebar-glow 2s infinite ease-in-out;
+}
+
+@keyframes sidebar-glow {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(13, 202, 240, 0.7);
+    }
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 6px rgba(13, 202, 240, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(13, 202, 240, 0);
+    }
+}
+
+/* Ajustes para que la sidebar lateral sea flexible */
+.sidebar-item {
+    transition: all 0.2s ease;
+}
+
+.sidebar-item:hover {
+    background-color: rgba(11, 89, 97, 0.05) !important;
+}
+
+/* ============================================================
+   6. CARDS DE EVENTOS
+   ============================================================ */
+.card-hubs {
+    display: flex; 
+    border-radius: var(--hubs-radius) !important;
+    box-shadow: var(--hubs-shadow);
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+}
+
+.card-hubs:hover {
+    transform: translateY(-12px) !important;
+    box-shadow: 0 14px 30px rgba(11, 89, 97, 0.18);
+}
+
+.row-cols-1 .card-hubs, 
+.row-cols-md-2 .card-hubs, 
+.row-cols-lg-3 .card-hubs {
+    height: 100%;
+    flex-direction: column;
+}
+
+.img-event-wrapper {
+    width: 100% !important;
+    height: 200px !important;
+    overflow: hidden !important;
+    background-color: #dde8ea !important;
+    border-bottom: 1px solid rgba(11, 89, 97, 0.12);
+    position: relative !important;
+}
+
+.img-event-hubs {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    transition: transform 0.5s ease;
+}
+
+.card-hubs:hover .img-event-hubs { transform: scale(1.05); }
+
+.card-hubs .card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Detalle de fecha en Mis Inscripciones */
+.bi-calendar3 {
+    font-size: 0.9rem;
+    color: var(--hubs-primary); /* Tu Teal corporativo */
+}
+
+.text-muted {
+    font-size: 0.95rem;
+    letter-spacing: -0.2px;
+}
+
+/* ============================================================
+   7. UTILIDADES Y ANIMACIÓN
+   ============================================================ */
+.bg-light-hover:hover {
+    background-color: var(--hubs-primary-subtle) !important;
+    border-color: var(--hubs-primary) !important;
+}
+
+.transition-all { transition: all 0.2s ease-in-out; }
+
+@keyframes headShake {
+    0% { transform: translateX(0); }
+    6.5% { transform: translateX(-6px) rotateY(-9deg); }
+    18.5% { transform: translateX(5px) rotateY(7deg); }
+    31.5% { transform: translateX(-3px) rotateY(-5deg); }
+    43.5% { transform: translateX(2px) rotateY(3deg); }
+    50% { transform: translateX(0); }
+}
+.animate__headShake { animation: headShake 1s ease-in-out; }
+
+/* ============================================================
+   8. FOOTER Y OTROS
+   ============================================================ */
+footer {
+    flex-shrink: 0;
+    background-color: white;
+    border-top: 1px solid var(--hubs-border);
+    padding: 2rem 0;
+    margin-top: auto;
+}
+
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2100;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: var(--hubs-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+/* ============================================================
+   BARRA DE PROGRESO EN CARDS (ESTILIZADA)
+   ============================================================ */
+
+/* Contenedor de la barra */
+.progress {
+    border-radius: 10px; /* Bordes redondeados modernos */
+    overflow: hidden;
+    background-color: var(--hubs-primary-subtle) !important; /* Fondo Teal muy suave */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* Relleno de la barra (Estado normal: Teal) */
+.bg-hubs {
+    background-color: var(--hubs-primary) !important;
+    /* Degradado sutil para un efecto más "premium" */
+    background: linear-gradient(90deg, var(--hubs-primary) 0%, #14a2b1 100%) !important;
+}
+
+/* Animación de carga al entrar o filtrar */
+.progress-bar {
+    transition: width 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* Ajuste para el texto de plazas y porcentajes */
+.extra-small {
+    font-size: 0.75rem;
+    letter-spacing: -0.2px;
+}
+
+/* Color de fondo para el estado "Completo" */
+.bg-danger-subtle {
+    background-color: #fce8e8 !important;
+}
+
+/* Badges de Nivel Estilizados */
+.bg-success-subtle { background-color: #e8f5e9 !important; color: #2e7d32 !important; }
+.bg-warning-subtle { background-color: #fff8e1 !important; color: #f57f17 !important; }
+.bg-danger-subtle { background-color: #ffebee !important; color: #c62828 !important; }
+
+.badge.small {
+    padding: 0.35em 0.5em;
+    font-size: 0.7rem;
+    border-radius: 6px;
+}
+
+/* Estilos para el Match de Nivel */
+.card-match-level {
+    border: 2px solid #0dcaf0 !important; /* Azul cian para resaltar el match */
+    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.1) !important;
+}
+
+.bg-info {
+    background-color: #0dcaf0 !important;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.extra-small {
+    font-size: 0.7rem;
+}
+/* ============================================================
+   8. DISTINTIVOS DE USUARIO (ORGANIZADOR)
+   ============================================================ */
+.badge-organizer {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background-color: #ffc107; /* Amarillo/Dorado vibrante */
+    color: white !important;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    border: 2px solid white; /* Crea un anillo blanco que lo separa de la foto */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+/* Asegura que el icono de la estrella dentro del badge sea blanco */
+.badge-organizer i {
+    color: white !important;
+    font-size: 10px;
+    line-height: 1;
+}
+
+/* ============================================================
+   9. GALERÍA DE CLICKS (MASONRY FIX)
+   ============================================================ */
+.clicks-grid {
+    width: 100%;
+    margin: 0 auto;
+    display: block; 
+}
+.grid-item {
+    width: 100%;
+    padding: 10px;
+    float: left;
+    box-sizing: border-box;
+}
+@media (min-width: 768px) { .grid-item { width: 50%; } }
+@media (min-width: 1100px) { .grid-item { width: 33.333%; } }
+
+.card-click {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.card-click:hover {
+    transform: translateY(-12px) !important;
+    box-shadow: 0 14px 30px rgba(11, 89, 97, 0.18);
+}
+
+/* --- SIDEBAR PERSISTENTE --- */
+.sticky-sidebar {
+    position: sticky;
+    top: 90px;
+    z-index: 10;
+}
+.sidebar-label {
+    font-size: 0.8rem;
+    font-weight: 800 !important;
+    color: var(--hubs-primary) !important;
+    letter-spacing: 1.2px;
+    padding-left: 12px;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+.sidebar-group {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #e9ecef;
+    background: white;
+}
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px !important;
+    border: none !important;
+    transition: all 0.2s ease-in-out;
+}
+.sidebar-item:hover {
+    background-color: #f8f9fa !important;
+    transform: translateX(4px);
+}
+
+
+/* --- NAVEGACIÓN DE HOBBIES --- */
+.hobby-name {
+    font-size: 0.9rem;
+    font-weight: 700 !important;
+    color: var(--hubs-primary) !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+}
+
+.sidebar-item:hover .hobby-name {
+    color: var(--hubs-primary-hover) !important;
+}
+
+.hobby-dot {
+     width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+    margin-right: 12px;
+    background-color: var(--hubs-primary);
+    box-shadow: 0 4px 10px rgba(11, 89, 97, 0.35);
+    border: 2px solid #ffffff;
+}
+
+
+/* --- LÓGICA HTMX --- */
+/* 1. Ocultar el spinner por defecto */
+.htmx-indicator {
+    display: none !important;
+}
+
+/* 2. Mostrar el spinner solo cuando HTMX está trabajando */
+.htmx-request.htmx-indicator,
+.htmx-request .htmx-indicator {
+    display: inline-block !important;
+}
+
+/* 3. Ocultar el texto del botón mientras HTMX está trabajando */
+.htmx-request.htmx-indicator-hide,
+.htmx-request .htmx-indicator-hide {
+    display: none !important;
+}
+
+/* ============================================================
+   ESTILOS PARA CARGA DE FORMULARIOS (SPINNER)
+   ============================================================ */
+.btn-spinner {
+    width: 1rem !important;
+    height: 1rem !important;
+    border-width: 0.15em !important;
+    vertical-align: middle;
+    /* Eliminamos el color blanco fijo para que herede el del botón */
+}
+
+/* Solo forzamos blanco en botones que tienen fondo de color sólido */
+.btn-hubs .btn-spinner, 
+.btn-success .btn-spinner, 
+.btn-danger .btn-spinner,
+.btn-primary .btn-spinner {
+    color: white !important;
+}
+
+/* Para botones outline, el spinner usará el color del borde/texto automáticamente */
+
+/* ============================================================
+   10. MODAL DE POST RESPONSIVO (FIX PARA IPHONE)
+   ============================================================ */
+
+@media (min-width: 992px) {
+    .post-modal-container { height: 80vh; flex-direction: row; }
+    .post-modal-image-col { flex: 0 0 70%; height: 100%; }
+    .post-modal-content-col { flex: 0 0 30%; height: 100%; }
+}
+
+@media (max-width: 991.98px) {
+    .post-modal-container {
+        display: flex;
+        flex-direction: column;
+        height: 85vh;
+        overflow: hidden;
+    }
+
+    .post-modal-image-col {
+        height: 30vh;
+        min-height: 200px;
+        flex-shrink: 0;
+    }
+
+    .post-modal-content-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+}
+
+.post-comments-scroll {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background-color: #f8f9fa;
+}
+
+.post-main-img {
+    max-height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
+
+/* ============================================================
+   SIDEBAR HORIZONTAL EN MÓVILES Y TABLETS (<992px)
+   ============================================================ */
+@media (max-width: 991.98px) {
+    /* Oculta el sidebar vertical de desktop */
+    .sticky-sidebar {
+        display: none !important;
+    }
+
+    /* Contenedor de scroll horizontal */
+    .mobile-hobby-scroll {
+        display: flex !important;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        gap: 0.75rem;
+        padding-bottom: 0.5rem;
+        margin-left: -0.25rem;  /* evita padding extra a la izquierda */
+        padding-left: 0.25rem;
+    }
+
+    /* Cada pill */
+    .mobile-hobby-pill {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 1rem;
+        background-color: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        text-decoration: none;
+        color: var(--hubs-dark);
+        white-space: nowrap;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+    .mobile-hobby-pill:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 12px rgba(11, 89, 97, 0.15);
+    }
+
+    /* Círculo con inicial */
+    .mobile-hobby-pill .hobby-dot-sm {
+        width: 40px;       /* más grande en tablets y móviles */
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
+        background-color: var(--hubs-primary);
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Ajuste visual para scroll suave y alineación */
+    .mobile-hobby-scroll::-webkit-scrollbar {
+        display: none; /* ocultar scrollbar en webkit */
+    }
+    .mobile-hobby-scroll {
+        -ms-overflow-style: none;  /* IE y Edge */
+        scrollbar-width: none;     /* Firefox */
+    }
+}
+/* ============================================================
+   SISTEMA DE NIVELES Y MATCH (LISTADO DE EVENTOS)
+   ============================================================ */
+
+/* Estilo base para los badges de nivel con texto */
+.badge-level-text {
+    font-size: 0.75rem !important;
+    padding: 0.4rem 0.6rem !important;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 6px;
+    gap: 4px; /* Espacio entre icono y texto */
+}
+/* Colores de los estados */
+.bg-all-levels { background-color: #e0f7fa !important; color: #006064 !important; border: 1px solid #b2ebf2; }
+.bg-success-subtle { background-color: #d1f2d5 !important; color: #0f5132 !important; border: 1px solid #badbcc !important; }
+.bg-warning-subtle { background-color: #fff3cd !important; color: #664d03 !important; border: 1px solid #ffecb5 !important; }
+.bg-danger-subtle { background-color: #f8d7da !important; color: #842029 !important; border: 1px solid #f5c2c7 !important; }
+
+/* Iconos dentro de los badges */
+.badge-level-text i {
+    font-size: 0.85rem;
+    margin-right: 4px;
+}
+
+/* Resaltado de la tarjeta cuando el nivel coincide (Match) */
+.card-match-level {
+    border: 2px solid #0dcaf0 !important;
+    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.15) !important;
+}
+
+/* Efecto al pasar el ratón por una tarjeta con match */
+.card-match-level:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(13, 202, 240, 0.25) !important;
+}
+
+/* Badge específico de "Tu nivel" */
+.bg-info {
+    background-color: #0dcaf0 !important;
+    color: #000 !important;
+    font-weight: 700;
+}
+
+/* Colores de fondo para los niveles (Refinados para lectura) */
+.bg-success-subtle { 
+    background-color: #d1f2d5 !important; 
+    color: #0f5132 !important; 
+}
+.bg-warning-subtle { 
+    background-color: #fff3cd !important; 
+    color: #664d03 !important; 
+}
+.bg-danger-subtle { 
+    background-color: #f8d7da !important; 
+    color: #842029 !important; 
+}
+/* Nivel Experto: Fondo oscuro y texto blanco para máximo impacto */
+.bg-dark {
+    background-color: #212529 !important;
+    color: #ffffff !important;
+    border: 1px solid #000 !important;
+}
+
+/* Opcional: Si quieres que el "Match" de Experto brille más */
+.card-match-level[data-level="expert"] {
+    border-color: #6f42c1 !important; /* Un tono púrpura */
+    box-shadow: 0 4px 20px rgba(111, 66, 193, 0.2) !important;
+}
+
+/* Banner de Match en Detalle */
+.alert-info {
+    background: linear-gradient(45deg, #e0f7fa, #ffffff);
+    color: #0b5961;
+    border-left: 5px solid #0dcaf0 !important;
+}
+
+.alert-info i {
+    color: #0dcaf0;
+    animation: shine 2s infinite;
+}
+
+@keyframes shine {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+/* Banner de Mentor (Púrpura/Dorado) */
+.mentor-banner {
+    background: linear-gradient(90deg, #f3e5f5 0%, #ffffff 100%);
+    border-left: 4px solid #6f42c1;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #4a148c;
+}
+
+.mentor-icon-container {
+    color: #6f42c1;
+    font-size: 1.4rem;
+}
+
+.mentor-icon-container i {
+    filter: drop-shadow(0 0 5px rgba(111, 66, 193, 0.3));
+}
+/* Animación de brillo suave para el icono de Match */
+.match-pulse {
+    animation: match-glow 2s infinite ease-in-out;
+    display: inline-block; /* Necesario para que la transformación funcione bien */
+}
+
+@keyframes match-glow {
+    0% {
+        transform: scale(1);
+        text-shadow: 0 0 0px rgba(13, 202, 240, 0);
+    }
+    50% {
+        transform: scale(1.2);
+        text-shadow: 0 0 8px rgba(13, 202, 240, 0.8);
+        color: #00e5ff; /* Un azul un poco más vibrante en el pico del brillo */
+    }
+    100% {
+        transform: scale(1);
+        text-shadow: 0 0 0px rgba(13, 202, 240, 0);
+    }
+}
+
+/* Opcional: Brillo dorado para el Mentor */
+.mentor-pulse {
+    animation: mentor-glow 3s infinite ease-in-out;
+}
+
+@keyframes mentor-glow {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; text-shadow: 0 0 5px rgba(111, 66, 193, 0.5); }
+}
+/* Badge específico para móvil */
+.mobile-hobby-badge {
+    position: absolute;
+    top: -4px;      /* Ajusta este valor para bajarlo o subirlo */
+    right: -4px;    /* Ajusta este valor para moverlo lateralmente */
+    font-size: 0.6rem !important;
+    padding: 0.25em 0.5em !important;
+    border: 2px solid #fff; /* Ayuda a que resalte sobre el fondo */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 5;
+}
+
+/* Espaciado del contenedor para evitar cortes */
+.mobile-hobby-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-top: 12px !important; /* Espacio para que el badge respire */
+}

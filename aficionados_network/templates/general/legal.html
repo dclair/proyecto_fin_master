@@ -1,0 +1,40 @@
+{% extends "general/layout.html" %}
+
+{% block head_title %}Hubs&Clicks | Aviso Legal{% endblock head_title %}
+
+{% block page_title %}
+<div class="container-fluid px-4 mt-4">
+    <h1 class="fw-bold h2">Aviso Legal</h1>
+</div>
+{% endblock page_title %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <p>
+                        Hubs&Clicks es una plataforma desarrollada como proyecto academico para facilitar la conexion entre personas con aficiones compartidas.
+                    </p>
+                    <h2 class="h5 mt-4">Responsable</h2>
+                    <p>
+                        Este sitio forma parte de un proyecto de fin de master. Para cualquier consulta relacionada con el servicio, puedes usar el formulario de contacto.
+                    </p>
+                    <h2 class="h5 mt-4">Uso del sitio</h2>
+                    <p>
+                        Las personas usuarias se comprometen a utilizar la plataforma de forma respetuosa, sin publicar contenido ofensivo, ilegal o que vulnere derechos de terceros.
+                    </p>
+                    <h2 class="h5 mt-4">Propiedad intelectual</h2>
+                    <p>
+                        Los contenidos, textos, logotipos y elementos visuales del sitio pertenecen a Hubs&Clicks o a sus autores correspondientes.
+                    </p>
+                    <div class="mt-4">
+                        <a href="{% url 'contact' %}" class="btn btn-outline-secondary btn-sm">Contactar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

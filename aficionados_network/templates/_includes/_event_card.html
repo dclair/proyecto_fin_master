@@ -1,0 +1,51 @@
+<div class="event-item mb-3 pb-3 border-bottom transition-all bg-light-hover rounded p-2">
+    <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-1">
+        <span class="badge-hobby-post extra-small">
+            <i class="bi bi-tag-fill me-1"></i> {{ event.hobby.name|upper }}
+        </span>
+
+        {% if request.user == event.organizer %}
+            <span class="badge bg-warning text-dark border-0 shadow-sm extra-small px-2" title="Eres el anfitrión">
+                <i class="bi bi-star-fill"></i> MÍO
+            </span>
+        {% elif request.user in event.participants.all %}
+            <span class="badge bg-success text-white border-0 shadow-sm extra-small px-2" title="Ya tienes tu plaza">
+                <i class="bi bi-check-lg"></i> APUNTADO
+            </span>
+        {% endif %}
+    </div>
+    
+    <h6 class="mb-1 fw-bold text-dark text-truncate" title="{{ event.title }}">
+        {{ event.title }}
+    </h6>
+    
+    <div class="d-flex flex-column gap-1 mb-2">
+        <small class="text-muted extra-small">
+            <i class="bi bi-calendar3 me-1 text-hubs"></i> {{ event.event_date|date:"d M - H:i" }}
+        </small>
+        <small class="text-muted extra-small">
+            <i class="bi bi-geo-alt-fill me-1 text-danger"></i> {{ event.location|truncatechars:20 }}
+        </small>
+    </div>
+
+    <div class="mt-2 d-flex align-items-center justify-content-between">
+        <div class="progress flex-grow-1 me-2" style="height: 6px; background-color: var(--hubs-primary-subtle);">
+            <div class="progress-bar {% if event.participants.count >= event.max_participants %}bg-danger{% else %}bg-hubs{% endif %}" 
+                 role="progressbar" 
+                 style="width: {% widthratio event.participants.count event.max_participants 100 %}%" 
+                 aria-valuenow="{{ event.participants.count }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="{{ event.max_participants }}">
+            </div>
+        </div>
+        <small class="text-hubs fw-bold extra-small">
+            {{ event.participants.count }}/{{ event.max_participants }}
+        </small>
+    </div>
+
+    <div class="text-end mt-2">
+        <a href="{% url 'posts:event_detail' event.id %}" class="text-decoration-none text-hubs fw-bold extra-small">
+            Ver detalles <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>

@@ -1,0 +1,197 @@
+{% extends "general/layout.html" %}
+{% load static %}
+
+{% block head_title %}Usuarios | Hubs&Clicks{% endblock head_title %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <h2 class="mb-4 text-center">Explorar Usuarios</h2>
+            
+            <form class="mb-4" id="search-form" method="GET">
+                <div class="input-group">
+                    <input type="text" 
+                           id="search-input"
+                           class="form-control" 
+                           name="q"
+                           placeholder="Buscar perfiles..." 
+                           value="{{ request.GET.q|default:'' }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+            </form>
+
+            {% if user.is_authenticated %}
+            <div class="mb-4 text-center">
+                <div class="btn-group" role="group" aria-label="Filtros de perfiles">
+                    <a href="?filter=all{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+                       class="btn btn-outline-primary {% if active_filter == 'all' %}active{% endif %}">
+                        <i class="bi bi-people me-1"></i> Todos ({{ count_all }})
+                    </a>
+                    <a href="?filter=following{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+                       class="btn btn-outline-primary {% if active_filter == 'following' %}active{% endif %}">
+                        <i class="bi bi-person-check me-1"></i> Siguiendo ({{ count_following }})
+                    </a>
+                    <a href="?filter=not_following{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+                       class="btn btn-outline-primary {% if active_filter == 'not_following' %}active{% endif %}">
+                        <i class="bi bi-person-plus me-1"></i> No siguiendo ({{ count_not_following }})
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="mb-3">
+                <h5 class="text-muted">
+                    {% if active_filter == 'following' %}
+                        <i class="bi bi-people-fill me-2"></i>Usuarios que sigues ({{ count_following }})
+                    {% elif active_filter == 'not_following' %}
+                        <i class="bi bi-person-plus-fill me-2"></i>Usuarios que no sigues ({{ count_not_following }})
+                    {% else %}
+                        <i class="bi bi-people me-2"></i>Todos los usuarios ({{ count_all }})
+                    {% endif %}
+                </h5>
+                {% if request.GET.q %}
+                    <p class="small text-primary">Resultados para la búsqueda: "<strong>{{ request.GET.q }}</strong>"</p>
+                {% endif %}
+            </div>
+
+            
+            <div class="row g-4 justify-content-center">
+                {% for profile in profiles %}
+                <div class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-4 profile-card">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <a href="{% url 'profiles:profile' profile.pk %}" class="text-decoration-none">
+                                    <div class="position-relative d-inline-block">
+                                        <img src="{{ profile.profile_picture_url }}" 
+                                             class="rounded-circle img-thumbnail" 
+                                             style="width: 100px; height: 100px; object-fit: cover;"
+                                             alt="{{ profile.user.username }}">
+                                        {% if profile.user.is_online %}
+                                        <span class="position-absolute bottom-0 end-0 bg-success rounded-circle p-2 border border-3 border-white"></span>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            </div>
+                            
+                            <h5 class="card-title mb-1">
+                                <a href="{% url 'profiles:profile' profile.pk %}" 
+                                   class="text-decoration-none text-dark fw-bold">
+                                    {{ profile.user.username }}
+                                </a>
+                            </h5>
+
+                            <div class="mb-3">
+                                {% if user.is_authenticated %}
+                                    {% if user == profile.user %}
+                                        <span class="badge bg-secondary">Tú</span>
+                                    {% elif profile.is_followed %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle-fill"></i> Siguiendo
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="bi bi-person-plus"></i> No sigues
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+
+                            <div class="mt-2 small text-muted">
+                                <div>
+                                    <i class="bi bi-postcard me-1"></i>
+                                    {{ profile.user.posts.count }} publicaciones
+                                </div>
+                                <div>
+                                    <i class="bi bi-people me-1"></i>
+                                    {{ profile.followers_count }} seguidores
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-people display-4 text-muted mb-3"></i>
+                    <p class="h5 text-muted">No se encontraron perfiles</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.filter %}&filter={{ request.GET.filter }}{% endif %}" 
+                           aria-label="Anterior">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.filter %}&filter={{ request.GET.filter }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.filter %}&filter={{ request.GET.filter }}{% endif %}" 
+                           aria-label="Siguiente">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('search-form');
+    
+    // Al enviar el formulario, asegurarse de mantener el filtro activo
+    searchForm.addEventListener('submit', function(e) {
+        const currentFilter = new URLSearchParams(window.location.search).get('filter');
+        if (currentFilter && !searchForm.querySelector('input[name="filter"]')) {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'filter';
+            hiddenInput.value = currentFilter;
+            searchForm.appendChild(hiddenInput);
+        }
+    });
+});
+</script>
+
+<style>
+    .profile-card .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .profile-card .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .btn-outline-primary.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+</style>
+{% endblock content %}
