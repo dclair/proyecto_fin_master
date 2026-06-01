@@ -1,82 +1,132 @@
-from django.test import TestCase, override_settings
-from profiles.models import UserProfile, Follow
+from datetime import timedelta
+
 from django.contrib.auth.models import User
+from django.test import TestCase, override_settings
 from django.urls import reverse
-from django.core.files.storage import FileSystemStorage
-from django.conf import settings
-import shutil
-import tempfile
+from django.utils import timezone
 
-# Crear un almacenamiento temporal para las pruebas
-TEMP_MEDIA_ROOT = tempfile.mkdtemp()
+from notifications.models import Notification
+from posts.models import Event
+from profiles.models import Hobby, Review, UserHobby
 
 
-@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
-class TestUserProfileViews(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        # Limpiar el directorio temporal después de las pruebas
-        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
-        super().tearDownClass()
-
+@override_settings(DEBUG=True, SECURE_SSL_REDIRECT=False)
+class ProfileViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username="testuser",
-            password="testpass",
-            first_name="FirstTest",
-            last_name="LastTest",
-            email="testuser@example.com",
+            username="ana", email="ana@example.com", password="testpass123"
+        )
+        self.other = User.objects.create_user(
+            username="luis", email="luis@example.com", password="testpass123"
+        )
+        self.hobby = Hobby.objects.create(name="Fotografia")
+
+    def test_profile_list_excludes_current_user_and_supports_filters(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("profile_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.other.username)
+        self.assertNotContains(response, self.user.username)
+        self.assertEqual(response.context["count_all"], 1)
+        self.assertEqual(response.context["count_following"], 0)
+        self.assertEqual(response.context["count_not_following"], 1)
+
+    def test_profile_detail_toggles_follow_and_creates_notification(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse("profiles:profile", kwargs={"pk": self.other.profile.pk}),
+            {"profile_pk": self.other.profile.pk},
         )
 
-        # PERFIL YA EXISTE POR SIGNAL
-        self.user_profile = self.user.profile
-
-        self.user2 = User.objects.create_user(
-            username="testuser2",
-            password="testpass2",
-            email="testuser2@example.com",
+        self.assertRedirects(
+            response, reverse("profiles:profile", kwargs={"pk": self.other.profile.pk})
+        )
+        self.assertTrue(self.user.profile.is_following(self.other.profile))
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.other, sender=self.user, notification_type="follow"
+            ).exists()
         )
 
-        self.user2_profile = self.user2.profile
+        self.client.post(
+            reverse("profiles:profile", kwargs={"pk": self.other.profile.pk}),
+            {"profile_pk": self.other.profile.pk},
+        )
+        self.assertFalse(self.user.profile.is_following(self.other.profile))
 
-        self.follow = Follow.objects.create(
-            follower=self.user_profile, following=self.user2_profile
+    def test_profile_edit_updates_user_profile_and_hobbies(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse("profiles:profile_edit"),
+            {
+                "username": "ana-updated",
+                "email": "ana-updated@example.com",
+                "first_name": "Ana",
+                "last_name": "Garcia",
+                "bio": "Nueva bio",
+                "birth_date": "1990-01-01",
+                "location": "Telde",
+                "website": "https://example.com",
+            },
         )
 
-    def test_profile_list_view(self):
-        print("=== Probando la vista de lista de perfiles ===")
+        self.assertRedirects(
+            response, reverse("profiles:profile", kwargs={"pk": self.user.profile.pk})
+        )
+        self.user.refresh_from_db()
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.username, "ana-updated")
+        self.assertEqual(self.user.profile.bio, "Nueva bio")
+        self.assertEqual(self.user.profile.location, "Telde")
 
-        # 1. Iniciar sesión
-        self.client.login(username="testuser", password="testpass")
-        # 2. Hacer la petición a la URL correcta
-        response = self.client.get("/profile/list/")
-        self.assertEqual(response.status_code, 200)
-        # 3. Verificar que los usuarios están en el contexto
-        self.assertIn("object_list", response.context)
-        users_in_context = list(response.context["object_list"])
+    def test_add_and_delete_hobby_for_current_profile(self):
+        self.client.force_login(self.user)
 
-        # 4. Verificar que solo se devuelve el usuario que NO es el actual
-        # (la vista excluye al usuario autenticado)
-        self.assertEqual(len(users_in_context), 1)
+        response = self.client.post(
+            reverse("profiles:add_hobby"),
+            {"hobby": self.hobby.pk, "level": "advanced"},
+        )
 
-        # 5. Verificar que el usuario devuelto es testuser2
-        self.assertEqual(users_in_context[0].user.username, "testuser2")
+        self.assertRedirects(response, reverse("profiles:profile_edit"))
+        user_hobby = UserHobby.objects.get(profile=self.user.profile, hobby=self.hobby)
+        self.assertEqual(user_hobby.level, "advanced")
 
-        # 6. Verificar que el usuario autenticado no está en la lista
-        print("=== Verificando que el usuario autenticado no está en la lista ===")
-        self.assertNotIn(self.user_profile, users_in_context)
-        print("=== Prueba de vista de perfiles completada exitosamente ===")
+        response = self.client.post(
+            reverse("profiles:delete_hobby", kwargs={"hobby_id": user_hobby.pk})
+        )
 
-        # 7. probar que la lista de perfiles se muestra correctamente
-        print("=== Probando la vista de lista de perfiles ===")
-        url = reverse("profile_list")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        print("=== Prueba de vista de lista de perfiles completada exitosamente ===")
+        self.assertRedirects(response, reverse("profiles:profile_edit"))
+        self.assertFalse(UserHobby.objects.filter(pk=user_hobby.pk).exists())
 
-        # 8 probar vista detalle del perfil
-        print("=== Probando la vista de detalle del perfil ===")
-        url = reverse("profile", kwargs={"pk": self.user2_profile.id})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        print("=== Prueba de vista de detalle del perfil completada exitosamente ===")
+    def test_add_review_creates_review_and_notification(self):
+        event = Event.objects.create(
+            title="Fotos al atardecer",
+            description="Plan de prueba",
+            location="Maspalomas",
+            event_date=timezone.now() - timedelta(days=1),
+            organizer=self.other,
+            hobby=self.hobby,
+        )
+        event.participants.add(self.user)
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse("profiles:add_review", kwargs={"event_id": event.pk}),
+            {"rating": 5, "comment": "Gran organizacion"},
+        )
+
+        self.assertRedirects(response, reverse("posts:my_participations"))
+        review = Review.objects.get(event=event, author=self.user)
+        self.assertEqual(review.recipient, self.other)
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.other,
+                sender=self.user,
+                notification_type="review",
+                review=review,
+            ).exists()
+        )

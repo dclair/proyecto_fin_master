@@ -21,11 +21,13 @@ Read in this order:
 Reusable knowledge:
 
 - `knowledge/project-architecture-hubs-clicks.md`
+- `knowledge/testing-strategy-hubs-clicks.md`
 - `knowledge/django-sqlite-to-mysql-mariadb.md`
 
 ## Notes For Future AI Agents
 
 - Read `knowledge/project-architecture-hubs-clicks.md` first when you need to understand the product, app structure, models, routes, templates, signals, and operational caveats.
+- Read `knowledge/testing-strategy-hubs-clicks.md` before adding or changing tests; it records the current 35-test baseline, command, conventions, and gaps.
 - Prefer `ai-handoff.md` for the current operational truth.
 - Prefer `implementation-log.md` for what was actually executed.
 - Prefer `verification-report.md` for evidence and acceptance checks.

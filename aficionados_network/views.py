@@ -554,7 +554,9 @@ class ContactFormView(FormView):
         }
 
         # 2. Renderizamos el HTML
-        html_content = render_to_string("emails/notification_email.html", context)
+        html_content = render_to_string(
+            "general/emails/notification_email.html", context
+        )
         text_content = strip_tags(html_content)
 
         # 3. Creamos el objeto Email
