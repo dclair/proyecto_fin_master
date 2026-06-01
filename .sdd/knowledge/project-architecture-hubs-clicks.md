@@ -634,28 +634,43 @@ Current test files:
 - `notifications/tests.py`
 - `aficionados_network/test.py`
 
-Most visible coverage is around:
+As of 2026-06-01, the suite has 35 tests covering:
 
-- Automatic profile creation.
-- Follow relationships.
-- Follow counts.
-- Unique follow constraint.
-- Profile list/detail views.
+- Core views and emails: home, login/logout, registration, activation, contact form, `ContactMessage`.
+- Profile models: automatic profile signal, superuser profile exception, age/birth-date validation, hobbies, user hobby uniqueness, follows, review uniqueness.
+- Profile routes: profile list/detail, follow/unfollow notifications, profile edit, add/delete hobbies, add review.
+- Post models/routes: image validation, post image delete cleanup, likes, comments, modal partial, notification/email creation.
+- Event models/routes: event helpers, event comments, list/detail matching context, create, attendance toggle, cancel, reactivate, duplicate, organizer comments, hobby hub, clicks gallery.
+- Notifications: model string/default state, follow signal, list read marking, unread-count endpoint, context processor, smart redirects.
 
-Suggested command:
+Primary development command:
 
 ```bash
-python manage.py test
+env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 ```
 
-For database-specific checks, use:
+Why this command:
+
+- The local `.env` may select MySQL/MariaDB by default.
+- In the sandbox, MySQL socket access can fail with `PermissionError: [Errno 1] Operation not permitted`.
+- SQLite keeps the test run fast and isolated for ordinary feature work.
+
+Optional database-specific checks:
 
 ```bash
-DB_ENGINE=sqlite python manage.py test
-DB_ENGINE=mysql python manage.py test
+env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test
+env DB_ENGINE=mysql DEBUG=True ./env/bin/python manage.py test
 ```
 
 If MySQL permissions block test database creation, see `.sdd/knowledge/django-sqlite-to-mysql-mariadb.md`.
+
+Testing conventions now in place:
+
+- Use `override_settings(DEBUG=True, SECURE_SSL_REDIRECT=False)` in route tests to avoid environment-driven redirects.
+- Use `EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend"` and inspect `django.core.mail.outbox` for email assertions.
+- Use a temporary `MEDIA_ROOT` for image upload tests so tests do not write into project `media/`.
+- Prefer `force_login()` for authenticated route tests unless the login flow itself is under test.
+- Keep tests focused on observable product behavior: database rows, redirects, templates, context, notifications, and emails.
 
 Manual smoke-test workflows after meaningful changes:
 
@@ -675,7 +690,7 @@ Manual smoke-test workflows after meaningful changes:
 - Profile routes exist both as global names and namespaced profile URLs. Check templates before renaming.
 - `notifications/context_procesors.py` appears to be a misspelled duplicate-like file; settings use `notifications.context_processors`.
 - `posts.Posts.save()` includes unrelated self-follow validation logic that likely came from older code.
-- `ContactFormView` renders `"emails/notification_email.html"`, while the existing reusable template path seen elsewhere is `"general/emails/notification_email.html"`. Verify before relying on contact email in production.
+- `ContactFormView` was corrected on 2026-06-01 to render `"general/emails/notification_email.html"` so contact emails use the existing template path.
 - `EventComment` is not registered in `posts/admin.py` at the time of this review.
 - Event-level match flags (`is_match`, `is_mentor`) are runtime attributes added in views, not model fields.
 - The product uses both internal notifications and emails; preserve both surfaces when changing interaction flows.
