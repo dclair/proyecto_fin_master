@@ -36,8 +36,8 @@
                 <li class="nav-item">
                     <a class="nav-link px-2 d-flex align-items-center text-nowrap {% if 'profiles' in request.resolver_match.app_name %}active fw-bold text-hubs{% endif %}" 
                        href="{% url 'profiles:profile_list' %}"
-                       title="Encuentra a otros aficionados con tus mismos intereses">
-                        <i class="bi bi-people me-1"></i> Perfiles
+                       title="Encuentra a otros compañeros terapeutas, con las mismas o distintas habilidades que tú">
+                        <i class="bi bi-people me-1"></i> Los Terapeutas
                     </a>
                 </li>
 
@@ -80,7 +80,7 @@
                            class="nav-link px-3 d-flex align-items-center text-nowrap rounded-pill border border-hubs-subtle {% if request.resolver_match.url_name == 'post_create' %}active fw-bold bg-light{% endif %}" 
                            style="border: 1px solid rgba(11, 89, 97, 0.2);"
                            title="Añadir publicaciones y descubrir la comunidad">
-                            <i class="bi bi-plus-circle-fill me-1 text-hubs"></i> Nuevo Hub
+                            <i class="bi bi-plus-circle-fill me-1 text-hubs"></i> Nueva Publicación
                         </a>
                     </li>
 
@@ -89,7 +89,7 @@
                             <a href="{% url 'profiles:profile' user.profile.pk %}" 
                                class="nav-link px-2 d-flex align-items-center text-nowrap {% if 'profile' in request.resolver_match.url_name and 'list' not in request.resolver_match.url_name %}active fw-bold text-hubs{% endif %}"
                                title="Ver y editar tu información personal">
-                                <i class="bi bi-person-circle me-1"></i> Perfil
+                                <i class="bi bi-person-circle me-1"></i> Mi Perfil
                             </a>
                         {% endif %}
                     </li>
