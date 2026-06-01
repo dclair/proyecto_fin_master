@@ -2,6 +2,14 @@
 
 This directory stores structured design and delivery documentation for the project.
 
+Start here:
+
+1. `index.md`
+2. `current-state.md`
+3. `architecture-map.md`
+4. `decision-log.md`
+5. `changelog-logical.md`
+
 ## Active/Recent Changes
 
 ### `sqlite-to-mysql-migration`
@@ -20,12 +28,18 @@ Read in this order:
 
 Reusable knowledge:
 
+- `current-state.md`
+- `architecture-map.md`
+- `decision-log.md`
+- `changelog-logical.md`
 - `knowledge/project-architecture-hubs-clicks.md`
 - `knowledge/testing-strategy-hubs-clicks.md`
 - `knowledge/django-sqlite-to-mysql-mariadb.md`
 
 ## Notes For Future AI Agents
 
+- Read `index.md` first. It is the hub for the entire `.sdd` workspace.
+- Treat `current-state.md` as the single operational truth.
 - Read `knowledge/project-architecture-hubs-clicks.md` first when you need to understand the product, app structure, models, routes, templates, signals, and operational caveats.
 - Read `knowledge/testing-strategy-hubs-clicks.md` before adding or changing tests; it records the current 35-test baseline, command, conventions, and gaps.
 - Prefer `ai-handoff.md` for the current operational truth.
