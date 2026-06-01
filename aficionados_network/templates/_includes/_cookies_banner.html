@@ -1,20 +1,25 @@
-<div id="cookie-banner" class="cookie-banner-hubs shadow-lg animate__animated animate__fadeInUp">
+<div id="cookie-banner" class="cookie-banner-hubs shadow-lg animate__animated animate__fadeInDown">
     <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between py-3">
         <div class="cookie-content d-flex align-items-center mb-3 mb-md-0">
             <div class="cookie-icon me-3">
-                <i class="bi bi-cookie fs-3"></i>
+                <i class="bi bi-cookie fs-3 text-white"></i>
             </div>
             <div class="cookie-text">
                 <span class="fw-bold d-block text-white">¿Te apetece una cookie?</span>
                 <span class="small text-white-50">
                     Usamos cookies para mejorar tu experiencia en **Hubs&Clicks**. Al seguir navegando, aceptas nuestra 
-                    <a href="legal" class="text-white text-decoration-underline">política de privacidad</a>.
+                    <a href="/legal" class="text-white text-decoration-underline">política de privacidad</a>.
                 </span>
             </div>
         </div>
-        <div class="cookie-actions">
-            <button id="accept-cookies" class="btn btn-light btn-sm fw-bold px-4 py-2 shadow-sm">
-                ¡Entendido!
+        <div class="cookie-actions d-flex gap-2">
+            <!-- Botón 1: Rechazar / Necesarias -->
+            <button id="reject-cookies" class="btn btn-outline-light btn-sm fw-bold px-3 py-2 shadow-sm">
+                Solo necesarias
+            </button>
+            <!-- Botón 2: Aceptar -->
+            <button id="accept-cookies" class="btn btn-light btn-sm fw-bold px-4 py-2 shadow-sm text-dark">
+                Aceptar todas
             </button>
         </div>
     </div>

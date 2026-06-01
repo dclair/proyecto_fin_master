@@ -255,6 +255,28 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 }
 .animate__headShake { animation: headShake 1s ease-in-out; }
 
+/* --- BANNER DE COOKIES --- */
+.cookie-banner-hubs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1050; /* Por encima del menú de navegación */
+    border-radius: 0;
+    background-color: var(--hubs-primary); /* El fondo Teal corporativo */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Sombra para separar del fondo */
+}
+
+#cookie-banner {
+    transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+}
+
+#cookie-banner.hidden {
+    transform: translateY(-100%); /* Lo oculta hacia arriba, muy elegante */
+    opacity: 0;
+    pointer-events: none;
+}
+
 /* ============================================================
    8. FOOTER Y OTROS
    ============================================================ */
