@@ -13,7 +13,6 @@ from .views import (
     ContactFormView,
     activate,
 )
-from profiles.views import ProfilesListView, ProfileView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -23,8 +22,6 @@ urlpatterns = [
     path(
         "profile/", include("profiles.urls")
     ),  # Esto delega las rutas a la app profiles
-    path("profile/list/", ProfilesListView.as_view(), name="profile_list"),
-    path("profile/<int:pk>/", ProfileView.as_view(), name="profile"),
     # urls autenticación
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),

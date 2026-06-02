@@ -24,7 +24,7 @@ class ProfileViewTests(TestCase):
     def test_profile_list_excludes_current_user_and_supports_filters(self):
         self.client.force_login(self.user)
 
-        response = self.client.get(reverse("profile_list"))
+        response = self.client.get(reverse("profiles:profile_list"))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.other.username)
