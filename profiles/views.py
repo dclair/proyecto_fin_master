@@ -204,7 +204,7 @@ class ProfileUpdateView(LoginRequiredMixin, View):
         )
 
 
-# --- ACCIONES DE AFICIONES ---
+# --- ACCIONES DE TERAPIAS ---
 @login_required
 def add_hobby(request):
     if request.method == "POST":
@@ -216,18 +216,18 @@ def add_hobby(request):
                 profile=user_hobby.profile, hobby=user_hobby.hobby
             ).exists():
                 user_hobby.save()
-                messages.success(request, "Afición añadida.")
+                messages.success(request, "Terapia añadida.")
             else:
-                messages.warning(request, "Ya tienes esta afición en tu lista.")
+                messages.warning(request, "Ya tienes esta terapia en tu lista.")
     return redirect("profiles:profile_edit")
 
 
-# para eliminar una afición
+# Vista para eliminar una terapia del perfil
 @login_required
 def delete_hobby(request, hobby_id):
     user_hobby = get_object_or_404(UserHobby, id=hobby_id, profile=request.user.profile)
     user_hobby.delete()
-    messages.success(request, "Afición eliminada.")
+    messages.success(request, "Terapia eliminada.")
     return redirect("profiles:profile_edit")
 
 

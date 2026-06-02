@@ -115,7 +115,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         # Contamos cuántos posts tiene cada categoría y traemos las 5 mejores
         from posts.models import (
             Hobby,
-        )  # Asegúrate de importar tu modelo de Categoría/Afición
+        )  # Asegúrate de importar tu modelo de Categoría/Terapia
 
         context["trending_categories"] = (
             Hobby.objects.annotate(num_posts=Count("posts"))
@@ -815,7 +815,7 @@ def clicks_gallery(request):
     return render(request, "posts/clicks_list.html", {"clicks": clicks_page})
 
 
-# CON ESTO SE MUESTRA LA GALERIA DE LOS EVENTOS DE UNA AFICION O HOBBY
+# CON ESTO SE MUESTRA LA GALERIA DE LOS EVENTOS DE UNA TERAPIA O HOBBY
 # aficionados_network/views.py (o donde tengas hobby_hub)
 from django.utils import timezone
 from django.db.models import Q

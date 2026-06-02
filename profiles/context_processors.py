@@ -1,6 +1,6 @@
 def user_hobbies_processor(request):
     """
-    Hace que las aficiones del usuario estén disponibles
+    Hace que las terapias del usuario estén disponibles
     en todos los templates del sitio.
     """
     if request.user.is_authenticated and hasattr(request.user, "profile"):

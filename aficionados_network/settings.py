@@ -93,7 +93,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "notifications.context_processors.unread_notifications",  # <---ESTO para notificaciones
-                "profiles.context_processors.user_hobbies_processor",  # <---ESTO para aficiones
+                "profiles.context_processors.user_hobbies_processor",  # <---ESTO para terapias
             ],
         },
     },
@@ -198,7 +198,9 @@ LOGIN_URL = "/login/"
 # Después de cerrar sesión, el usuario irá a la página de inicio
 LOGOUT_REDIRECT_URL = "/"
 
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+)
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
