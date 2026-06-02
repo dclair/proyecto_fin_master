@@ -125,8 +125,6 @@ Testing:
 
 ## Current Caveats Snapshot
 
-- Some legacy/duplicated profile code remains in `aficionados_network/views.py`.
-- Root and namespaced profile routes coexist.
 - MySQL may be selected by `.env`; tests should explicitly select SQLite.
 - Media files are separate from DB state.
 - Notifications and emails are both product contracts for many interactions.

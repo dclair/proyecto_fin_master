@@ -210,6 +210,11 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", EMAIL_HOST_USER)
 SERVER_EMAIL = os.getenv("SERVER_EMAIL", EMAIL_HOST_USER)
 
+# Configuración de Sesión
+SESSION_COOKIE_AGE = 3600  # 1 hora de inactividad
+SESSION_SAVE_EVERY_REQUEST = True  # Renueva el tiempo con cada request
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expira al cerrar el navegador
+
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", True)
