@@ -105,7 +105,7 @@
                     </div>
                 </div>
                 
-                {# Bio y Aficiones #}
+                {# Bio y Terapias #}
                 <div class="bg-white p-3 border rounded shadow-sm mb-4">
                     {% if user_profile.bio %}
                         <div class="mb-3">
@@ -116,7 +116,7 @@
 
                     {# Lista de Hobbies #}
                     <div class="mb-3">
-                        <h6 class="fw-bold small text-uppercase text-muted mb-2">Mis Aficiones</h6>
+                        <h6 class="fw-bold small text-uppercase text-muted mb-2">Mis Terapias</h6>
                         <div class="d-flex flex-wrap gap-2">
                             {% for user_hobby in user_profile.userhobby_set.all %}
                                 <span class="badge border text-dark bg-light fw-normal p-2">
@@ -128,7 +128,7 @@
                                     {% endif %}
                                 </span>
                             {% empty %}
-                                <small class="text-muted italic">Sin aficiones aún.</small>
+                                <small class="text-muted italic">Sin terapias aún.</small>
                             {% endfor %}
                         </div>
                     </div>

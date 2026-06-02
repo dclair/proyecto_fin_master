@@ -106,7 +106,7 @@ class AddHobbyForm(forms.ModelForm):
     class Meta:
         model = UserHobby
         fields = ["hobby", "level"]
-        labels = {"hobby": "Afición", "level": "Nivel de experiencia"}
+        labels = {"hobby": "Terapia", "level": "Nivel de experiencia"}
         widgets = {
             "hobby": forms.Select(attrs={"class": "form-select"}),
             "level": forms.Select(attrs={"class": "form-select"}),

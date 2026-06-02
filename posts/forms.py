@@ -49,7 +49,7 @@ class PostCreateForm(forms.ModelForm):
 
         error_messages = {
             "category": {
-                "required": "Debes elegir una afición para clasificar tu post.",
+                "required": "Debes elegir una terapia para clasificar tu post.",
             },
             "image": {
                 "required": "Una publicación sin imagen no es un 'Click'. ¡Sube una!",

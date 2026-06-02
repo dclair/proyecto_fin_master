@@ -17,7 +17,7 @@ def validate_birth_date(value):
         raise ValidationError("Por favor ingrese una fecha de nacimiento válida")
 
 
-# esta clase la usaremos para crear las aficiones
+# esta clase la usaremos para crear las terapias
 class Hobby(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
@@ -149,7 +149,7 @@ class UserProfile(models.Model):
                 raise ValidationError("No puedes seguirte a ti mismo.")
 
 
-# Con esta clase gestionaremos los niveles de cada afición
+# Con esta clase gestionaremos los niveles de cada terapia
 class UserHobby(models.Model):
     LEVEL_CHOICES = [
         ("beginner", "Principiante"),
@@ -166,7 +166,7 @@ class UserHobby(models.Model):
         unique_together = (
             "profile",
             "hobby",
-        )  # Evita que un usuario repita la misma afición
+        )  # Evita que un usuario repita la misma terapia
 
 
 class Follow(models.Model):

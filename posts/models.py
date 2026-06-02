@@ -67,7 +67,7 @@ class Posts(models.Model):
     slug = models.SlugField(
         max_length=255, unique=True, blank=True, null=True, verbose_name="slug"
     )
-    # --- NUEVO CAMPO: Categoría por Afición ---
+    # --- NUEVO CAMPO: Categoría por Terapia ---
     category = models.ForeignKey(
         Hobby,
         on_delete=models.SET_NULL,
@@ -227,7 +227,7 @@ class Event(models.Model):
         User, on_delete=models.CASCADE, related_name="events_created"
     )
 
-    # A qué afición pertenece (Fotografía, Ciclismo, etc.)
+    # A qué terapia pertenece (Fotografía, Ciclismo, etc.)
     hobby = models.ForeignKey(Hobby, on_delete=models.CASCADE, related_name="events")
 
     # Lista de usuarios que se apuntan (Muchos a Muchos)

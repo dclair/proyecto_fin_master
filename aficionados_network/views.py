@@ -95,7 +95,7 @@ class HomeView(TemplateView):
         upcoming_events = Event.objects.none()
 
         if user.is_authenticated and hasattr(user, "profile"):
-            my_hobbies = user.profile.hobbies.all()  # Tus aficiones para la sidebar
+            my_hobbies = user.profile.hobbies.all()  # Tus terapias para la sidebar
 
             # --- LÓGICA DE NIVELES PARA LA SIDEBAR (NUEVO) ---
             user_levels = UserHobby.objects.filter(profile=user.profile).values(
