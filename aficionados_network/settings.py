@@ -43,6 +43,7 @@ if not DEBUG and not ALLOWED_HOSTS:
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -60,6 +61,7 @@ INSTALLED_APPS = [
     "profiles",
     "aficionados_network",  # App para mensajes de contacto
     "notifications",  # App para notificaciones
+    "chat",  # App para chat en vivo
 ]
 
 MIDDLEWARE = [
@@ -100,6 +102,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "aficionados_network.wsgi.application"
+ASGI_APPLICATION = "aficionados_network.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").strip().lower()
