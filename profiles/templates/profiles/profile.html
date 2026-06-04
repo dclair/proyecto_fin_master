@@ -45,15 +45,20 @@
                                 <i class="bi bi-gear me-1"></i> Editar perfil
                             </a>
                         {% else %}
-                            <form method="post" action="{% url 'profiles:profile' user_profile.pk %}" class="d-inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="profile_pk" value="{{ user_profile.pk }}">
-                                {% if is_following %}
-                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">Dejar de seguir</button>
-                                {% else %}
-                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Seguir</button>
-                                {% endif %}
-                            </form>
+                            <div class="d-inline-flex gap-2 align-items-center">
+                                <form method="post" action="{% url 'profiles:profile' user_profile.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="profile_pk" value="{{ user_profile.pk }}">
+                                    {% if is_following %}
+                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">Dejar de seguir</button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Seguir</button>
+                                    {% endif %}
+                                </form>
+                                <button onclick="window.dispatchEvent(new CustomEvent('openChatWith', { detail: { userId: {{ user_profile.user.id }} } }))" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                    <i class="bi bi-chat-dots me-1"></i> Mensaje
+                                </button>
+                            </div>
                         {% endif %}
                     {% endif %}
                 </div>
