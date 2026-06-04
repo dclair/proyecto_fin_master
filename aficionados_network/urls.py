@@ -84,6 +84,7 @@ urlpatterns = [
     ),
     path("pages/", include("django.contrib.flatpages.urls")),
     path("notifications/", include("notifications.urls")),
+    path("api/chat/", include("chat.api_urls")),
 ]
 
 # Configuración para servir archivos multimedia en desarrollo

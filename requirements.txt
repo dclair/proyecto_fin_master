@@ -16,6 +16,8 @@ dj-database-url==3.1.0
 Django==6.0
 django-crispy-forms==2.5
 django-extensions==4.1
+django-vite==3.1.0
+djangorestframework==3.17.1
 executing==2.2.1
 gunicorn==21.2.0
 hyperlink==21.0.0

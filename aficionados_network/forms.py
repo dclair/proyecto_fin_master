@@ -10,6 +10,12 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ["first_name", "username", "email", "password1", "password2"]
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Ya existe un usuario registrado con este correo electrónico.")
+        return email
+
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -34,6 +40,12 @@ class UserUpdateForm(forms.ModelForm):
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
             "last_name": forms.TextInput(attrs={"class": "form-control"}),
         }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Este correo electrónico ya está en uso por otro usuario.")
+        return email
 
 
 class ProfileUpdateForm(forms.ModelForm):

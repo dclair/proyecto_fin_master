@@ -62,6 +62,10 @@ INSTALLED_APPS = [
     "aficionados_network",  # App para mensajes de contacto
     "notifications",  # App para notificaciones
     "chat",  # App para chat en vivo
+    
+    # Nuevas dependencias
+    "rest_framework",
+    "django_vite",
 ]
 
 MIDDLEWARE = [
@@ -173,8 +177,33 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    BASE_DIR / "static",
+    BASE_DIR / "frontend" / "dist",
 ]
+
+# CONFIGURACIÓN VITE (React Frontend)
+DJANGO_VITE = {
+    "default": {
+        "dev_mode": DEBUG,
+        "dev_server_port": 5173,
+        "manifest_path": BASE_DIR / "frontend" / "dist" / ".vite" / "manifest.json",
+    }
+}
+
+# STATICFILES_DIRS must include the directory where Vite puts the built assets
+# if it is not already covered by BASE_DIR / "static"
+# (we will output vite builds directly into static/react)
+
+# CONFIGURACIÓN DJANGO REST FRAMEWORK
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
