@@ -95,3 +95,164 @@ class MarkConversationReadView(APIView):
             return Response({'status': 'ok'})
         except ConversationParticipant.DoesNotExist:
             return Response({'error': 'Not a participant'}, status=status.HTTP_403_FORBIDDEN)
+
+from .api_serializers import UserBasicSerializer, GroupJoinRequestSerializer
+from .models import GroupJoinRequest
+
+class GroupConversationCreateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        name = request.data.get('name')
+        user_ids = request.data.get('user_ids', [])
+        
+        if not name:
+            return Response({'error': 'Group name is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user_ids or not isinstance(user_ids, list):
+            return Response({'error': 'user_ids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Ensure creator is in the group
+        if request.user.id not in user_ids:
+            user_ids.append(request.user.id)
+            
+        users = User.objects.filter(id__in=user_ids)
+        if users.count() < 2:
+            return Response({'error': 'At least 2 users are required to form a group'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Create group conversation
+        conv = Conversation.objects.create(is_group=True, name=name, admin=request.user)
+        
+        # Create participants
+        participants = [ConversationParticipant(conversation=conv, user=user) for user in users]
+        ConversationParticipant.objects.bulk_create(participants)
+        
+        serializer = ConversationSerializer(conv)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class UserListView(generics.ListAPIView):
+    serializer_class = UserBasicSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        # Exclude the current user so they don't select themselves
+        return User.objects.exclude(id=self.request.user.id).order_by('first_name', 'username')
+
+class GroupConversationAddUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, conversation_id):
+        try:
+            conv = Conversation.objects.get(id=conversation_id, is_group=True)
+        except Conversation.DoesNotExist:
+            return Response({'error': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        # Verificar que el usuario es el administrador del grupo
+        if conv.admin != request.user:
+            return Response({'error': 'Only the admin can add users'}, status=status.HTTP_403_FORBIDDEN)
+            
+        user_ids = request.data.get('user_ids', [])
+        if not user_ids or not isinstance(user_ids, list):
+            return Response({'error': 'user_ids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        users = User.objects.filter(id__in=user_ids)
+        
+        # Filtrar los que ya existen
+        existing_ids = set(ConversationParticipant.objects.filter(conversation=conv).values_list('user_id', flat=True))
+        
+        new_participants = []
+        for u in users:
+            if u.id not in existing_ids:
+                new_participants.append(ConversationParticipant(conversation=conv, user=u))
+                
+        if new_participants:
+            ConversationParticipant.objects.bulk_create(new_participants)
+            
+        return Response({'status': 'ok', 'added': len(new_participants)})
+
+class DiscoverGroupsView(generics.ListAPIView):
+    serializer_class = ConversationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Grupos donde NO participo
+        my_group_ids = ConversationParticipant.objects.filter(
+            user=self.request.user, conversation__is_group=True
+        ).values_list('conversation_id', flat=True)
+        return Conversation.objects.filter(is_group=True).exclude(id__in=my_group_ids)
+
+class RequestJoinGroupView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, conversation_id):
+        try:
+            conv = Conversation.objects.get(id=conversation_id, is_group=True)
+        except Conversation.DoesNotExist:
+            return Response({'error': 'Group not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        # Check if already a participant
+        if ConversationParticipant.objects.filter(conversation=conv, user=request.user).exists():
+            return Response({'error': 'Already a participant'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Get or create pending request
+        join_req, created = GroupJoinRequest.objects.get_or_create(
+            conversation=conv,
+            user=request.user,
+            defaults={'status': 'pending'}
+        )
+        if not created and join_req.status != 'pending':
+            join_req.status = 'pending'
+            join_req.save()
+            
+        return Response({'status': 'ok'})
+
+class GroupJoinRequestsListView(generics.ListAPIView):
+    serializer_class = GroupJoinRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Solicitudes pendientes para los grupos que administro
+        return GroupJoinRequest.objects.filter(
+            conversation__admin=self.request.user,
+            status='pending'
+        )
+
+class ManageJoinRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, request_id):
+        try:
+            join_req = GroupJoinRequest.objects.get(id=request_id, conversation__admin=request.user)
+        except GroupJoinRequest.DoesNotExist:
+            return Response({'error': 'Request not found or unauthorized'}, status=status.HTTP_404_NOT_FOUND)
+            
+        action = request.data.get('action')
+        if action not in ['accept', 'reject']:
+            return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if action == 'accept':
+            join_req.status = 'accepted'
+            ConversationParticipant.objects.get_or_create(conversation=join_req.conversation, user=join_req.user)
+        else:
+            join_req.status = 'rejected'
+            
+        join_req.save()
+        return Response({'status': 'ok'})
+
+class ConversationDeleteView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, conversation_id):
+        try:
+            conv = Conversation.objects.get(id=conversation_id)
+        except Conversation.DoesNotExist:
+            return Response({'error': 'Conversation not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if conv.is_group:
+            if conv.admin != request.user:
+                return Response({'error': 'Only the group administrator can delete this group'}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            if not ConversationParticipant.objects.filter(conversation=conv, user=request.user).exists():
+                return Response({'error': 'You are not a participant in this conversation'}, status=status.HTTP_403_FORBIDDEN)
+
+        conv.delete()
+        return Response({'status': 'ok'})

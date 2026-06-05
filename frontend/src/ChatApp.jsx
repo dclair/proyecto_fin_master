@@ -3,12 +3,16 @@ import axios from 'axios';
 import { MessageCircle, X } from 'lucide-react';
 import ConversationList from './components/ConversationList';
 import MessageArea from './components/MessageArea';
+import GroupCreator from './components/GroupCreator';
+import GroupExplorer from './components/GroupExplorer';
 import './ChatApp.css';
 
 const ChatApp = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [isExploringGroups, setIsExploringGroups] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const panelRef = useRef(null);
   
@@ -74,7 +78,8 @@ const ChatApp = () => {
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
+    let interval;
+    const fetchConversations = () => {
       axios.get('/api/chat/conversations/')
         .then(response => {
           setConversations(response.data);
@@ -82,7 +87,16 @@ const ChatApp = () => {
         .catch(error => {
           console.error("Error cargando conversaciones:", error);
         });
+    };
+
+    if (isOpen) {
+      fetchConversations();
+      interval = setInterval(fetchConversations, 15000);
     }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isOpen]);
 
   // Escuchar evento global para iniciar chat desde perfiles
@@ -127,7 +141,30 @@ const ChatApp = () => {
 
   const handleBackToList = () => {
     setActiveConversationId(null);
+    setIsCreatingGroup(false);
+    setIsExploringGroups(false);
   };
+
+  const handleConversationDeleted = () => {
+    setActiveConversationId(null);
+    axios.get('/api/chat/conversations/')
+      .then(response => setConversations(response.data))
+      .catch(error => console.error("Error recargando conversaciones:", error));
+  };
+
+  const activeConversation = conversations.find(c => c.id === activeConversationId);
+  const conversationTitle = activeConversation ? 
+    (activeConversation.is_group ? (activeConversation.name || "Chat Grupal") : activeConversation.participants.map(p => p.first_name || p.username).join(", ")) 
+    : `Chat #${activeConversationId}`;
+  const isGroup = activeConversation?.is_group || false;
+
+  const sortedConversations = [...conversations].sort((a, b) => {
+    if ((a.unread_count || 0) > 0 && (b.unread_count || 0) === 0) return -1;
+    if ((b.unread_count || 0) > 0 && (a.unread_count || 0) === 0) return 1;
+    const dateA = a.last_message ? new Date(a.last_message.timestamp) : new Date(a.created_at);
+    const dateB = b.last_message ? new Date(b.last_message.timestamp) : new Date(b.created_at);
+    return dateB - dateA;
+  });
 
   return (
     <>
@@ -201,17 +238,36 @@ const ChatApp = () => {
             </button>
           </div>
           
-          {activeConversationId ? (
+          {isCreatingGroup ? (
+            <GroupCreator 
+              onBack={() => setIsCreatingGroup(false)}
+              onGroupCreated={(id) => {
+                setIsCreatingGroup(false);
+                setActiveConversationId(id);
+                axios.get('/api/chat/conversations/').then(res => setConversations(res.data));
+              }}
+            />
+          ) : isExploringGroups ? (
+            <GroupExplorer 
+              onBack={() => setIsExploringGroups(false)}
+            />
+          ) : activeConversationId ? (
             <MessageArea 
               conversationId={activeConversationId} 
+              conversationTitle={conversationTitle}
+              isGroup={isGroup}
+              activeConversation={activeConversation}
               onBack={handleBackToList}
+              onConversationDeleted={handleConversationDeleted}
               currentUsername={currentUsername}
             />
           ) : (
             <ConversationList 
-              conversations={conversations} 
+              conversations={sortedConversations} 
               onSelect={(id) => setActiveConversationId(id)}
               activeId={activeConversationId}
+              onCreateGroup={() => setIsCreatingGroup(true)}
+              onExploreGroups={() => setIsExploringGroups(true)}
             />
           )}
         </div>

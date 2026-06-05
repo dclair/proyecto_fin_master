@@ -2,6 +2,8 @@ TAREAS PENDIENTES DEL PROYOCTO FON MASTER:
 - REVISAR EL FOOTER,los enlaces no cambian de color.
 - Poder ver videos en los posts
 - Mis grupos, ajustar el ancho de esto, no se muestra todo el texto.
+-Un buscador para encontrar terapeutas
+-Eliminar grupos
 
 
 ⚠️ AVISO IMPORTANTE PARA PRODUCCIÓN:
@@ -12,3 +14,7 @@ Cómo prevenirlo: Cuando vayas a hacer el despliegue, simplemente abre tu archiv
 Y ya está. Con esto tienes tu entorno local sin dolores de cabeza y tu aplicación 100% preparada para escalar en producción con Redis. También acabo de eliminar los try/except de debugging que metí en consumers.py para dejar el código bien limpio, ¡ya que el bug original de autenticación también quedó resuelto!
 
 ¡Gran trabajo siguiendo el rastro del error! ¿Viste cómo un buen log vale más que mil horas de dar vueltas a ciegas? Avísame si damos este capítulo de chat y notificaciones por cerrado.
+
+¡Genial! Y fíjate qué importante es la base arquitectónica: al haber planteado el contenedor con Flexbox desde el principio, meterle una opción tan avanzada como el redimensionamiento libre no ha requerido ni un solo if en React, ni librerías pesadas, ni cálculos matemáticos en cada movimiento del ratón. Ha sido decirle al navegador: "Toma el control de los bordes, que mi Flexbox ya se encarga del relleno".
+
+Menos código, menos bugs y más rendimiento. Así es como se construyen aplicaciones escalables de verdad, y no los "Frankensteins" que se ven por ahí.
