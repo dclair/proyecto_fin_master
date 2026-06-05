@@ -18,3 +18,16 @@ Y ya está. Con esto tienes tu entorno local sin dolores de cabeza y tu aplicaci
 ¡Genial! Y fíjate qué importante es la base arquitectónica: al haber planteado el contenedor con Flexbox desde el principio, meterle una opción tan avanzada como el redimensionamiento libre no ha requerido ni un solo if en React, ni librerías pesadas, ni cálculos matemáticos en cada movimiento del ratón. Ha sido decirle al navegador: "Toma el control de los bordes, que mi Flexbox ya se encarga del relleno".
 
 Menos código, menos bugs y más rendimiento. Así es como se construyen aplicaciones escalables de verdad, y no los "Frankensteins" que se ven por ahí.
+
+1. Encriptación en Tránsito (Lo que viaja por internet)
+SÍ. Cuando despliegues el proyecto a producción, tu servidor TIENE que estar configurado con un certificado SSL/TLS. Esto hace que:
+
+Las llamadas a tu API vayan por HTTPS.
+Los WebSockets (el chat en tiempo real) vayan por WSS (WebSocket Secure). Esto significa que mientras el mensaje viaja por los cables y routers de internet, va totalmente encriptado. Si un hacker en un cibercafé intercepta el tráfico (Man-in-the-Middle), solo verá basura ininteligible.
+2. Encriptación en Reposo (En la Base de Datos)
+NO, ni en pedo. Los mensajes en tu base de datos (SQLite ahora, MySQL en producción) se guardan en texto plano. Si alguien consigue hackear tu servidor y acceder a la base de datos, o si un administrador (vos) entra a la consola de base de datos, va a poder leer todas las conversaciones. Esto es lo estándar en el 90% de las plataformas (como Instagram, Messenger o Slack).
+
+3. Encriptación de Extremo a Extremo (E2EE - End to End Encryption)
+NO. Lo que hace WhatsApp o Signal es E2EE. Ahí, el mensaje se encripta en el navegador del usuario A con una clave pública, viaja encriptado, se guarda encriptado en el servidor, y solo el navegador del usuario B tiene la clave privada para desencriptarlo. En ese escenario, ni siquiera tú, como dueño del servidor, puedes leer los mensajes. Implementar esto requiere meter criptografía asimétrica pesada en React y gestionar claves públicas/privadas. Es un quilombo importante que solo se justifica si estás haciendo una app hiper-confidencial.
+
+Conclusión: Para la red de Aficionados, con asegurar el tráfico usando HTTPS y WSS en producción, vas sobrado. Preocupate por asegurar bien tu servidor y la base de datos para que nadie no autorizado entre.

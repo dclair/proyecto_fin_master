@@ -27,7 +27,16 @@ Conversaciones Inteligentes: Hilos de comentarios tanto en publicaciones como en
 
 Notificaciones en Tiempo Real: Sistema de "campana" con contadores dinámicos (HTMX) para avisos de likes, comentarios, seguidores y alertas de eventos.
 
-4. Ecosistema de Comunicación & Branding 📧
+4. Sistema de Mensajería en Tiempo Real (Chat) 💬
+Chats Privados y Grupales: Creación de conversaciones 1 a 1 y salas de grupo temáticas.
+
+Gestión Avanzada de Grupos: Roles de administrador, control de invitaciones, buscador de usuarios y solicitudes de acceso (join requests).
+
+Notificaciones Visuales: Sistema de badges y reordenación inteligente de la lista de chats para destacar mensajes no leídos.
+
+Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección de rutas.
+
+5. Ecosistema de Comunicación & Branding 📧
 Emails HTML Corporativos: Notificaciones de sistema con diseño "Visión de Empresa", incluyendo logotipos incrustados (CID) y botones de acción.
 
 Lógica de Notificación Dual: Cada interacción crítica genera un aviso interno (web) y, en casos de eventos o contacto, un correo electrónico profesional.
@@ -37,11 +46,11 @@ Formulario de Contacto Pro: Integración de mensajes de usuario con guardado en 
 💻 Stack Tecnológico
 Backend: Django 6.0 + Python 3.12.
 
-Frontend: HTML5, CSS3, Bootstrap 5.3.
+Frontend: HTML5, CSS3, Bootstrap 5.3, React 18 (para la interfaz de Chat).
 
-Interactividad: HTMX & JavaScript Vanilla (AJAX para sistema de Likes).
+Interactividad: HTMX & JavaScript Vanilla (AJAX) y WebSockets para el chat en tiempo real.
 
-Comunicaciones: Django Mail (EmailMultiAlternatives) + MIME para incrustación de recursos.
+Comunicaciones: Django Mail (EmailMultiAlternatives) + Channels (ASGI).
 
 Base de Datos: SQLite (Desarrollo) / MySQL (Producción).
 
@@ -162,6 +171,8 @@ CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contac
 
 [ ] Filtro de "Mis Aficiones": Acceso rápido a eventos que coinciden con los hobbies del perfil.
 
-[ ] Chat en tiempo real: Para coordinar los detalles de cada quedada.
+[x] Chat en tiempo real: Implementado con WebSockets (React + Django Channels), grupos y chats privados.
+
+[ ] Compartir Archivos Multimedia: Subida de imágenes y documentos en el chat.
 
 Hubs&Clicks - "Descubre, Comparte, Disfruta"
