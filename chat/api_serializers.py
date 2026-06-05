@@ -20,7 +20,7 @@ class MessageSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Message
-        fields = ['id', 'conversation', 'sender', 'content', 'timestamp']
+        fields = ['id', 'conversation', 'sender', 'content', 'attachment', 'attachment_type', 'timestamp']
 
 class ConversationSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()

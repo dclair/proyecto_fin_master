@@ -30,6 +30,12 @@ Notificaciones en Tiempo Real: Sistema de "campana" con contadores dinámicos (H
 4. Sistema de Mensajería en Tiempo Real (Chat) 💬
 Chats Privados y Grupales: Creación de conversaciones 1 a 1 y salas de grupo temáticas.
 
+Intercambio Multimedia: Envío de imágenes, videos y documentos en tiempo real con vistas previas. Límite de carga validado y sincronización instantánea vía WebSockets.
+
+Control Total de Mensajes: 
+- "Eliminar para todos": Borrado físico de mensajes y destrucción automática de sus archivos adjuntos para todos los participantes.
+- "Eliminar para mí": Borrado lógico (ocultación) de cualquier mensaje indeseado (propio o ajeno) solo en tu pantalla.
+
 Gestión Avanzada de Grupos: Roles de administrador, control de invitaciones, buscador de usuarios y solicitudes de acceso (join requests).
 
 Notificaciones Visuales: Sistema de badges y reordenación inteligente de la lista de chats para destacar mensajes no leídos.

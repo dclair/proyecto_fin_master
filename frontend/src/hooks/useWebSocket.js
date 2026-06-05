@@ -29,11 +29,18 @@ export const useWebSocket = (conversationId) => {
       const data = JSON.parse(event.data);
       console.log('Mensaje recibido:', data);
       
+      if (data.action === 'delete') {
+        setMessages((prev) => prev.filter(m => m.id !== data.message_id));
+        return;
+      }
+      
       setMessages((prev) => [...prev, {
-        id: data.message_id,
-        content: data.message,
-        sender: { username: data.sender }, // El consumer devuelve sender como string, simulamos el objeto
-        timestamp: data.timestamp
+        id: data.message_id || data.id,
+        content: data.message || data.content,
+        sender: data.sender?.username ? data.sender : { username: data.sender }, 
+        timestamp: data.timestamp,
+        attachment: data.attachment,
+        attachment_type: data.attachment_type
       }]);
     };
 

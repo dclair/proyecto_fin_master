@@ -172,6 +172,7 @@
   border-radius: 12px;
   font-size: 0.95rem;
   word-wrap: break-word;
+  position: relative;
 }
 
 .me .message-bubble {
