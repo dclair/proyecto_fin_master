@@ -12,7 +12,46 @@ const ChatApp = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const panelRef = useRef(null);
   
+  // Estados para el arrastre (Drag & Drop)
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  
   const currentUsername = window.DJANGO_USER || "";
+
+  // Funciones de arrastre
+  const handleMouseDown = (e) => {
+    // Solo permitir arrastrar desde el header (click izquierdo)
+    if (e.button !== 0) return;
+    setIsDragging(true);
+    dragStartPos.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    };
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+      setPosition({
+        x: e.clientX - dragStartPos.current.x,
+        y: e.clientY - dragStartPos.current.y
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   // Obtener mensajes no leídos periódicamente
   useEffect(() => {
@@ -127,18 +166,27 @@ const ChatApp = () => {
             border: '1px solid #e5e5e5',
             borderRadius: '12px',
             zIndex: 9999,
-            overflow: 'hidden'
+            overflow: 'hidden',
+            transform: `translate(${position.x}px, ${position.y}px)`,
+            transition: isDragging ? 'none' : 'box-shadow 0.2s',
+            boxShadow: isDragging ? '0 15px 30px rgba(0,0,0,0.2)' : ''
           }}
         >
-          <div className="chat-panel-header" style={{
-            backgroundColor: '#0b5961', // Color "hubs"
-            color: 'white',
-            padding: '12px 15px',
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
+          <div 
+            className="chat-panel-header" 
+            onMouseDown={handleMouseDown}
+            style={{
+              backgroundColor: '#0b5961', // Color "hubs"
+              color: 'white',
+              padding: '12px 15px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: isDragging ? 'grabbing' : 'grab',
+              userSelect: 'none'
+            }}
+          >
             <span>Chat Terapeutas</span>
             <button 
               onClick={() => setIsOpen(false)}
