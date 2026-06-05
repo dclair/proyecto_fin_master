@@ -62,3 +62,36 @@ class MessageListView(generics.ListAPIView):
             return Message.objects.none()
         
         return Message.objects.filter(conversation_id=conversation_id).order_by('timestamp')
+
+class UnreadMessagesCountView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        unread_count = 0
+        
+        # Obtener todas las conversaciones donde el usuario participa
+        participants = ConversationParticipant.objects.filter(user=user).select_related('conversation')
+        for participant in participants:
+            # Contar mensajes posteriores al last_read_timestamp que no hayan sido enviados por el propio usuario
+            count = Message.objects.filter(
+                conversation=participant.conversation,
+                timestamp__gt=participant.last_read_timestamp
+            ).exclude(sender=user).count()
+            unread_count += count
+            
+        return Response({'unread_count': unread_count})
+
+from django.utils.timezone import now
+
+class MarkConversationReadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, conversation_id):
+        try:
+            participant = ConversationParticipant.objects.get(conversation_id=conversation_id, user=request.user)
+            participant.last_read_timestamp = now()
+            participant.save()
+            return Response({'status': 'ok'})
+        except ConversationParticipant.DoesNotExist:
+            return Response({'error': 'Not a participant'}, status=status.HTTP_403_FORBIDDEN)

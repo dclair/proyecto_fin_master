@@ -1,0 +1,974 @@
+INFO:daphne.server:HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO:daphne.server:Configuring endpoint tcp:port=8000:interface=127.0.0.1
+INFO:daphne.server:Listening on TCP address 127.0.0.1:8000
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.03, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.03, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /profile/profile/3/ 200 [0.12, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[36mHTTP GET /static/js/cookies.js 304 [0.01, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[36mHTTP GET /media/profile_pictures/D7D_sin_fondo.png 304 [0.03, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.01, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /profile/profile/3/ 200 [0.07, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[36mHTTP GET /static/css/style.css 304 [0.00, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48844]
+INFO:django.channels.server:[36mHTTP GET /static/js/cookies.js 304 [0.00, 127.0.0.1:48844][0m
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[36mHTTP GET /media/profile_pictures/D7D_sin_fondo.png 304 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/ 200 [0.03, 127.0.0.1:32868][0m
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:32786]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 32786] to WebSocket
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.ws_protocol:WebSocket closed for ['127.0.0.1', 32786]
+INFO:django.channels.server:WebSocket DISCONNECT /ws/chat/3/ [127.0.0.1:32786]
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:32790]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 32790] to WebSocket
+INFO:root:WebSocket conectado: User Juan en sala chat_3
+INFO:root:WebSocket desconectado: User Juan
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 32790] open and established
+INFO:django.channels.server:WebSocket CONNECT /ws/chat/3/ [127.0.0.1:32790]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 32790] accepted by application
+INFO:root:WebSocket conectado: User Juan en sala chat_3
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.11, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32868]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32868]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.03, 127.0.0.1:32868][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48844]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:48844][0m
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48844]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.02, 127.0.0.1:48844][0m
+ERROR:daphne.server:Exception inside application: Timeout reading from 127.0.0.1:6379
+Traceback (most recent call last):
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/asyncio/connection.py", line 755, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 185, in read_response
+    response = await self._read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 197, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/_parsers/base.py", line 578, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/asyncio/connection.py", line 754, in read_response
+    async with async_timeout(read_timeout):
+  File "/usr/lib/python3.12/asyncio/timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/django/contrib/staticfiles/handlers.py", line 101, in __call__
+    return await self.application(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/routing.py", line 48, in __call__
+    return await application(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/sessions.py", line 44, in __call__
+    return await self.inner(dict(scope, cookies=cookies), receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/sessions.py", line 261, in __call__
+    return await self.inner(wrapper.scope, receive, wrapper.send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/auth.py", line 185, in __call__
+    return await super().__call__(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/middleware.py", line 24, in __call__
+    return await self.inner(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/routing.py", line 118, in __call__
+    return await application(
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/consumer.py", line 95, in app
+    return await consumer(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/consumer.py", line 58, in __call__
+    await await_many_dispatch(
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/utils.py", line 57, in await_many_dispatch
+    await task
+redis.exceptions.TimeoutError: Timeout reading from 127.0.0.1:6379
+DEBUG:daphne.ws_protocol:WebSocket closed for ['127.0.0.1', 32790]
+INFO:django.channels.server:WebSocket DISCONNECT /ws/chat/3/ [127.0.0.1:32790]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48844]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48844][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.03, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /profile/profile/3/ 200 [0.10, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[36mHTTP GET /static/js/cookies.js 304 [0.01, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 37012]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 37012]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 37012]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 37012]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:37012][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48844]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:48844][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48844]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48844][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/ 200 [0.03, 127.0.0.1:50402][0m
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:50404]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 50404] to WebSocket
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 50404] open and established
+INFO:django.channels.server:WebSocket CONNECT /ws/chat/3/ [127.0.0.1:50404]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 50404] accepted by application
+INFO:root:WebSocket conectado: User admin en sala chat_3
+DEBUG:daphne.ws_protocol:WebSocket closed for ['127.0.0.1', 50404]
+INFO:django.channels.server:WebSocket DISCONNECT /ws/chat/3/ [127.0.0.1:50404]
+INFO:root:WebSocket desconectado: User admin
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.04, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.04, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:32882][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:50402][0m
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:50418]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 50418] to WebSocket
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 50418] open and established
+INFO:django.channels.server:WebSocket CONNECT /ws/chat/3/ [127.0.0.1:50418]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 50418] accepted by application
+INFO:root:WebSocket conectado: User admin en sala chat_3
+ERROR:daphne.server:Exception inside application: Timeout reading from 127.0.0.1:6379
+Traceback (most recent call last):
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/asyncio/connection.py", line 755, in read_response
+    response = await self._parser.read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 185, in read_response
+    response = await self._read_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/_parsers/resp3.py", line 197, in _read_response
+    raw = await self._readline()
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/_parsers/base.py", line 578, in _readline
+    data = await self._stream.readline()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "/usr/lib/python3.12/asyncio/streams.py", line 545, in _wait_for_data
+    await self._waiter
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/redis/asyncio/connection.py", line 754, in read_response
+    async with async_timeout(read_timeout):
+  File "/usr/lib/python3.12/asyncio/timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/django/contrib/staticfiles/handlers.py", line 101, in __call__
+    return await self.application(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/routing.py", line 48, in __call__
+    return await application(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/sessions.py", line 44, in __call__
+    return await self.inner(dict(scope, cookies=cookies), receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/sessions.py", line 261, in __call__
+    return await self.inner(wrapper.scope, receive, wrapper.send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/auth.py", line 185, in __call__
+    return await super().__call__(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/middleware.py", line 24, in __call__
+    return await self.inner(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/routing.py", line 118, in __call__
+    return await application(
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/consumer.py", line 95, in app
+    return await consumer(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/consumer.py", line 58, in __call__
+    await await_many_dispatch(
+  File "/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/django/aficionados_network/env/lib/python3.12/site-packages/channels/utils.py", line 57, in await_many_dispatch
+    await task
+redis.exceptions.TimeoutError: Timeout reading from 127.0.0.1:6379
+DEBUG:daphne.ws_protocol:WebSocket closed for ['127.0.0.1', 50418]
+INFO:django.channels.server:WebSocket DISCONNECT /ws/chat/3/ [127.0.0.1:50418]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48844]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48844][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48844]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:48844][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48844]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48844]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48844][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 50402]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 50402]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.03, 127.0.0.1:50402][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 32882]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 32882]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:32882][0m
+INFO:django.utils.autoreload:/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/PROYECTO_FIN_MASTER/aficionados_network/settings.py changed, reloading.
+INFO:daphne.server:HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO:daphne.server:Configuring endpoint tcp:port=8000:interface=127.0.0.1
+INFO:daphne.server:Listening on TCP address 127.0.0.1:8000
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.03, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.03, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.03, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.06, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /profile/profile/3/ 200 [0.12, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[36mHTTP GET /static/js/cookies.js 304 [0.01, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /profile/profile/3/ 200 [0.07, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[36mHTTP GET /static/css/style.css 304 [0.00, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[36mHTTP GET /static/js/cookies.js 304 [0.00, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/ 200 [0.03, 127.0.0.1:48588][0m
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:54672]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 54672] to WebSocket
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 54672] open and established
+INFO:django.channels.server:WebSocket CONNECT /ws/chat/3/ [127.0.0.1:54672]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 54672] accepted by application
+INFO:root:WebSocket conectado: User admin en sala chat_3
+DEBUG:daphne.ws_protocol:WebSocket closed for ['127.0.0.1', 54672]
+INFO:django.channels.server:WebSocket DISCONNECT /ws/chat/3/ [127.0.0.1:54672]
+INFO:root:WebSocket desconectado: User admin
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.04, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.05, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:48588][0m
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:54676]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 54676] to WebSocket
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 54676] open and established
+INFO:django.channels.server:WebSocket CONNECT /ws/chat/3/ [127.0.0.1:54676]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 54676] accepted by application
+INFO:root:WebSocket conectado: User admin en sala chat_3
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.ws_protocol:WebSocket incoming frame on ['127.0.0.1', 54676]
+INFO:root:Mensaje recibido: {"message":"prueba nuemro de 2 debgu chat"}
+INFO:root:Mensaje guardado en DB: ID 3
+INFO:root:Mensaje enviado al channel layer.
+DEBUG:daphne.ws_protocol:Sent WebSocket packet to client for ['127.0.0.1', 54676]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/ 200 [0.04, 127.0.0.1:43816][0m
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:45500]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 45500] to WebSocket
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.ws_protocol:WebSocket closed for ['127.0.0.1', 45500]
+INFO:django.channels.server:WebSocket DISCONNECT /ws/chat/3/ [127.0.0.1:45500]
+INFO:root:WebSocket conectado: User Juan en sala chat_3
+INFO:root:WebSocket desconectado: User Juan
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:45502]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 45502] to WebSocket
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 45502] open and established
+INFO:django.channels.server:WebSocket CONNECT /ws/chat/3/ [127.0.0.1:45502]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 45502] accepted by application
+INFO:root:WebSocket conectado: User Juan en sala chat_3
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.04, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 45508]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.05, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.05, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 45508]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 45508]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 45508]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.05, 127.0.0.1:45508][0m
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43816]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43816]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.04, 127.0.0.1:43816][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.04, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.ws_protocol:WebSocket incoming frame on ['127.0.0.1', 45502]
+INFO:root:Mensaje recibido: {"message":"Mensaje recibido, gracias Admin"}
+INFO:root:Mensaje guardado en DB: ID 4
+INFO:root:Mensaje enviado al channel layer.
+DEBUG:daphne.ws_protocol:Sent WebSocket packet to client for ['127.0.0.1', 45502]
+DEBUG:daphne.ws_protocol:Sent WebSocket packet to client for ['127.0.0.1', 54676]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.ws_protocol:WebSocket closed for ['127.0.0.1', 54676]
+INFO:django.channels.server:WebSocket DISCONNECT /ws/chat/3/ [127.0.0.1:54676]
+INFO:root:WebSocket desconectado: User admin
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /profile/profile/3/ 200 [0.08, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP 304 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[36mHTTP GET /static/js/cookies.js 304 [0.01, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 404 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+WARNING:django.channels.server:[33mHTTP GET /static/js/backTop.js 404 [0.01, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.03, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.ws_protocol:WebSocket incoming frame on ['127.0.0.1', 45502]
+INFO:root:Mensaje recibido: {"message":"dame el ok!"}
+INFO:root:Mensaje guardado en DB: ID 5
+INFO:root:Mensaje enviado al channel layer.
+DEBUG:daphne.ws_protocol:Sent WebSocket packet to client for ['127.0.0.1', 45502]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/ 200 [0.03, 127.0.0.1:48588][0m
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:49076]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 49076] to WebSocket
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 49076] open and established
+INFO:django.channels.server:WebSocket CONNECT /ws/chat/3/ [127.0.0.1:49076]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 49076] accepted by application
+INFO:root:WebSocket conectado: User admin en sala chat_3
+DEBUG:daphne.ws_protocol:WebSocket closed for ['127.0.0.1', 49076]
+INFO:django.channels.server:WebSocket DISCONNECT /ws/chat/3/ [127.0.0.1:49076]
+INFO:root:WebSocket desconectado: User admin
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.06, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/conversations/3/messages/ 200 [0.06, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 49084]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.04, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 49084]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 49084]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 49084]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:49084][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.04, 127.0.0.1:48588][0m
+INFO:django.channels.server:WebSocket HANDSHAKING /ws/chat/3/ [127.0.0.1:49100]
+DEBUG:daphne.http_protocol:Upgraded connection ['127.0.0.1', 49100] to WebSocket
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 49100] open and established
+INFO:django.channels.server:WebSocket CONNECT /ws/chat/3/ [127.0.0.1:49100]
+DEBUG:daphne.ws_protocol:WebSocket ['127.0.0.1', 49100] accepted by application
+INFO:root:WebSocket conectado: User admin en sala chat_3
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.ws_protocol:WebSocket incoming frame on ['127.0.0.1', 49100]
+INFO:root:Mensaje recibido: {"message":"OK, recibido"}
+INFO:root:Mensaje guardado en DB: ID 6
+INFO:root:Mensaje enviado al channel layer.
+DEBUG:daphne.ws_protocol:Sent WebSocket packet to client for ['127.0.0.1', 49100]
+DEBUG:daphne.ws_protocol:Sent WebSocket packet to client for ['127.0.0.1', 45502]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP b'POST' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP POST /api/chat/conversations/3/read/ 200 [0.03, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.03, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 43818]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 43818]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.03, 127.0.0.1:43818][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /notifications/api/unread-count/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:54666][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 48588]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 48588]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:48588][0m
+DEBUG:daphne.http_protocol:HTTP b'GET' request for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP 200 response started for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP close for ['127.0.0.1', 54666]
+DEBUG:daphne.http_protocol:HTTP response complete for ['127.0.0.1', 54666]
+INFO:django.channels.server:[mHTTP GET /api/chat/unread_count/ 200 [0.02, 127.0.0.1:54666][0m
+INFO:django.utils.autoreload:/home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/PROYECTO_FIN_MASTER/chat/consumers.py changed, reloading.

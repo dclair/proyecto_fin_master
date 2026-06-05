@@ -16,7 +16,7 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarHubs">
-            <ul class="navbar-nav mx-auto align-items-xl-center">
+            <ul class="navbar-nav mx-auto align-items-xl-center flex-xl-wrap justify-content-xl-center">
                 
                 <li class="nav-item">
                     <a class="nav-link px-2 d-flex align-items-center text-nowrap {% if request.resolver_match.url_name == 'home' %}active fw-bold text-hubs{% endif %}" 
@@ -151,18 +151,17 @@
                         <i class="bi bi-envelope me-1"></i> Contacto
                     </a>
                 </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item d-none d-xl-block ms-xl-2">
+                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link nav-link text-muted small px-2 border-0 text-decoration-none text-nowrap fw-medium" title="Cerrar sesión y salir de tu cuenta">
+                            <i class="bi bi-power text-danger me-1"></i> Salir
+                        </button>
+                    </form>
+                </li>
+                {% endif %}
             </ul>
-
-            {% if user.is_authenticated %}
-            <div class="d-none d-xl-flex ms-2">
-                <form method="post" action="{% url 'logout' %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-link nav-link text-muted small px-2 border-0 text-decoration-none text-nowrap fw-medium" title="Cerrar sesión y salir de tu cuenta">
-                        <i class="bi bi-power text-danger me-1"></i> Salir
-                    </button>
-                </form>
-            </div>
-            {% endif %}
         </div>
     </div>
 </nav>

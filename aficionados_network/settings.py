@@ -108,14 +108,21 @@ TEMPLATES = [
 WSGI_APPLICATION = "aficionados_network.wsgi.application"
 ASGI_APPLICATION = "aficionados_network.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+if DEBUG:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
         },
-    },
-}
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [os.getenv("REDIS_URL", "redis://127.0.0.1:6379")],
+            },
+        },
+    }
 
 
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").strip().lower()
