@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Conversation, ConversationParticipant, Message
+from .models import Conversation, ConversationParticipant, Message, GroupJoinRequest
+from django.contrib.auth.models import User
 from django.contrib.auth.models import User
 
 class UserBasicSerializer(serializers.ModelSerializer):
@@ -24,10 +25,11 @@ class MessageSerializer(serializers.ModelSerializer):
 class ConversationSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
+    unread_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Conversation
-        fields = ['id', 'is_group', 'created_at', 'participants', 'last_message']
+        fields = ['id', 'is_group', 'name', 'admin', 'created_at', 'participants', 'last_message', 'unread_count']
         
     def get_participants(self, obj):
         # Obtener los usuarios de los participantes
@@ -39,3 +41,20 @@ class ConversationSerializer(serializers.ModelSerializer):
         if last_msg:
             return MessageSerializer(last_msg).data
         return None
+
+    def get_unread_count(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return 0
+        participant = obj.participants.filter(user=request.user).first()
+        if not participant:
+            return 0
+        return obj.messages.filter(timestamp__gt=participant.last_read_timestamp).count()
+
+class GroupJoinRequestSerializer(serializers.ModelSerializer):
+    user = UserBasicSerializer(read_only=True)
+    conversation_name = serializers.CharField(source='conversation.name', read_only=True)
+    
+    class Meta:
+        model = GroupJoinRequest
+        fields = ['id', 'conversation', 'conversation_name', 'user', 'status', 'created_at']
