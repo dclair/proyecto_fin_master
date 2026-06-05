@@ -1,22 +1,36 @@
 import React from "react";
-import { User, Users, Plus } from "lucide-react";
+import { User, Users, Plus, MessageSquarePlus, Search } from "lucide-react";
 
-const ConversationList = ({ conversations, onSelect, activeId, onCreateGroup, onExploreGroups }) => {
+const ConversationList = ({ conversations, onSelect, activeId, onCreateGroup, onExploreGroups, onExploreUsers }) => {
   return (
     <div className="conversation-list d-flex flex-column h-100">
-      <div className="p-2 border-bottom text-center d-flex gap-2">
+      <div className="p-2 border-bottom d-flex gap-1">
         <button 
-          className="btn btn-sm btn-outline-secondary flex-grow-1 d-flex align-items-center justify-content-center gap-1 fw-bold"
-          onClick={onCreateGroup}
+          className="btn btn-sm btn-outline-primary flex-grow-1 d-flex flex-column align-items-center justify-content-center py-1 fw-bold"
+          onClick={onExploreUsers}
+          title="Nuevo Chat Privado"
+          style={{fontSize: '0.75rem'}}
         >
-          <Plus size={16} /> Nuevo Grupo
+          <MessageSquarePlus size={16} className="mb-1" />
+          Chat
         </button>
         <button 
-          className="btn btn-sm btn-outline-primary flex-grow-1 d-flex align-items-center justify-content-center gap-1 fw-bold"
+          className="btn btn-sm btn-outline-secondary flex-grow-1 d-flex flex-column align-items-center justify-content-center py-1 fw-bold"
+          onClick={onCreateGroup}
+          title="Nuevo Grupo"
+          style={{fontSize: '0.75rem'}}
+        >
+          <Plus size={16} className="mb-1" />
+          Grupo
+        </button>
+        <button 
+          className="btn btn-sm btn-outline-info flex-grow-1 d-flex flex-column align-items-center justify-content-center py-1 fw-bold text-dark"
           onClick={onExploreGroups}
           title="Explorar Grupos"
+          style={{fontSize: '0.75rem'}}
         >
-          <Users size={16} /> Explorar
+          <Search size={16} className="mb-1" />
+          Explorar
         </button>
       </div>
       
