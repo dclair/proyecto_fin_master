@@ -5,18 +5,25 @@ from .models import Conversation, ConversationParticipant, Message
 from django.contrib.auth.models import User
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    @database_sync_to_async
+    def get_user_auth(self):
+        user = self.scope["user"]
+        return user.is_authenticated, getattr(user, 'id', None), getattr(user, 'username', None)
+
     async def connect(self):
-        self.user = self.scope["user"]
         self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
         self.room_group_name = f"chat_{self.conversation_id}"
 
+        # Resolver el usuario de forma segura (evita SynchronousOnlyOperation)
+        is_authenticated, self.user_id, self.username = await self.get_user_auth()
+
         # Rechazar si no está autenticado
-        if not self.user.is_authenticated:
+        if not is_authenticated:
             await self.close()
             return
             
         # Verificar que el usuario pertenece a la conversación
-        is_participant = await self.is_participant(self.user, self.conversation_id)
+        is_participant = await self.is_participant(self.user_id, self.conversation_id)
         if not is_participant:
             await self.close()
             return
@@ -42,7 +49,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = text_data_json['message']
 
         # Guardar en DB
-        new_msg = await self.save_message(self.user, self.conversation_id, message)
+        new_msg = await self.save_message(self.user_id, self.conversation_id, message)
 
         # Enviar el mensaje al grupo
         await self.channel_layer.group_send(
@@ -50,7 +57,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'chat_message',
                 'message': new_msg.content,
-                'sender': self.user.username,
+                'sender': self.username,
                 'message_id': new_msg.id,
                 'timestamp': str(new_msg.timestamp)
             }
@@ -67,13 +74,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def is_participant(self, user, conversation_id):
-        return ConversationParticipant.objects.filter(user=user, conversation_id=conversation_id).exists()
+    def is_participant(self, user_id, conversation_id):
+        return ConversationParticipant.objects.filter(user_id=user_id, conversation_id=conversation_id).exists()
 
     @database_sync_to_async
-    def save_message(self, user, conversation_id, content):
+    def save_message(self, user_id, conversation_id, content):
         return Message.objects.create(
-            sender=user,
+            sender_id=user_id,
             conversation_id=conversation_id,
             content=content
         )

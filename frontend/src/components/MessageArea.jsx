@@ -9,6 +9,17 @@ const MessageArea = ({ conversationId, onBack, currentUsername }) => {
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
+  // Marcar como leído
+  const markAsRead = () => {
+    // Para asegurar que Django CSRF se maneja correctamente, o usar el default de axios.
+    // Asumimos que los endpoints en /api/ no requieren CSRF fuerte o axios lo toma de las cookies
+    axios.post(`/api/chat/conversations/${conversationId}/read/`, {}, {
+      headers: {
+        'X-CSRFToken': document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1]
+      }
+    }).catch(e => console.error("Error al marcar como leído:", e));
+  };
+
   // Obtener historial al abrir la conversación
   useEffect(() => {
     setLoading(true);
@@ -16,6 +27,7 @@ const MessageArea = ({ conversationId, onBack, currentUsername }) => {
       .then(response => {
         setInitialMessages(response.data);
         setLoading(false);
+        markAsRead(); // Marcar al cargar el historial
       })
       .catch(error => {
         console.error("Error cargando mensajes:", error);
@@ -23,9 +35,13 @@ const MessageArea = ({ conversationId, onBack, currentUsername }) => {
       });
   }, [conversationId, setInitialMessages]);
 
-  // Hacer scroll abajo cuando hay mensajes nuevos
+  // Hacer scroll abajo cuando hay mensajes nuevos y marcar como leído
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Si hay mensajes nuevos y tenemos la ventana abierta, marcamos como leído
+    if (messages.length > 0) {
+      markAsRead();
+    }
   }, [messages]);
 
   const handleSend = (e) => {

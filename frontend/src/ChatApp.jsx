@@ -9,9 +9,30 @@ const ChatApp = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const panelRef = useRef(null);
   
   const currentUsername = window.DJANGO_USER || "";
+
+  // Obtener mensajes no leídos periódicamente
+  useEffect(() => {
+    const fetchUnreadCount = () => {
+      axios.get('/api/chat/unread_count/')
+        .then(response => {
+          setUnreadCount(response.data.unread_count || 0);
+        })
+        .catch(error => {
+          console.error("Error obteniendo no leídos:", error);
+        });
+    };
+
+    // Consultar inmediatamente
+    fetchUnreadCount();
+
+    // Luego cada 15 segundos
+    const interval = setInterval(fetchUnreadCount, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -79,7 +100,17 @@ const ChatApp = () => {
         title="Chat de la comunidad"
         style={{ cursor: 'pointer' }}
       >
-        <MessageCircle size={20} className={isOpen ? 'text-hubs' : 'text-dark'} />
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <MessageCircle size={20} className={isOpen ? 'text-hubs' : 'text-dark'} />
+          {unreadCount > 0 && (
+            <span 
+              className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white"
+              style={{ fontSize: '0.55rem', padding: '0.2rem 0.35rem', marginTop: '2px', marginLeft: '-5px' }}
+            >
+              {unreadCount}
+            </span>
+          )}
+        </div>
       </a>
 
       {isOpen && (

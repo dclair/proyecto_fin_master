@@ -1,0 +1,13 @@
+TAREAS PENDIENTES DEL PROYOCTO FON MASTER:
+- REVISAR EL FOOTER,los enlaces no cambian de color.
+- Poder ver videos en los posts
+
+
+⚠️ AVISO IMPORTANTE PARA PRODUCCIÓN:
+Ese "Timeout" que vimos hoy es un bug documentado entre la librería channels-redis y las versiones muy modernas del paquete de Python redis (versiones 5.x para arriba). Como en producción vas a usar Redis, podrías volver a encontrarte con el timeout allí.
+
+Cómo prevenirlo: Cuando vayas a hacer el despliegue, simplemente abre tu archivo requirements.txt y busca la línea de redis. Bájala a una versión más estable que no tenga este bug asíncrono. Lo ideal es fijarla así: redis<5.0.0
+
+Y ya está. Con esto tienes tu entorno local sin dolores de cabeza y tu aplicación 100% preparada para escalar en producción con Redis. También acabo de eliminar los try/except de debugging que metí en consumers.py para dejar el código bien limpio, ¡ya que el bug original de autenticación también quedó resuelto!
+
+¡Gran trabajo siguiendo el rastro del error! ¿Viste cómo un buen log vale más que mil horas de dar vueltas a ciegas? Avísame si damos este capítulo de chat y notificaciones por cerrado.
