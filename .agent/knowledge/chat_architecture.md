@@ -12,6 +12,10 @@ Este documento registra el diseño, componentes y reglas de negocio del sistema 
   - `last_read_timestamp`: Marca de tiempo que registra cuándo el usuario entró por última vez al chat. Usado para calcular mensajes no leídos.
 - **`Message`**:
   - Pertenece a una `Conversation` y tiene un `sender` (User).
+  - `content` (TextField): Texto opcional del mensaje.
+  - `attachment` (FileField): Archivo adjunto (imagen, video o documento). Limitado por validaciones del backend.
+  - `attachment_type` (String): Indica el tipo ('image', 'video', 'document') para renderizado específico en el frontend.
+  - `hidden_by` (ManyToManyField a User): Relación para la funcionalidad "Eliminar para mí" (Borrado Lógico). Permite que cada participante oculte independientemente el mensaje sin afectar al resto.
 - **`GroupJoinRequest`**:
   - `user`, `conversation`, `status` ('pending', 'accepted', 'rejected').
   - Gestiona las solicitudes de los usuarios para unirse a grupos públicos.
@@ -41,6 +45,15 @@ Este documento registra el diseño, componentes y reglas de negocio del sistema 
 ## 4. Tecnologías y Tráfico
 - **REST API**: Django REST Framework. Protegido por autenticación basada en sesiones de Django (CSRF Token presente en cookies).
 - **Tiempo Real**: Django Channels (WebSockets) implementado en el hook `useWebSocket.js`.
+  - El formato de envío soporta tanto acciones estándar de mensajes (`action: 'chat_message'`) transmitiendo el objeto completo (`full_message`) para inyectar archivos adjuntos directamente sin recargar.
+  - Incorpora evento `action: 'delete'` para el "Eliminar para todos", sincronizando el borrado de mensajes instantáneamente en todas las sesiones conectadas.
 - **Seguridad en Producción**: Todo el tráfico viaja encriptado por HTTPS y WSS. Los mensajes NO están encriptados de extremo a extremo (E2EE) ni en reposo en la BD, modelo clásico tipo red social.
 
-*Nota de actualización: Junio 2026. Implementación base, grupos, búsqueda de usuarios, indicadores de no leídos y limpieza de chats finalizada.*
+## 5. Gestión de Archivos (Multimedia)
+- **Carga de Archivos**: Vía endpoint híbrido POST (`MessageUploadView`) usando `multipart/form-data`.
+- **Validación Backend**: Tamaño limitado a 5MB (Imágenes y Docs) y 15MB (Vídeos).
+- **Borrado**:
+  - **Físico ("Eliminar para Todos")**: Borra el registro en DB y el archivo físico del servidor (`msg.attachment.delete()`). Notifica a clientes por WebSocket.
+  - **Lógico ("Eliminar para Mí")**: Endpoint `MessageHideView` agrega al usuario al campo `hidden_by`. Solo se remueve de la vista local en React.
+
+*Nota de actualización: Junio 2026. Implementación base, grupos, intercambio de multimedia, control avanzado de borrado de mensajes y archivos finalizado.*

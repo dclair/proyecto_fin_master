@@ -5,6 +5,29 @@
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
 
+## 2026-06-05: Real-Time Chat with Multimedia and Advanced Deletion
+
+**Type:** feature / architecture
+**Status:** done
+
+What changed:
+- Integrated Django Channels (WebSockets) for real-time messaging.
+- Built a React-based frontend (`ChatApp.jsx`, `MessageArea.jsx`) embedded in the Django template.
+- Implemented 1-on-1 and Group Chat capabilities with admin roles and join requests.
+- Added multimedia support (images, videos, documents) via a hybrid API upload strategy + WebSocket broadcast.
+- Implemented "Delete for everyone" (physical DB/file deletion).
+- Implemented "Delete for me" (logical deletion via `hidden_by` ManyToMany relation).
+
+Why:
+- To provide a modern, WhatsApp-like real-time messaging experience for users.
+- To handle heavy file uploads securely via standard HTTP while maintaining real-time UX via WebSockets.
+- To provide users with control over their data (deleting mistakes) and safety (hiding inappropriate received content).
+
+Impact:
+- The platform now has a fully functional, real-time communication layer.
+- New database tables: `Conversation`, `ConversationParticipant`, `Message`, `GroupJoinRequest`.
+- Redis is now required for Channels layer in production.
+
 ## 2026-06-01: Project Knowledge Base Established
 
 **Type:** documentation / operational knowledge  

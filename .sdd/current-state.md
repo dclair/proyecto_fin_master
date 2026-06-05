@@ -25,6 +25,8 @@ Current user-facing capabilities:
 - Receive in-app notifications.
 - Receive HTML emails for important interactions.
 - Send contact messages to the site owner/admin.
+- Chat in real-time (1-on-1 and Groups) with multimedia support (images, videos, documents).
+- Full control over messages ("Delete for everyone" and "Delete for me").
 
 ## Runtime
 
@@ -34,6 +36,8 @@ Stack:
 - Django 6.0.
 - Bootstrap/crispy forms for server-rendered UI.
 - Vanilla JS, AJAX, and some HTMX-style partial responses.
+- React 18 embedded via Vite for the Chat interface.
+- Django Channels for WebSockets (ASGI).
 - Pillow for image handling.
 - Django email with HTML templates and CID logos.
 
@@ -73,6 +77,7 @@ Domain apps:
 - `profiles/`: profiles, hobbies, follows, reviews, profile routes, profile signals.
 - `posts/`: Clicks, comments, Quedadas, event comments, event routes, likes, attendance, hub/gallery flows.
 - `notifications/`: notification model, follow signal, unread context, list and redirect routes.
+- `chat/`: Models (`Conversation`, `Message`, `GroupJoinRequest`), DRF API views, and Channels WebSockets consumers.
 
 Assets and data:
 

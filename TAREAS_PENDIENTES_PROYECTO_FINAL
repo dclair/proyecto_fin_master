@@ -1,9 +1,11 @@
 TAREAS PENDIENTES DEL PROYOCTO FON MASTER:
+-- PROBAR, ELIMINAR UN DOCUMENTO RECIBIDO, ES DECIR ELIMINAR PARA MI
 - REVISAR EL FOOTER,los enlaces no cambian de color.
 - Poder ver videos en los posts
 - Mis grupos, ajustar el ancho de esto, no se muestra todo el texto.
--Un buscador para encontrar terapeutas
--Eliminar grupos
+-Mensaje indicando los pesos máximo de cada archivo para enviar por chat
+- REvisión completa del README principal, modificar todo, estrucutra, stack tecnologico, etc
+
 
 
 ⚠️ AVISO IMPORTANTE PARA PRODUCCIÓN:
@@ -31,3 +33,53 @@ NO, ni en pedo. Los mensajes en tu base de datos (SQLite ahora, MySQL en producc
 NO. Lo que hace WhatsApp o Signal es E2EE. Ahí, el mensaje se encripta en el navegador del usuario A con una clave pública, viaja encriptado, se guarda encriptado en el servidor, y solo el navegador del usuario B tiene la clave privada para desencriptarlo. En ese escenario, ni siquiera tú, como dueño del servidor, puedes leer los mensajes. Implementar esto requiere meter criptografía asimétrica pesada en React y gestionar claves públicas/privadas. Es un quilombo importante que solo se justifica si estás haciendo una app hiper-confidencial.
 
 Conclusión: Para la red de Aficionados, con asegurar el tráfico usando HTTPS y WSS en producción, vas sobrado. Preocupate por asegurar bien tu servidor y la base de datos para que nadie no autorizado entre.
+
+Plan de Implementación: Archivos Adjuntos en el Chat
+Objetivo
+Permitir a los usuarios enviar imágenes, vídeos y documentos dentro de los chats (tanto privados como de grupo).
+
+Arquitectura de Solución
+Dado que enviar archivos binarios puros a través de WebSockets es poco eficiente y complejo de gestionar en Django, usaremos una estrategia híbrida estándar:
+
+El archivo se sube por HTTP normal (REST API) usando multipart/form-data.
+El servidor guarda el archivo, crea el mensaje en la base de datos y empuja el mensaje (con la URL del archivo) al WebSocket del grupo para que aparezca en tiempo real a todos los conectados.
+Cambios Propuestos
+1. Base de Datos (chat/models.py)
+[MODIFY] Message
+Cambiar content = models.TextField() a models.TextField(blank=True, null=True) (para permitir mensajes que solo contengan un archivo sin texto).
+Añadir attachment = models.FileField(upload_to='chat_attachments/', blank=True, null=True).
+Añadir attachment_type = models.CharField(max_length=20, blank=True, null=True) (para saber si renderizar un <img>, un <video> o un enlace de descarga en React).
+2. API y Serializadores (chat/api_serializers.py, api_views.py, api_urls.py)
+[MODIFY] MessageSerializer
+Incluir attachment y attachment_type en los campos.
+[NEW] MessageUploadView
+Nuevo endpoint POST /api/chat/conversations/<id>/upload/.
+Recibirá content (opcional) y file.
+Detectará el tipo MIME del archivo para asignar attachment_type (ej. image, video, document).
+Creará el Message y usará channel_layer.group_send para avisar a todos los clientes del WebSocket al instante.
+3. Interfaz de Usuario (frontend/src/components/MessageArea.jsx)
+[MODIFY] MessageArea.jsx
+Input Area: Añadir icono de "Clip" (Paperclip) junto al botón de emojis.
+Vista Previa: Si se selecciona un archivo, mostrar una vista previa encima del cajón de texto (miniatura de imagen o nombre del archivo) con opción de cancelar (X).
+Envío: Modificar handleSend para que, si hay un archivo seleccionado, use axios.post (con FormData). Si es texto normal, usará el WebSocket (sendMessage) como siempre para máxima velocidad.
+Renderizado de Mensajes: En la lista de mensajes, si msg.attachment existe, renderizar:
+Imagen: <img src={msg.attachment} style={{maxHeight: '200px', borderRadius: '8px'}} />
+Video: <video controls src={msg.attachment} ... />
+Documento: Un enlace con icono para descargar.
+IMPORTANT
+
+Requeriremos ejecutar python manage.py makemigrations y migrate por los cambios en el modelo.
+Se creará una carpeta media/chat_attachments/ para alojar los ficheros subidos.
+User Review Required
+¿Estás de acuerdo con este enfoque híbrido (API para subida, WebSocket para notificación) y con los tipos de visualización (imagen, vídeo, documento general)? Si me das luz verde, empiezo con el modelo de datos.
+
+Resumen rápido de lo que acabo de hacer:
+
+Base de Datos & Migraciones: Modifiqué el modelo Message para incluir soporte para attachment (FileField) y su tipo (attachment_type). Luego, generé y apliqué las migraciones con éxito (0004_message_attachment...).
+Backend: Creé el endpoint /api/chat/conversations/<id>/upload/. Este endpoint aplica la seguridad que acordamos (máximo 5MB para imágenes/docs, y 15MB para vídeos). Una vez guardado el archivo, dispara un "broadcast" al WebSocket (channels) para que la imagen/vídeo se pinte al vuelo en la pantalla de la otra persona.
+Frontend (React):
+Añadí el botón del "Clip" (Paperclip).
+Le puse una vista previa súper limpia. Si vas a mandar una foto, ves la foto en miniatura arriba de donde escribes. Si es un archivo o vídeo, ves el icono. También tienes una 'X' para cancelarlo si te arrepientes.
+Puse la doble validación. Antes de que salga un solo byte del navegador, React revisa el peso. Si te pasas, te salta una alerta inmediata sin bloquear el servidor.
+Todo renderiza perfecto: <img> para fotos, reproductor <video> para clips, y un link bonito para documentos.
+Compilación final: Ejecuté npm run build en el frontend de React con Vite y todo ha compilado verde y fluido.

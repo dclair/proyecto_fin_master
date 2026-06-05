@@ -12,7 +12,10 @@ urlpatterns = [
     path('groups/join_requests/<int:request_id>/manage/', api_views.ManageJoinRequestView.as_view(), name='api-groups-manage-request'),
     path('conversations/<int:conversation_id>/delete/', api_views.ConversationDeleteView.as_view(), name='api-conversations-delete'),
     path('conversations/<int:conversation_id>/messages/', api_views.MessageListView.as_view(), name='api-messages'),
+    path('conversations/<int:conversation_id>/upload/', api_views.MessageUploadView.as_view(), name='api-messages-upload'),
     path('conversations/<int:conversation_id>/read/', api_views.MarkConversationReadView.as_view(), name='api-conversations-read'),
+    path('messages/<int:message_id>/delete/', api_views.MessageDeleteView.as_view(), name='api-messages-delete'),
+    path('messages/<int:message_id>/hide/', api_views.MessageHideView.as_view(), name='api-messages-hide'),
     path('unread_count/', api_views.UnreadMessagesCountView.as_view(), name='api-unread-count'),
     path('users/', api_views.UserListView.as_view(), name='api-chat-users'),
 ]

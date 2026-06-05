@@ -61,7 +61,7 @@ class MessageListView(generics.ListAPIView):
         if not ConversationParticipant.objects.filter(conversation_id=conversation_id, user=self.request.user).exists():
             return Message.objects.none()
         
-        return Message.objects.filter(conversation_id=conversation_id).order_by('timestamp')
+        return Message.objects.filter(conversation_id=conversation_id).exclude(hidden_by=self.request.user).order_by('timestamp')
 
 class UnreadMessagesCountView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -77,7 +77,7 @@ class UnreadMessagesCountView(APIView):
             count = Message.objects.filter(
                 conversation=participant.conversation,
                 timestamp__gt=participant.last_read_timestamp
-            ).exclude(sender=user).count()
+            ).exclude(sender=user).exclude(hidden_by=user).count()
             unread_count += count
             
         return Response({'unread_count': unread_count})
@@ -256,3 +256,126 @@ class ConversationDeleteView(APIView):
 
         conv.delete()
         return Response({'status': 'ok'})
+
+from rest_framework.parsers import MultiPartParser, FormParser
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+class MessageUploadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, conversation_id):
+        try:
+            conv = Conversation.objects.get(id=conversation_id)
+        except Conversation.DoesNotExist:
+            return Response({'error': 'Conversation not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not ConversationParticipant.objects.filter(conversation=conv, user=request.user).exists():
+            return Response({'error': 'You are not a participant in this conversation'}, status=status.HTTP_403_FORBIDDEN)
+
+        file_obj = request.FILES.get('file')
+        content = request.data.get('content', '').strip()
+        
+        if not file_obj and not content:
+            return Response({'error': 'Either file or content is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        attachment_type = None
+        if file_obj:
+            mime_type = file_obj.content_type
+            file_size = file_obj.size
+            
+            MB = 1024 * 1024
+            if mime_type.startswith('image/'):
+                attachment_type = 'image'
+                if file_size > 5 * MB:
+                    return Response({'error': 'Image file size exceeds 5MB limit'}, status=status.HTTP_400_BAD_REQUEST)
+            elif mime_type.startswith('video/'):
+                attachment_type = 'video'
+                if file_size > 15 * MB:
+                    return Response({'error': 'Video file size exceeds 15MB limit'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                attachment_type = 'document'
+                if file_size > 5 * MB:
+                    return Response({'error': 'Document file size exceeds 5MB limit'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crear el mensaje
+        msg = Message.objects.create(
+            conversation=conv,
+            sender=request.user,
+            content=content if content else None,
+            attachment=file_obj,
+            attachment_type=attachment_type
+        )
+        
+        # Actualizar timestamp para nosotros
+        ConversationParticipant.objects.filter(conversation=conv, user=request.user).update(last_read_timestamp=now())
+
+        serializer = MessageSerializer(msg)
+        message_data = serializer.data
+
+        # Broadcast via Channels
+        channel_layer = get_channel_layer()
+        room_group_name = f'chat_{conversation_id}'
+        
+        # Make absolute URL for the attachment if it exists
+        if msg.attachment:
+            message_data['attachment'] = request.build_absolute_uri(msg.attachment.url)
+
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                'type': 'chat_message',
+                'full_message': message_data
+            }
+        )
+
+        return Response(message_data, status=status.HTTP_201_CREATED)
+
+class MessageDeleteView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, message_id):
+        try:
+            msg = Message.objects.get(id=message_id)
+        except Message.DoesNotExist:
+            return Response({'error': 'Message not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if msg.sender != request.user:
+            return Response({'error': 'You can only delete your own messages'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Broadcast deletion via Channels before deleting from DB
+        channel_layer = get_channel_layer()
+        room_group_name = f'chat_{msg.conversation_id}'
+        
+        async_to_sync(channel_layer.group_send)(
+            room_group_name,
+            {
+                'type': 'message_deleted',
+                'message_id': msg.id
+            }
+        )
+
+        # Delete physical file if exists
+        if msg.attachment:
+            msg.attachment.delete(save=False)
+            
+        msg.delete()
+        
+        return Response({'status': 'deleted'})
+
+class MessageHideView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, message_id):
+        try:
+            msg = Message.objects.get(id=message_id)
+        except Message.DoesNotExist:
+            return Response({'error': 'Message not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the user is a participant of the conversation
+        if not ConversationParticipant.objects.filter(conversation=msg.conversation, user=request.user).exists():
+            return Response({'error': 'You are not a participant in this conversation'}, status=status.HTTP_403_FORBIDDEN)
+
+        msg.hidden_by.add(request.user)
+        return Response({'status': 'hidden'})

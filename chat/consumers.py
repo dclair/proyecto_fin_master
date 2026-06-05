@@ -66,11 +66,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # Recibir mensaje desde el grupo de Channels
     async def chat_message(self, event):
         # Enviar el mensaje por el WebSocket al cliente final
+        if 'full_message' in event:
+            await self.send(text_data=json.dumps(event['full_message']))
+        else:
+            await self.send(text_data=json.dumps({
+                'message': event['message'],
+                'sender': event['sender'],
+                'message_id': event['message_id'],
+                'timestamp': event['timestamp']
+            }))
+
+    async def message_deleted(self, event):
         await self.send(text_data=json.dumps({
-            'message': event['message'],
-            'sender': event['sender'],
-            'message_id': event['message_id'],
-            'timestamp': event['timestamp']
+            'action': 'delete',
+            'message_id': event['message_id']
         }))
 
     @database_sync_to_async

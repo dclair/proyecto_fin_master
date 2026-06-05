@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Send, ArrowLeft, Smile, UserPlus, Check, UserCheck, Trash2 } from 'lucide-react';
+import { Send, ArrowLeft, Smile, UserPlus, Check, UserCheck, Trash2, Paperclip, X, FileText, Image as ImageIcon, Video } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 
 const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConversation, onBack, onConversationDeleted, currentUsername }) => {
@@ -10,6 +10,12 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
   const [loading, setLoading] = useState(true);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   
+  // File upload states
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
   // States for adding members
   const [showAddMember, setShowAddMember] = useState(false);
   const [usersToAdd, setUsersToAdd] = useState([]);
@@ -134,6 +140,48 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
     }
   };
 
+  const handleDeleteMessage = (messageId, isMe) => {
+    const token = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+    
+    let type = 'me';
+    if (isMe) {
+        const delAll = window.confirm("¿Deseas eliminar este mensaje para TODOS?");
+        if (delAll) {
+            type = 'all';
+        } else {
+            const delMe = window.confirm("¿Deseas eliminar este mensaje solo para TI?");
+            if (!delMe) return;
+        }
+    } else {
+        const delMe = window.confirm("¿Deseas eliminar este mensaje solo para TI?");
+        if (!delMe) return;
+    }
+
+    if (type === 'all') {
+      axios.delete(`/api/chat/messages/${messageId}/delete/`, {
+        headers: { 'X-CSRFToken': token }
+      })
+      .then(() => {
+        // The message will be removed via WebSocket
+      })
+      .catch(err => {
+        console.error("Error al eliminar mensaje:", err);
+        alert("Hubo un error al intentar eliminar el mensaje.");
+      });
+    } else {
+      axios.post(`/api/chat/messages/${messageId}/hide/`, {}, {
+        headers: { 'X-CSRFToken': token }
+      })
+      .then(() => {
+        setMessages(prev => prev.filter(m => m.id !== messageId));
+      })
+      .catch(err => {
+        console.error("Error al ocultar mensaje:", err);
+        alert("Hubo un error al intentar ocultar el mensaje.");
+      });
+    }
+  };
+
   const onEmojiClick = (emojiObject) => {
     setInputValue(prevInput => prevInput + emojiObject.emoji);
   };
@@ -173,9 +221,83 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
     }
   }, [messages]);
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const mimeType = file.type;
+    const MB = 1024 * 1024;
+    
+    // Frontend validation
+    if (mimeType.startsWith('video/')) {
+      if (file.size > 15 * MB) {
+        alert("El vídeo es demasiado grande (Máximo 15 MB).");
+        return;
+      }
+    } else if (mimeType.startsWith('image/')) {
+      if (file.size > 5 * MB) {
+        alert("La imagen es demasiado grande (Máximo 5 MB).");
+        return;
+      }
+    } else {
+      if (file.size > 5 * MB) {
+        alert("El documento es demasiado grande (Máximo 5 MB).");
+        return;
+      }
+    }
+
+    setSelectedFile(file);
+    if (mimeType.startsWith('image/')) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else if (mimeType.startsWith('video/')) {
+      setPreviewUrl('video');
+    } else {
+      setPreviewUrl('document');
+    }
+    
+    // Reset file input value so same file can be selected again if canceled
+    e.target.value = null;
+  };
+
+  const cancelAttachment = () => {
+    setSelectedFile(null);
+    if (previewUrl && previewUrl !== 'video' && previewUrl !== 'document') {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+  };
+
   const handleSend = (e) => {
     e.preventDefault();
-    if (inputValue.trim()) {
+    if (uploading) return;
+    
+    if (selectedFile) {
+      setUploading(true);
+      const token = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      if (inputValue.trim()) {
+        formData.append('content', inputValue.trim());
+      }
+      
+      axios.post(`/api/chat/conversations/${conversationId}/upload/`, formData, {
+        headers: { 
+          'X-CSRFToken': token,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      .then(() => {
+        setInputValue('');
+        cancelAttachment();
+        setUploading(false);
+      })
+      .catch(err => {
+        console.error("Error subiendo archivo:", err);
+        alert("Ocurrió un error al subir el archivo.");
+        setUploading(false);
+      });
+      
+    } else if (inputValue.trim()) {
       sendMessage(inputValue);
       setInputValue('');
     }
@@ -304,7 +426,39 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
               <div key={msg.id || `temp-${idx}`} className={`message-bubble-wrapper ${isMe ? 'me' : 'them'}`}>
                 <div className="message-bubble">
                   {!isMe && <div className="sender-name">{msg.sender.first_name || msg.sender.username}</div>}
-                  <div className="message-content">{msg.content}</div>
+                  
+                  {msg.attachment && (
+                    <div className="message-attachment mb-1">
+                      {msg.attachment_type === 'image' && (
+                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
+                          <img src={msg.attachment} alt="Adjunto" style={{maxHeight: '200px', maxWidth: '100%', borderRadius: '8px', cursor: 'pointer'}} />
+                        </a>
+                      )}
+                      {msg.attachment_type === 'video' && (
+                        <video controls style={{maxHeight: '200px', maxWidth: '100%', borderRadius: '8px'}}>
+                          <source src={msg.attachment} />
+                          Tu navegador no soporta el video.
+                        </video>
+                      )}
+                      {msg.attachment_type === 'document' && (
+                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center gap-2 p-2 rounded text-decoration-none" style={{backgroundColor: 'rgba(0,0,0,0.05)'}}>
+                          <FileText size={24} />
+                          <span style={{wordBreak: 'break-all', fontSize: '0.85rem'}}>{msg.attachment.split('/').pop()}</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {msg.content && <div className="message-content">{msg.content}</div>}
+                  
+                  <button 
+                    className={`btn btn-sm btn-link p-0 position-absolute ${isMe ? 'text-danger' : 'text-secondary'}`}
+                    style={{ [isMe ? 'right' : 'left']: '-25px', top: '5px', opacity: 0.6 }}
+                    onClick={() => handleDeleteMessage(msg.id, isMe)}
+                    title={isMe ? "Eliminar mensaje" : "Eliminar para mí"}
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               </div>
             );
@@ -312,6 +466,36 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Preview Area */}
+      {selectedFile && (
+        <div className="p-2 border-top bg-light position-relative" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button 
+            className="btn btn-sm btn-light rounded-circle p-1 position-absolute top-0 start-100 translate-middle" 
+            onClick={cancelAttachment}
+            style={{ zIndex: 10, border: '1px solid #ccc' }}
+            title="Cancelar adjunto"
+          >
+            <X size={14} className="text-danger" />
+          </button>
+          
+          {previewUrl && previewUrl !== 'video' && previewUrl !== 'document' ? (
+            <img src={previewUrl} alt="Preview" style={{ height: '60px', borderRadius: '4px', objectFit: 'cover' }} />
+          ) : previewUrl === 'video' ? (
+            <div className="d-flex align-items-center justify-content-center bg-secondary text-white rounded" style={{ height: '60px', width: '60px' }}>
+              <Video size={24} />
+            </div>
+          ) : (
+            <div className="d-flex align-items-center justify-content-center bg-secondary text-white rounded" style={{ height: '60px', width: '60px' }}>
+              <FileText size={24} />
+            </div>
+          )}
+          <div className="text-truncate flex-grow-1" style={{ fontSize: '0.8rem' }}>
+            <div className="fw-bold">{selectedFile.name}</div>
+            <div className="text-muted">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
+          </div>
+        </div>
+      )}
 
       <form className="message-input-area" onSubmit={handleSend} style={{ position: 'relative' }}>
         {showEmojiPicker && (
@@ -335,6 +519,21 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
           <Smile size={24} />
         </button>
 
+        <button 
+          type="button" 
+          onClick={() => fileInputRef.current?.click()}
+          style={{ background: 'none', border: 'none', color: '#6c757d', cursor: 'pointer', padding: '0 8px 0 0', display: 'flex', alignItems: 'center' }}
+          title="Adjuntar archivo"
+        >
+          <Paperclip size={24} />
+        </button>
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          style={{ display: 'none' }} 
+          onChange={handleFileChange} 
+        />
+
         <input 
           type="text" 
           value={inputValue}
@@ -342,7 +541,7 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
           placeholder="Escribe un mensaje..."
           className="msg-input"
         />
-        <button type="submit" className="send-btn" disabled={!inputValue.trim()}>
+        <button type="submit" className="send-btn" disabled={(uploading || (!inputValue.trim() && !selectedFile))}>
           <Send size={18} />
         </button>
       </form>

@@ -27,8 +27,11 @@ class ConversationParticipant(models.Model):
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
-    content = models.TextField()
+    content = models.TextField(blank=True, null=True)
+    attachment = models.FileField(upload_to='chat_attachments/', blank=True, null=True)
+    attachment_type = models.CharField(max_length=20, blank=True, null=True) # 'image', 'video', 'document'
     timestamp = models.DateTimeField(auto_now_add=True)
+    hidden_by = models.ManyToManyField(User, related_name='hidden_messages', blank=True)
     
     def __str__(self):
         return f"Msg {self.id} by {self.sender.username} in Conv {self.conversation.id}"
