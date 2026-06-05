@@ -162,6 +162,11 @@ const ChatApp = () => {
             right: '-100px', // Centrado aprox respecto al icono
             width: '350px',
             height: '450px',
+            minWidth: '300px',
+            minHeight: '400px',
+            maxWidth: '800px',
+            maxHeight: '80vh',
+            resize: 'both',
             backgroundColor: 'white',
             border: '1px solid #e5e5e5',
             borderRadius: '12px',
