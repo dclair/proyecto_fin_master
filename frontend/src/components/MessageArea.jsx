@@ -1,13 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Send, ArrowLeft } from 'lucide-react';
+import { Send, ArrowLeft, Smile } from 'lucide-react';
+import EmojiPicker from 'emoji-picker-react';
 
 const MessageArea = ({ conversationId, onBack, currentUsername }) => {
   const { messages, sendMessage, setInitialMessages } = useWebSocket(conversationId);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
+  const emojiPickerRef = useRef(null);
+
+  // Cerrar emoji picker al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    
+    if (showEmojiPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmojiPicker]);
+
+  const onEmojiClick = (emojiObject) => {
+    setInputValue(prevInput => prevInput + emojiObject.emoji);
+  };
 
   // Marcar como leído
   const markAsRead = () => {
@@ -82,7 +103,28 @@ const MessageArea = ({ conversationId, onBack, currentUsername }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form className="message-input-area" onSubmit={handleSend}>
+      <form className="message-input-area" onSubmit={handleSend} style={{ position: 'relative' }}>
+        {showEmojiPicker && (
+          <div ref={emojiPickerRef} style={{ position: 'absolute', bottom: '60px', left: '10px', zIndex: 1000, boxShadow: '0 5px 15px rgba(0,0,0,0.1)', borderRadius: '8px' }}>
+            <EmojiPicker 
+              onEmojiClick={onEmojiClick} 
+              width={300} 
+              height={350}
+              searchPlaceholder="Buscar emoji..."
+              lazyLoadEmojis={true}
+            />
+          </div>
+        )}
+
+        <button 
+          type="button" 
+          onClick={() => setShowEmojiPicker(val => !val)}
+          style={{ background: 'none', border: 'none', color: showEmojiPicker ? '#0d6efd' : '#6c757d', cursor: 'pointer', padding: '0 8px 0 0', display: 'flex', alignItems: 'center' }}
+          title="Insertar emoji"
+        >
+          <Smile size={24} />
+        </button>
+
         <input 
           type="text" 
           value={inputValue}
