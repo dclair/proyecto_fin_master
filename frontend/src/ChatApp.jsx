@@ -5,6 +5,7 @@ import ConversationList from './components/ConversationList';
 import MessageArea from './components/MessageArea';
 import GroupCreator from './components/GroupCreator';
 import GroupExplorer from './components/GroupExplorer';
+import UserExplorer from './components/UserExplorer';
 import './ChatApp.css';
 
 const ChatApp = () => {
@@ -13,6 +14,7 @@ const ChatApp = () => {
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [isExploringGroups, setIsExploringGroups] = useState(false);
+  const [isExploringUsers, setIsExploringUsers] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const panelRef = useRef(null);
   
@@ -143,6 +145,24 @@ const ChatApp = () => {
     setActiveConversationId(null);
     setIsCreatingGroup(false);
     setIsExploringGroups(false);
+    setIsExploringUsers(false);
+  };
+
+  const handleStartPrivateChat = (userId) => {
+    const token = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+    axios.post('/api/chat/conversations/create/', { user_id: userId }, {
+      headers: { 'X-CSRFToken': token }
+    })
+    .then(response => {
+      setConversations(prev => {
+        const exists = prev.find(c => c.id === response.data.id);
+        if (exists) return prev;
+        return [response.data, ...prev];
+      });
+      setActiveConversationId(response.data.id);
+      setIsExploringUsers(false);
+    })
+    .catch(error => console.error("Error al iniciar chat privado:", error));
   };
 
   const handleConversationDeleted = () => {
@@ -251,6 +271,11 @@ const ChatApp = () => {
             <GroupExplorer 
               onBack={() => setIsExploringGroups(false)}
             />
+          ) : isExploringUsers ? (
+            <UserExplorer
+              onBack={() => setIsExploringUsers(false)}
+              onStartChat={handleStartPrivateChat}
+            />
           ) : activeConversationId ? (
             <MessageArea 
               conversationId={activeConversationId} 
@@ -268,6 +293,7 @@ const ChatApp = () => {
               activeId={activeConversationId}
               onCreateGroup={() => setIsCreatingGroup(true)}
               onExploreGroups={() => setIsExploringGroups(true)}
+              onExploreUsers={() => setIsExploringUsers(true)}
             />
           )}
         </div>
