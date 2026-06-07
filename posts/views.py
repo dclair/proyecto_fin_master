@@ -330,15 +330,18 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         response = super().form_valid(form)
 
         # 3. ¡Aquí está el truco! Añadimos al creador como participante
-        self.object.participants.add(self.request.user)
+        attendance_type = 'online' if self.object.is_online and not self.object.location else 'physical'
+        self.object.participants.add(self.request.user, through_defaults={'attendance_type': attendance_type})
 
         return response
 
 
 # Función para APUNTARSE o DESAPUNTARSE
 @login_required
+@require_POST
 def toggle_attendance(request, event_id):
     event = get_object_or_404(Event, id=event_id)
+    attendance_type = request.POST.get('attendance_type', 'physical')
 
     # 🚨 VALIDACIÓN CRÍTICA: Bloqueo por fecha pasada
     # Comparamos la fecha del evento con el momento actual
@@ -368,18 +371,21 @@ def toggle_attendance(request, event_id):
             action_url,
         )
     else:
-        if event.participants.count() < event.max_participants:
-            event.participants.add(request.user)
-            messages.success(request, "¡Te has apuntado!")
+        # Validar aforo SÓLO para asistentes presenciales
+        physical_count = event.attendances.filter(attendance_type='physical').count()
+        if attendance_type == 'physical' and physical_count >= event.max_participants:
+            messages.error(request, "El aforo presencial para este evento está lleno.")
+        else:
+            event.participants.add(request.user, through_defaults={'attendance_type': attendance_type})
+            tipo_msg = "presencial" if attendance_type == 'physical' else "online"
+            messages.success(request, f"¡Te has apuntado de forma {tipo_msg}!")
             # USAMOS LA FUNCIÓN MAESTRA
             send_hubs_email(
-                f"✅ ¡Alguien se ha unido!: {event.title}",
+                f"✅ ¡Alguien se ha unido ({tipo_msg})!: {event.title}",
                 event.organizer,
-                f"¡Buenas noticias! @{request.user.username} se ha unido a '{event.title}'.",
+                f"¡Buenas noticias! @{request.user.username} se ha unido a '{event.title}' de forma {tipo_msg}.",
                 action_url,
             )
-        else:
-            messages.error(request, "Evento lleno.")
 
     return redirect("posts:event_detail", pk=event.id)
 
@@ -467,7 +473,9 @@ class EventDetailView(LoginRequiredMixin, DetailView):
         # 1. Obtenemos el diccionario base de Django
         context = super().get_context_data(**kwargs)
 
-        # 2. Obtenemos la lista de participantes
+        # 2. Obtenemos la lista de participaciones con los usuarios y sus perfiles
+        context["attendances"] = self.object.attendances.select_related('user', 'user__profile').all()
+        # Mantenemos context["participants"] por compatibilidad en otros sitios si hace falta, aunque ya no lo usaremos en la plantilla
         context["participants"] = self.object.participants.all()
 
         # 3. Obtenemos la lista de comentarios

@@ -244,27 +244,36 @@
                 <h5 class="fw-bold text-hubs mb-2">
                     <i class="bi bi-people me-2"></i>Asistentes
                     <span class="badge bg-light text-hubs border ms-1">
-                        {{ event.participants.count }}/{{ event.max_participants }}
+                        {{ event.physical_participants_count }}/{{ event.max_participants }} presencial
                     </span>
+                    {% if event.is_online %}
+                    <span class="badge bg-info text-white border ms-1">
+                        {{ event.online_participants_count }} online
+                    </span>
+                    {% endif %}
                 </h5>
 
-                {# BARRA DE PROGRESO VISUAL #}
+                {# BARRA DE PROGRESO VISUAL (Solo presencial) #}
                 <div class="progress mb-4" style="height: 8px; background-color: var(--hubs-primary-subtle);">
-                    <div class="progress-bar {% if event.participants.count >= event.max_participants %}bg-danger{% else %}bg-hubs{% endif %}"
+                    <div class="progress-bar {% if event.physical_participants_count >= event.max_participants %}bg-danger{% else %}bg-hubs{% endif %}"
                          role="progressbar"
-                         style="width: {% widthratio event.participants.count event.max_participants 100 %}%">
+                         style="width: {% widthratio event.physical_participants_count event.max_participants 100 %}%">
                     </div>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 mb-4">
-                    {% for participant in event.participants.all %}
+                    {% for attendance in attendances %}
                     <div class="position-relative">
-                        <img src="{% if participant.profile.profile_picture %}{{ participant.profile.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ participant.username }}&background=random{% endif %}"
+                        <img src="{% if attendance.user.profile.profile_picture %}{{ attendance.user.profile.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ attendance.user.username }}&background=random{% endif %}"
                              class="rounded-circle border shadow-sm"
                              style="width:48px;height:48px;object-fit:cover;"
-                             title="{{ participant.username }}">
-                        {% if participant == event.organizer %}
-                        <span class="badge-organizer"><i class="bi bi-star-fill"></i></span>
+                             title="{{ attendance.user.username }} ({{ attendance.get_attendance_type_display }})">
+                        {% if attendance.user == event.organizer %}
+                        <span class="badge-organizer" title="Organizador"><i class="bi bi-star-fill"></i></span>
+                        {% elif attendance.attendance_type == 'online' %}
+                        <span class="position-absolute bottom-0 start-100 translate-middle p-1 bg-info border border-light rounded-circle" title="Asistencia Online">
+                            <span class="visually-hidden">Online</span>
+                        </span>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -284,15 +293,36 @@
                         <form action="{% url 'posts:toggle_attendance' event.id %}" method="POST" class="js-form-loading">
                             {% csrf_token %}
                             {% if request.user in event.participants.all %}
-                                <button type="submit" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center">
+                                <button type="submit" name="attendance_type" value="cancel" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center">
                                     <span class="spinner-border spinner-border-sm btn-spinner d-none me-2" role="status" aria-hidden="true"></span>
                                     <span class="btn-text"><i class="bi bi-person-dash-fill me-2"></i>No podré asistir</span>
                                 </button>
                             {% else %}
-                                <button type="submit" class="btn btn-hubs w-100 d-flex align-items-center justify-content-center">
-                                    <span class="spinner-border spinner-border-sm btn-spinner d-none me-2" role="status" aria-hidden="true"></span>
-                                    <span class="btn-text"><i class="bi bi-person-plus-fill me-2"></i>Me apunto</span>
-                                </button>
+                                <div class="mb-2 text-center text-secondary small fw-bold">
+                                    <i class="bi bi-question-circle me-1"></i> ¿Cómo quieres asistir?
+                                </div>
+                                {% if event.is_online and event.location %}
+                                    <div class="d-flex flex-column flex-sm-row gap-2">
+                                        <button type="submit" name="attendance_type" value="physical" class="btn btn-hubs w-100 d-flex align-items-center justify-content-center flex-column py-2" title="Reserva tu plaza física en el lugar del evento." {% if event.physical_participants_count >= event.max_participants %}disabled{% endif %}>
+                                            <span class="spinner-border spinner-border-sm btn-spinner d-none mb-1" role="status" aria-hidden="true"></span>
+                                            <span class="btn-text"><i class="bi bi-person-check-fill d-block mb-1 fs-5"></i>Presencial</span>
+                                        </button>
+                                        <button type="submit" name="attendance_type" value="online" class="btn btn-info text-white w-100 d-flex align-items-center justify-content-center flex-column py-2" title="Participa en remoto a través de streaming o videollamada.">
+                                            <span class="spinner-border spinner-border-sm btn-spinner d-none mb-1" role="status" aria-hidden="true"></span>
+                                            <span class="btn-text"><i class="bi bi-laptop d-block mb-1 fs-5"></i>Online</span>
+                                        </button>
+                                    </div>
+                                {% elif event.is_online %}
+                                    <button type="submit" name="attendance_type" value="online" class="btn btn-info text-white w-100 d-flex align-items-center justify-content-center" title="Participa en remoto a través de streaming o videollamada.">
+                                        <span class="spinner-border spinner-border-sm btn-spinner d-none me-2" role="status" aria-hidden="true"></span>
+                                        <span class="btn-text"><i class="bi bi-laptop me-2"></i>Asistir Online</span>
+                                    </button>
+                                {% else %}
+                                    <button type="submit" name="attendance_type" value="physical" class="btn btn-hubs w-100 d-flex align-items-center justify-content-center" title="Reserva tu plaza física en el lugar del evento." {% if event.physical_participants_count >= event.max_participants %}disabled{% endif %}>
+                                        <span class="spinner-border spinner-border-sm btn-spinner d-none me-2" role="status" aria-hidden="true"></span>
+                                        <span class="btn-text"><i class="bi bi-person-plus-fill me-2"></i>Me apunto</span>
+                                    </button>
+                                {% endif %}
                             {% endif %}
                         </form>
                     {% endif %}

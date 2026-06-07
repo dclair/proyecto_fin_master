@@ -203,6 +203,25 @@ class Comment(models.Model):
             raise ValidationError("El comentario padre debe pertenecer al mismo post")
 
 
+class EventAttendance(models.Model):
+    ATTENDANCE_TYPE_CHOICES = [
+        ('physical', 'Presencial'),
+        ('online', 'Online'),
+    ]
+    event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='attendances')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='event_attendances')
+    attendance_type = models.CharField(max_length=10, choices=ATTENDANCE_TYPE_CHOICES, default='physical', verbose_name="Tipo de asistencia")
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('event', 'user')
+        verbose_name = "asistencia a evento"
+        verbose_name_plural = "asistencias a eventos"
+
+    def __str__(self):
+        return f"{self.user.username} asiste a {self.event.title} ({self.get_attendance_type_display()})"
+
+
 class Event(models.Model):
     LEVEL_CHOICES = [
         ("all", " Para todos"),
@@ -232,9 +251,12 @@ class Event(models.Model):
     # A qué terapia pertenece (Fotografía, Ciclismo, etc.)
     hobby = models.ForeignKey(Hobby, on_delete=models.CASCADE, related_name="events")
 
-    # Lista de usuarios que se apuntan (Muchos a Muchos)
+    # Lista de usuarios que se apuntan (Muchos a Muchos con modelo intermedio)
     participants = models.ManyToManyField(
-        User, related_name="events_attending", blank=True
+        User, 
+        through='EventAttendance',
+        related_name="events_attending", 
+        blank=True
     )
 
     # Aforo máximo
@@ -247,6 +269,14 @@ class Event(models.Model):
         default="beginner",
         verbose_name="Nivel de la actividad",
     )
+
+    @property
+    def physical_participants_count(self):
+        return self.attendances.filter(attendance_type='physical').count()
+
+    @property
+    def online_participants_count(self):
+        return self.attendances.filter(attendance_type='online').count()
 
     @property
     def is_past(self):
