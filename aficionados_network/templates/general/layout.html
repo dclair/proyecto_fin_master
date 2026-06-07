@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.6">
     
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script>
@@ -43,23 +43,43 @@
             {% if request.user.is_authenticated %}
                 <div class="col-12 d-lg-none mb-4">
                     <h6 class="sidebar-label px-1">MIS GRUPOS</h6>
-                    <div class="mobile-hobby-scroll d-flex pb-2 pt-2">
-                        {% for hobby in my_hobbies %}
-                            <a href="{% url 'posts:hobby_hub' hobby.slug %}" class="mobile-hobby-pill position-relative text-decoration-none">
-                                <div class="hobby-dot-sm bg-hubs">
-                                    {{ hobby.name|slice:":1"|upper }}
+                    <div class="mobile-hobby-wrapper position-relative">
+                        <div class="mobile-hobby-scroll d-flex pb-2 pt-2">
+                            <!-- Link "Inicio" -->
+                            <a href="{% url 'home' %}" class="mobile-hobby-pill position-relative text-decoration-none {% if not current_hub %}active{% endif %}">
+                                <div class="hobby-dot-sm bg-hubs flex-shrink-0">
+                                    <i class="bi bi-house-fill"></i>
                                 </div>
-                                <span>{{ hobby.name }}</span>
-                                
-                                {% if hobby.match_count > 0 %}
-                                    <span class="badge rounded-pill bg-info text-dark mobile-hobby-badge">
-                                        {{ hobby.match_count }}
-                                    </span>
-                                {% endif %}
+                                <span class="d-inline-block">Inicio</span>
                             </a>
-                        {% empty %}
-                            <small class="text-muted">Sin terapias</small>
-                        {% endfor %}
+                            
+                            {% for hobby in my_hobbies %}
+                                <a href="{% url 'posts:hobby_hub' hobby.slug %}" class="mobile-hobby-pill position-relative text-decoration-none {% if current_hub == hobby %}active{% endif %}" title="{{ hobby.name }}">
+                                    <div class="hobby-dot-sm bg-hubs flex-shrink-0">
+                                        {{ hobby.name|slice:":1"|upper }}
+                                    </div>
+                                    <span class="text-truncate d-inline-block" style="max-width: 130px;">{{ hobby.name }}</span>
+                                    
+                                    {% if hobby.match_count > 0 %}
+                                        <span class="badge rounded-pill bg-info text-dark mobile-hobby-badge">
+                                            {{ hobby.match_count }}
+                                        </span>
+                                    {% endif %}
+                                </a>
+                            {% empty %}
+                                <small class="text-muted">Sin terapias</small>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Flechas indicadoras (solo si hay varios elementos) -->
+                        {% if my_hobbies|length >= 2 %}
+                        <div class="scroll-arrow-left scroll-arrow-hidden">
+                            <i class="bi bi-chevron-left"></i>
+                        </div>
+                        <div class="scroll-arrow-right">
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -70,11 +90,11 @@
                             {% for hobby in my_hobbies %}
                                 <a href="{% url 'posts:hobby_hub' hobby.slug %}" 
                                    class="list-group-item list-group-item-action sidebar-item d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <div class="hobby-dot bg-hubs">
+                                    <div class="d-flex align-items-center" style="min-width: 0;">
+                                        <div class="hobby-dot bg-hubs flex-shrink-0">
                                             {{ hobby.name|slice:":1"|upper }}
                                         </div>
-                                        <span class="hobby-name">{{ hobby.name }}</span>
+                                        <span class="hobby-name" title="{{ hobby.name }}">{{ hobby.name }}</span>
                                     </div>
                                     
                                     {% if hobby.match_count > 0 %}
@@ -120,11 +140,52 @@
     {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/community-hub.js' %}?v=1.1"></script>
+    <script src="{% static 'js/community-hub.js' %}?v=1.6"></script>
     <script src="{% static 'js/backTop.js' %}"></script>
     <script src="{% static 'js/likes.js' %}"></script>
     <script src="{% static 'js/cookies.js' %}"></script> 
    
     {% block extra_js %}{% endblock extra_js %}
+
+    <!-- Script para gestionar el scroll de Mis Grupos en móvil -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const scrollContainer = document.querySelector('.mobile-hobby-scroll');
+        const arrowLeft = document.querySelector('.scroll-arrow-left');
+        const arrowRight = document.querySelector('.scroll-arrow-right');
+
+        if (scrollContainer && arrowRight) {
+            const handleScroll = () => {
+                // Tolerancia de 5px para detectar los bordes
+                const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+                
+                // Mostrar/Ocultar flecha izquierda
+                if (arrowLeft) {
+                    if (scrollContainer.scrollLeft > 5) {
+                        arrowLeft.classList.remove('scroll-arrow-hidden');
+                    } else {
+                        arrowLeft.classList.add('scroll-arrow-hidden');
+                    }
+                }
+
+                // Mostrar/Ocultar flecha derecha y difuminado
+                if (scrollContainer.scrollLeft >= maxScrollLeft - 5) {
+                    arrowRight.classList.add('scroll-arrow-hidden');
+                    scrollContainer.parentElement.classList.add('hide-fade');
+                } else {
+                    arrowRight.classList.remove('scroll-arrow-hidden');
+                    scrollContainer.parentElement.classList.remove('hide-fade');
+                }
+            };
+
+            // Ejecutar al cargar para configurar estado inicial
+            handleScroll();
+
+            // Escuchar eventos
+            scrollContainer.addEventListener('scroll', handleScroll);
+            window.addEventListener('resize', handleScroll);
+        }
+    });
+    </script>
 </body>
 </html>
