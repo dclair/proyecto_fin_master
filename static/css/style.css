@@ -306,6 +306,23 @@ footer {
     margin-top: auto;
 }
 
+/* Efecto hover para enlaces del footer */
+footer a {
+    transition: color 0.3s ease-in-out, transform 0.2s ease;
+    display: inline-block;
+}
+
+footer a:hover {
+    color: #20c997 !important; /* Verde claro / Teal brillante para fondo oscuro */
+    transform: translateX(3px); /* Pequeño desplazamiento a la derecha */
+}
+
+/* Efecto al hacer click (active) */
+footer a:active {
+    color: #198754 !important; /* Verde un poco más oscuro al presionar */
+    transform: scale(0.95) translateX(3px); /* Efecto de hundimiento rápido */
+}
+
 .back-to-top {
     position: fixed;
     bottom: 20px;
