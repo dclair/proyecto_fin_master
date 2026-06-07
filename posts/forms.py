@@ -125,6 +125,7 @@ class EventForm(forms.ModelForm):
                 }
             ),
             "event_date": forms.DateTimeInput(
+                format='%Y-%m-%dT%H:%M',
                 attrs={
                     "class": "form-control",
                     "type": "datetime-local",  # Esto activa el calendario en el navegador
