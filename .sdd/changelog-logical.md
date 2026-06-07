@@ -5,6 +5,27 @@
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
 
+## 2026-06-07: Search Enhancements, Reviews, and Therapy Filters
+
+**Type:** feature / UI
+**Status:** done
+
+What changed:
+- Upgraded the global directory search (`ProfilesListView`) and Chat user search to filter simultaneously by `username`, `first_name`, `last_name`, and `email` using Django `Q` objects.
+- Added email display to user cards across the application (Directory, Chat, Group Creator) to help distinguish between users with identical names.
+- Validated and finalized the Event Reviews (Star Rating) system, ensuring users can rate event organizers from the "Mis Citas" view.
+- Implemented the "Mis Terapias" fast filter on the events list (`EventListView`), allowing logged-in users to instantly filter events that match their registered hobbies/therapies.
+- Updated `README.md` to reflect 100% completion of the project roadmap.
+
+Why:
+- To drastically improve the UX of finding specific users or therapists in a growing platform.
+- To provide quick access to relevant events, boosting user engagement.
+- To mark the technical completion of the core MVP features.
+
+Impact:
+- The UI is more informative and filters are highly responsive.
+- The project is officially feature-complete according to the initial roadmap.
+
 ## 2026-06-07: Hybrid Event Attendance & Infinite Scroll UI Optimization
 
 **Type:** feature / UI

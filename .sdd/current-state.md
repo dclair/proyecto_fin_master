@@ -22,13 +22,14 @@ Current user-facing capabilities:
 - Cancel, reactivate, duplicate, edit, and list owned events.
 - View personal event participations.
 - Support for Hybrid events (Physical/Online) with physical capacity limits.
-- Browse the "Comunidad de Terapeutas" (Therapists Community) with infinite scrolling (HTMX).
-- Review event organizers after participation.
+- Browse the "Comunidad de Terapeutas" (Therapists Community) with infinite scrolling (HTMX) and multi-field search (username, name, email).
+- Review event organizers after participation with a 5-star system.
 - Receive in-app notifications.
 - Receive HTML emails for important interactions.
 - Send contact messages to the site owner/admin.
 - Chat in real-time (1-on-1 and Groups) with multimedia support (images, videos, documents).
 - Full control over messages ("Delete for everyone" and "Delete for me").
+- Filter events easily matching the user's registered therapies ("Mis Terapias" filter).
 
 ## Runtime
 

@@ -2,8 +2,9 @@
 Hubs&Clicks es una plataforma web diseñada para conectar a personas a través de sus terapias, permitiéndoles organizar eventos, unirse a quedadas y gestionar su comunidad de forma ágil, moderna y con una identidad visual corporativa única.
 
 🛠️ Características Principales (Features)
+
 1. Gestión de Eventos 360º
-Creación y Edición: Los usuarios pueden proponer planes detallando lugar, fecha, terapia y límite de asistentes.
+   Creación y Edición: Los usuarios pueden proponer planes detallando lugar, fecha, terapia y límite de asistentes.
 
 Sistema de Duplicado: Función inteligente para clonar eventos pasados y ahorrar tiempo al organizador.
 
@@ -14,7 +15,7 @@ Gestión de Estados: Soporte para eventos activos y finalizados.
 Protocolo de Cancelación: Sistema seguro de cancelación que bloquea interacciones y notifica automáticamente a todos los asistentes.
 
 2. Dashboard y Comunidad de Terapeutas
-Directorio de Profesionales: Exploración fluida mediante scroll infinito (HTMX) para navegar por la comunidad de terapeutas.
+   Directorio de Profesionales: Exploración fluida mediante scroll infinito (HTMX) para navegar por la comunidad de terapeutas.
 
 Identidad Social: Perfiles con biografía, ubicación, sitio web y selección de terapias con niveles de especialización.
 
@@ -23,18 +24,19 @@ Estadísticas en Tiempo Real: Contadores dinámicos de publicaciones, seguidores
 Agenda Personal: Visualización de las próximas citas confirmadas directamente en el perfil.
 
 3. Sistema de Interacción y Feedback
-Likes Dinámicos: Sistema de "Me gusta" con actualización asíncrona (AJAX/JS) y persistencia en base de datos.
+   Likes Dinámicos: Sistema de "Me gusta" con actualización asíncrona (AJAX/JS) y persistencia en base de datos.
 
 Conversaciones Inteligentes: Hilos de comentarios tanto en publicaciones como en eventos, con lógica de detección de autor para evitar spam.
 
 Notificaciones en Tiempo Real: Sistema de "campana" con contadores dinámicos (HTMX) para avisos de likes, comentarios, seguidores y alertas de eventos.
 
 4. Sistema de Mensajería en Tiempo Real (Chat) 💬
-Chats Privados y Grupales: Creación de conversaciones 1 a 1 y salas de grupo temáticas.
+   Chats Privados y Grupales: Creación de conversaciones 1 a 1 y salas de grupo temáticas.
 
 Intercambio Multimedia: Envío de imágenes, videos y documentos en tiempo real con vistas previas. Límite de carga validado y sincronización instantánea vía WebSockets.
 
-Control Total de Mensajes: 
+Control Total de Mensajes:
+
 - "Eliminar para todos": Borrado físico de mensajes y destrucción automática de sus archivos adjuntos para todos los participantes.
 - "Eliminar para mí": Borrado lógico (ocultación) de cualquier mensaje indeseado (propio o ajeno) solo en tu pantalla.
 
@@ -45,7 +47,7 @@ Notificaciones Visuales: Sistema de badges y reordenación inteligente de la lis
 Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección de rutas.
 
 5. Ecosistema de Comunicación & Branding 📧
-Emails HTML Corporativos: Notificaciones de sistema con diseño "Visión de Empresa", incluyendo logotipos incrustados (CID) y botones de acción.
+   Emails HTML Corporativos: Notificaciones de sistema con diseño "Visión de Empresa", incluyendo logotipos incrustados (CID) y botones de acción.
 
 Lógica de Notificación Dual: Cada interacción crítica genera un aviso interno (web) y, en casos de eventos o contacto, un correo electrónico profesional.
 
@@ -65,38 +67,40 @@ Base de Datos: SQLite (Desarrollo) / MySQL (Producción).
 🏗️ Estructura del Proyecto
 Bash
 proyecto_root/
-├── aficionados_network/  # Configuración principal
-├── chat/                 # Sistema de Mensajería (Channels, WebSockets)
-├── frontend/             # Interfaz de Chat en React (Vite)
-├── notifications/        # Motor de avisos internos y lógica de alertas
-├── posts/                # Gestión de Eventos, Publicaciones y Likes
-├── profiles/             # Usuarios, Terapias, Seguidores y Estadísticas
-└── templates/            # UI Global y plantillas de emails
+├── aficionados_network/ # Configuración principal
+├── chat/ # Sistema de Mensajería (Channels, WebSockets)
+├── frontend/ # Interfaz de Chat en React (Vite)
+├── notifications/ # Motor de avisos internos y lógica de alertas
+├── posts/ # Gestión de Eventos, Publicaciones y Likes
+├── profiles/ # Usuarios, Terapias, Seguidores y Estadísticas
+└── templates/ # UI Global y plantillas de emails
 ⚙️ Instalación y Configuración
 Sigue estos pasos para desplegar Hubs&Clicks en tu entorno local:
 
 1. Clonar el repositorio
-Bash
-git clone https://github.com/tu-usuario/aficionados_network.git
-cd aficionados_network
+   Bash
+   git clone https://github.com/tu-usuario/aficionados_network.git
+   cd aficionados_network
 2. Configurar el entorno virtual
-Se recomienda el uso de Python 3.12 para garantizar la compatibilidad con Django 6.0:
+   Se recomienda el uso de Python 3.12 para garantizar la compatibilidad con Django 6.0:
 
 Bash
+
 # Crear el entorno
+
 python3 -m venv env
 
 # Activar el entorno (Linux/macOS)
+
 source env/bin/activate
 
 # Activar el entorno (Windows)
-env\Scripts\activate
-3. Instalar dependencias
+
+env\Scripts\activate 3. Instalar dependencias
 Asegúrate de tener el archivo requirements.txt actualizado:
 
 Bash
-pip install -r requirements.txt
-4. Preparar la Base de Datos
+pip install -r requirements.txt 4. Preparar la Base de Datos
 Realiza las migraciones para crear la estructura de tablas (Eventos, Perfiles, Notificaciones, etc.):
 
 Bash
@@ -151,13 +155,11 @@ DB_ENGINE=mysql python manage.py flush --noinput
 DB_ENGINE=mysql python manage.py loaddata db_full_backup.json
 
 La migración ejecutada en este proyecto está registrada en `.sdd/changes/sqlite-to-mysql-migration/`.
-La guía reutilizable para futuros proyectos está en `.sdd/knowledge/django-sqlite-to-mysql-mariadb.md`.
-5. Crear superusuario (Admin)
+La guía reutilizable para futuros proyectos está en `.sdd/knowledge/django-sqlite-to-mysql-mariadb.md`. 5. Crear superusuario (Admin)
 Para gestionar las terapias y los mensajes de contacto desde el panel:
 
 Bash
-python manage.py createsuperuser
-6. Ejecutar el servidor
+python manage.py createsuperuser 6. Ejecutar el servidor
 Bash
 python manage.py runserver
 La plataforma estará disponible en http://127.0.0.1:8000.
@@ -171,17 +173,17 @@ EMAIL_BACKEND: Define el motor de envío.
 
 CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contacto.
 
-📈 Roadmap
+🏆 Roadmap Completado (MVP 100% Funcional)
 [x] Sistema de Notificaciones: Implementado (Likes, Comentarios, Eventos).
 
 [x] Identidad Corporativa: Emails y diseño unificado.
 
-[ ] Sistema de Valoraciones (Reviews): Puntuación por estrellas tras finalizar un evento (Estructura base iniciada).
+[x] Sistema de Valoraciones (Reviews): Puntuación por estrellas tras finalizar un evento implementada.
 
-[ ] Filtro de "Mis Terapias": Acceso rápido a eventos que coinciden con las terapias del perfil.
+[x] Filtro de "Mis Terapias": Acceso rápido a eventos que coinciden con las terapias del perfil.
 
 [x] Chat en tiempo real: Implementado con WebSockets (React + Django Channels), grupos y chats privados.
 
-[ ] Compartir Archivos Multimedia: Subida de imágenes y documentos en el chat.
+[x] Compartir Archivos Multimedia: Subida de imágenes y documentos en el chat implementada.
 
 Hubs&Clicks - "Descubre, Comparte, Disfruta"
