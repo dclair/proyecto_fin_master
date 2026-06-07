@@ -23,10 +23,15 @@
             
             <h6 class="card-title mb-1 text-truncate">
                 <a href="{% url 'profiles:profile' profile.pk %}" 
-                   class="text-decoration-none text-dark fw-bold">
+                   class="text-decoration-none text-dark fw-bold"
+                   title="{{ profile.user.username }}">
                     {{ profile.user.username }}
                 </a>
             </h6>
+            
+            <p class="text-muted text-truncate mb-2" style="font-size: 0.75rem;" title="{{ profile.user.email }}">
+                <i class="bi bi-envelope me-1"></i>{{ profile.user.email }}
+            </p>
 
             <div class="mb-2">
                 {% if user.is_authenticated %}

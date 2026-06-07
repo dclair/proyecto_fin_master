@@ -125,6 +125,7 @@ const GroupCreator = ({ onBack, onGroupCreated }) => {
                     </div>
                     <div className="text-truncate" style={{fontSize: '0.9rem'}}>
                       <strong>{user.first_name || user.username}</strong>
+                      {user.email && <div className="text-muted text-truncate" style={{fontSize: '0.75rem'}}>{user.email}</div>}
                     </div>
                   </button>
                 );

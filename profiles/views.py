@@ -31,7 +31,12 @@ class ProfilesListView(ListView):
         search_query = self.request.GET.get("q", "").strip()
 
         if search_query:
-            queryset = queryset.filter(user__username__istartswith=search_query)
+            queryset = queryset.filter(
+                Q(user__username__icontains=search_query) |
+                Q(user__first_name__icontains=search_query) |
+                Q(user__last_name__icontains=search_query) |
+                Q(user__email__icontains=search_query)
+            )
 
         if user.is_authenticated:
             queryset = queryset.exclude(user=user)
