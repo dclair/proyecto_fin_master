@@ -213,7 +213,9 @@ class Event(models.Model):
     ]
     title = models.CharField(max_length=200, verbose_name="Título de la quedada")
     description = models.TextField(verbose_name="Descripción del plan")
-    location = models.CharField(max_length=255, verbose_name="Lugar de encuentro")
+    location = models.CharField(max_length=255, null=True, blank=True, verbose_name="Lugar de encuentro")
+    is_online = models.BooleanField(default=False, verbose_name="¿Es un evento online?")
+    stream_url = models.URLField(blank=True, null=True, verbose_name="Enlace de transmisión (YouTube, etc.)")
     event_date = models.DateTimeField(verbose_name="Fecha y hora del evento")
     image = models.ImageField(
         upload_to="events/", null=True, blank=True, verbose_name="Imagen de la quedada"

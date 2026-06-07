@@ -80,6 +80,11 @@
                                 <div class="hubs-input-group">
                                     {{ field }}
                                 </div>
+                                {% if field.name == 'stream_url' %}
+                                    <div class="form-text text-muted small mt-2">
+                                        <i class="bi bi-info-circle me-1"></i>Pega tu enlace de YouTube, Vimeo o Twitch para integrarlo directamente en la página. Otros enlaces (Zoom, Meet) se mostrarán como un botón que se abrirá en una pestaña nueva.
+                                    </div>
+                                {% endif %}
                             {% endif %}
                             
                             {% if field.errors %}
@@ -113,3 +118,27 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const isOnlineCheckbox = document.getElementById('id_is_online');
+        const streamUrlContainer = document.getElementById('id_stream_url');
+        
+        if (isOnlineCheckbox && streamUrlContainer) {
+            const containerRow = streamUrlContainer.closest('.mb-4');
+            function toggleStreamUrl() {
+                if (isOnlineCheckbox.checked) {
+                    containerRow.style.display = 'block';
+                } else {
+                    containerRow.style.display = 'none';
+                    // Optional: clear out the value when hidden
+                    // streamUrlContainer.value = '';
+                }
+            }
+            isOnlineCheckbox.addEventListener('change', toggleStreamUrl);
+            toggleStreamUrl(); // Initial state
+        }
+    });
+</script>
+{% endblock extra_js %}

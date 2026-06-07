@@ -1,6 +1,9 @@
 git reset --hard 2004c05769d87d46b3ef01d7502e9c8aaad1de5d
 
 
+fuser -k 8000/tcp
+
+
 Mi opinión sincera, directa y sin filtro: Hacer el chat en React es, por escándalo, la mejor decisión técnica que podés tomar para este máster.
 
 Te explico el POR QUÉ, para que lo tengas claro cuando te toque defender el proyecto ante los profesores:

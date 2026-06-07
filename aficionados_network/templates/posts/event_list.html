@@ -131,8 +131,14 @@
                     <p class="text-muted small mb-3">{{ event.description|truncatechars:80 }}</p>
                     
                     <div class="bg-light p-3 rounded mb-3 small border-start border-hubs border-3">
-                        <div class="mb-1"><i class="bi bi-geo-alt-fill text-danger me-2"></i><strong>{{ event.location }}</strong></div>
-                        <div><i class="bi bi-calendar-check me-2 text-hubs"></i>{{ event.event_date|date:"d M, H:i" }}</div>
+                        {% if event.is_online and event.location %}
+                            <div class="mb-1"><span class="badge bg-primary me-2"><i class="bi bi-globe me-1"></i>Híbrido</span><strong>{{ event.location }} y Online</strong></div>
+                        {% elif event.is_online %}
+                            <div class="mb-1"><span class="badge bg-info text-dark me-2"><i class="bi bi-laptop me-1"></i>Online</span><strong>Transmisión en directo</strong></div>
+                        {% else %}
+                            <div class="mb-1"><span class="badge bg-secondary me-2"><i class="bi bi-geo-alt-fill me-1"></i>Presencial</span><strong>{{ event.location }}</strong></div>
+                        {% endif %}
+                        <div class="mt-2"><i class="bi bi-calendar-check me-2 text-hubs"></i>{{ event.event_date|date:"d M, H:i" }}</div>
                     </div>
 
                     <div class="mt-auto pt-3 border-top">

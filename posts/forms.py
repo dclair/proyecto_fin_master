@@ -91,6 +91,8 @@ class EventForm(forms.ModelForm):
             "description",
             "image",
             "hobby",
+            "is_online",
+            "stream_url",
             "location",
             "event_date",
             "max_participants",
@@ -109,10 +111,17 @@ class EventForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
             "image": forms.ClearableFileInput(attrs={"class": "form-control"}),
             "hobby": forms.Select(attrs={"class": "form-select"}),
+            "is_online": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "stream_url": forms.URLInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "https://www.youtube.com/watch?v=...",
+                }
+            ),
             "location": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "¿Dónde nos encontramos?",
+                    "placeholder": "¿Dónde nos encontramos? (Opcional si es online)",
                 }
             ),
             "event_date": forms.DateTimeInput(
@@ -126,6 +135,20 @@ class EventForm(forms.ModelForm):
             ),
             "level": forms.Select(attrs={"class": "form-select"}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        is_online = cleaned_data.get("is_online")
+        location = cleaned_data.get("location")
+        stream_url = cleaned_data.get("stream_url")
+
+        if not is_online and not location:
+            raise forms.ValidationError("Debes especificar un lugar físico si el evento no es online.")
+        
+        if is_online and not stream_url and not location:
+            raise forms.ValidationError("Debes proveer al menos el enlace de transmisión o un lugar físico.")
+            
+        return cleaned_data
 
 
 class EventCommentForm(forms.ModelForm):
