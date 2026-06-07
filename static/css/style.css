@@ -627,6 +627,61 @@ footer a:active {
         padding-bottom: 0.5rem;
         margin-left: -0.25rem;  /* evita padding extra a la izquierda */
         padding-left: 0.25rem;
+        padding-right: 2rem; /* Espacio extra para asegurar que el ultimo elemento se vea completo antes del fade */
+        
+        /* Firefox support */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(11, 89, 97, 0.5) transparent;
+    }
+
+    /* 1. Flechas indicadoras de scroll (Izquierda y Derecha) */
+    .scroll-arrow-right, .scroll-arrow-left {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        background-color: var(--hubs-card-bg);
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        pointer-events: none; /* Clics a través */
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .scroll-arrow-right { right: 0px; }
+    .scroll-arrow-left { left: 0px; }
+    
+    .scroll-arrow-hidden {
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    .scroll-arrow-right i, .scroll-arrow-left i {
+        font-size: 16px;
+        color: var(--hubs-primary);
+        margin-top: 1px;
+    }
+
+    /* 2. Efecto difuminado (Fade) a la derecha */
+    .mobile-hobby-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 8px; /* Deja libre el espacio del scrollbar para poder tocarlo */
+        width: 45px;
+        background: linear-gradient(to right, rgba(238, 244, 245, 0) 0%, var(--hubs-light) 100%);
+        pointer-events: none; /* Permite hacer clic a través del gradiente */
+        z-index: 2;
+        transition: opacity 0.3s ease;
+    }
+    
+    .mobile-hobby-wrapper.hide-fade::after {
+        opacity: 0;
     }
 
     /* Cada pill */
