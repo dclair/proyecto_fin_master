@@ -21,6 +21,8 @@ Current user-facing capabilities:
 - Join or leave events when allowed.
 - Cancel, reactivate, duplicate, edit, and list owned events.
 - View personal event participations.
+- Support for Hybrid events (Physical/Online) with physical capacity limits.
+- Browse the "Comunidad de Terapeutas" (Therapists Community) with infinite scrolling (HTMX).
 - Review event organizers after participation.
 - Receive in-app notifications.
 - Receive HTML emails for important interactions.

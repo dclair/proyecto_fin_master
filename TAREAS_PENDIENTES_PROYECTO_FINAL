@@ -1,5 +1,4 @@
 TAREAS PENDIENTES DEL PROYOCTO FIN MASTER:
--- Cómo se si asite online o en presencia
 -- Revisar el tiempo de cierre de sesion automatico
 --  fecha al modificar el evento
 - REVISAR EL FOOTER,los enlaces no cambian de color.
@@ -43,6 +42,8 @@ Permitir a los usuarios enviar imágenes, vídeos y documentos dentro de los cha
 
 Arquitectura de Solución
 Dado que enviar archivos binarios puros a través de WebSockets es poco eficiente y complejo de gestionar en Django, usaremos una estrategia híbrida estándar:
+
+
 
 El archivo se sube por HTTP normal (REST API) usando multipart/form-data.
 El servidor guarda el archivo, crea el mensaje en la base de datos y empuja el mensaje (con la URL del archivo) al WebSocket del grupo para que aparezca en tiempo real a todos los conectados.
@@ -179,4 +180,29 @@ Alternar la clase .theater-mode en el detail-banner-wrapper.
 Bloquear el scroll del cuerpo (document.body.style.overflow = 'hidden') para evitar que la página se mueva por debajo mientras se ve el video.
 Alternar el icono del botón a bi-fullscreen-exit.
 User Review Required
-Esta solución es un "falso fullscreen". Significa que el video ocupará toda tu ventana del navegador (cubriendo la barra de navegación y todo el contenido), pero no ocultará la barra de tareas de Windows/Mac ni las pestañas del navegador. ¿Estás de acuerdo con este enfoque para mantener viva la ventana de chat?
+Esta solución es un "falso fullscreen". Significa que el video ocupará toda tu ventana del navegador (cubriendo la barra de navegación y todo el contenido), pero no ocultará la barra de tareas de Windows/Mac ni las pestañas del navegador.
+ ¿Estás de acuerdo con este enfoque para mantener viva la ventana de chat?
+
+
+Implementación de Infinite Scroll y Reducción de Tarjetas
+El objetivo es mejorar la escalabilidad del listado de la "Comunidad de Terapeutas" mediante carga dinámica (scroll infinito) y optimizar el tamaño de las tarjetas para mostrar más usuarios por pantalla.
+
+Cambios Propuestos
+1. profiles/views.py
+Se modificará la vista ProfilesListView para que sea consciente de HTMX:
+
+Si la petición es estándar (carga de página completa), devolverá el template actual profile_list.html.
+Si la petición viene de HTMX (al hacer scroll), devolverá únicamente un nuevo fragmento HTML (_profile_list_items.html) con los usuarios de la siguiente página.
+2. Nuevo fragmento: profiles/templates/profiles/partials/_profile_list_items.html
+Extraeremos el bucle que pinta las tarjetas a este nuevo archivo.
+
+Reducción de tamaño:
+Cambiaremos las clases de columnas (ej. col-lg-3 en lugar de col-lg-5) para que quepan 3 o 4 por fila en ordenador.
+Reduciremos el padding (p-3 en lugar de p-4).
+Reduciremos la foto de perfil (de 100px a 80px).
+Scroll Infinito (Magia HTMX): Al último elemento de la lista le añadiremos las propiedades de HTMX (hx-get, hx-trigger="revealed", hx-swap="afterend") para que, en cuanto asome por la pantalla, dispare automáticamente la carga de la siguiente página.
+3. profiles/templates/profiles/profile_list.html
+Sustituiremos el código redundante de las tarjetas por un {% include "profiles/partials/_profile_list_items.html" %}.
+Eliminaremos la botonera clásica de paginación (botones "Anterior", "1", "2", "Siguiente") ya que el scroll dinámico la hace innecesaria.
+User Review Required
+¿Estás de acuerdo con el enfoque de usar HTMX para la carga dinámica (scroll infinito)? Esto evita recargar la página y no requiere escribir JavaScript pesado.

@@ -30,6 +30,7 @@
 </head>
 
 <body>
+    {% include "_includes/_cookies_banner.html" %}
     {% include "_includes/_header.html" %}
 
     <div class="message-container">
@@ -110,28 +111,6 @@
     <button id="btn-back-to-top" class="back-to-top shadow">
         <i class="bi bi-chevron-up"></i>
     </button>
-
-    <div id="cookie-banner" class="cookie-banner">
-        <div class="row align-items-center">
-            <div class="col-md-7">
-                <p class="cookie-text mb-md-0">
-                    <i class="bi bi-cookie text-warning fs-5 me-2"></i>
-                    En <strong>Hubs & Clicks</strong> utilizamos cookies para mejorar tu experiencia. 
-                    Ver <a href="{% url 'cookies_policy' %}" class="cookie-link">política de cookies</a>.
-                </p>
-            </div>
-            <div class="col-md-5 text-md-end">
-                <div class="cookie-buttons d-flex gap-2 mt-3 mt-md-0 justify-content-md-end">
-                    <button id="accept-cookies" class="btn btn-hubs btn-sm text-nowrap rounded-pill px-3">
-                        Aceptar todas
-                    </button>
-                    <button id="reject-cookies" class="btn btn-light btn-sm text-nowrap rounded-pill border px-3">
-                        Solo necesarias
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Variables para React -->
     {% if request.user.is_authenticated %}

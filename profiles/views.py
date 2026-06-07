@@ -58,6 +58,11 @@ class ProfilesListView(ListView):
             context["active_filter"] = self.request.GET.get("filter", "all")
         return context
 
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request"):
+            return ["profiles/partials/_profile_list_items.html"]
+        return ["profiles/profile_list.html"]
+
 
 # --- VISTA PÚBLICA DEL PERFIL (Vitaminada con Eventos) ---
 class ProfileView(LoginRequiredMixin, DetailView):

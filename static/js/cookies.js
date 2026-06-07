@@ -69,4 +69,13 @@ document.addEventListener("DOMContentLoaded", function() {
             banner.classList.add('hidden'); // Añade la clase CSS de subida/ocultación
         });
     }
+
+    // Botón: Rechazar todas
+    const rejectAllBtn = document.getElementById('reject-all-cookies');
+    if (rejectAllBtn) {
+        rejectAllBtn.addEventListener('click', () => {
+            localStorage.setItem('hubs-cookies-accepted', 'essential');
+            banner.classList.add('hidden'); 
+        });
+    }
 });

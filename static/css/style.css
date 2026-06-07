@@ -814,3 +814,8 @@ footer {
     -webkit-overflow-scrolling: touch;
     padding-top: 12px !important; /* Espacio para que el badge respire */
 }
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
