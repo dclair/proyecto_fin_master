@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { MessageCircle, X } from 'lucide-react';
 import ConversationList from './components/ConversationList';
@@ -16,6 +17,7 @@ const ChatApp = () => {
   const [isExploringGroups, setIsExploringGroups] = useState(false);
   const [isExploringUsers, setIsExploringUsers] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const panelRef = useRef(null);
   
   // Estados para el arrastre (Drag & Drop)
@@ -25,37 +27,67 @@ const ChatApp = () => {
   
   const currentUsername = window.DJANGO_USER || "";
 
+  // Detectar cambios en pantalla para centrar o ajustar en móvil
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Funciones de arrastre
-  const handleMouseDown = (e) => {
-    // Solo permitir arrastrar desde el header (click izquierdo)
-    if (e.button !== 0) return;
+  const handleDragStart = (e) => {
+    // Para ratón: click izquierdo
+    if (e.type === 'mousedown' && e.button !== 0) return;
+    
+    // Evitar scroll en táctil al empezar a arrastrar
+    if (e.type === 'touchstart' && e.cancelable) {
+      // Opcional: e.preventDefault() podría bloquear el click de botones dentro, lo aplicamos al move
+    }
+    
     setIsDragging(true);
+    
+    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+    
     dragStartPos.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
+      x: clientX - position.x,
+      y: clientY - position.y
     };
   };
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleDragMove = (e) => {
       if (!isDragging) return;
+      
+      // Prevenir scroll de la página en móvil al arrastrar el chat
+      if (e.type === 'touchmove' && e.cancelable) {
+        e.preventDefault();
+      }
+
+      const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
       setPosition({
-        x: e.clientX - dragStartPos.current.x,
-        y: e.clientY - dragStartPos.current.y
+        x: clientX - dragStartPos.current.x,
+        y: clientY - dragStartPos.current.y
       });
     };
 
-    const handleMouseUp = () => {
+    const handleDragEnd = () => {
       setIsDragging(false);
     };
 
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('mousemove', handleDragMove, { passive: false });
+      document.addEventListener('mouseup', handleDragEnd);
+      document.addEventListener('touchmove', handleDragMove, { passive: false });
+      document.addEventListener('touchend', handleDragEnd);
     }
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleDragMove);
+      document.removeEventListener('mouseup', handleDragEnd);
+      document.removeEventListener('touchmove', handleDragMove);
+      document.removeEventListener('touchend', handleDragEnd);
     };
   }, [isDragging]);
 
@@ -124,22 +156,9 @@ const ChatApp = () => {
     return () => window.removeEventListener('openChatWith', handleOpenChat);
   }, []);
 
-  // Cerrar al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (panelRef.current && !panelRef.current.contains(event.target)) {
-        // Asegurarse de no cerrar si el click fue en el botón de toggle
-        if (!event.target.closest('#chat-toggle-link')) {
-          setIsOpen(false);
-        }
-      }
-    };
-    
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  // Se eliminó el cierre automático al hacer clic fuera para permitir que 
+  // el usuario navegue o cierre el menú hamburguesa sin perder el chat.
+  // El chat ahora solo se cierra con la "X" o volviendo a pulsar el botón del menú.
 
   const handleBackToList = () => {
     setActiveConversationId(null);
@@ -221,34 +240,37 @@ const ChatApp = () => {
         </div>
       </a>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div 
           ref={panelRef}
           className="chat-panel shadow-lg"
           style={{
-            position: 'absolute',
-            top: '45px', // Justo debajo del navbar
-            right: '-100px', // Centrado aprox respecto al icono
-            width: '350px',
-            height: '450px',
-            minWidth: '300px',
-            minHeight: '400px',
-            maxWidth: '800px',
-            maxHeight: '80vh',
+            position: 'fixed',
+            top: isMobile ? '10vh' : 'auto',
+            bottom: isMobile ? 'auto' : '80px',
+            left: isMobile ? '5%' : 'auto',
+            right: isMobile ? 'auto' : '20px',
+            width: isMobile ? '90vw' : '350px',
+            height: isMobile ? '70vh' : '450px',
+            minWidth: isMobile ? '250px' : '300px',
+            minHeight: isMobile ? '300px' : '400px',
+            maxWidth: '100vw',
+            maxHeight: '100vh',
             resize: 'both',
             backgroundColor: 'white',
             border: '1px solid #e5e5e5',
             borderRadius: '12px',
-            zIndex: 9999,
+            zIndex: 99999, // Superar al navbar offcanvas
             overflow: 'hidden',
             transform: `translate(${position.x}px, ${position.y}px)`,
             transition: isDragging ? 'none' : 'box-shadow 0.2s',
-            boxShadow: isDragging ? '0 15px 30px rgba(0,0,0,0.2)' : ''
+            boxShadow: isDragging ? '0 15px 30px rgba(0,0,0,0.2)' : '0 10px 20px rgba(0,0,0,0.1)'
           }}
         >
           <div 
             className="chat-panel-header" 
-            onMouseDown={handleMouseDown}
+            onMouseDown={handleDragStart}
+            onTouchStart={handleDragStart}
             style={{
               backgroundColor: '#0b5961', // Color "hubs"
               color: 'white',
@@ -258,13 +280,22 @@ const ChatApp = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               cursor: isDragging ? 'grabbing' : 'grab',
-              userSelect: 'none'
+              userSelect: 'none',
+              touchAction: 'none' // Evitar comportamiento nativo de pan/scroll en móviles
             }}
           >
             <span>Chat Terapeutas</span>
             <button 
-              onClick={() => setIsOpen(false)}
-              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: 0 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setIsOpen(false);
+              }}
+              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <X size={18} />
             </button>
@@ -308,7 +339,8 @@ const ChatApp = () => {
               onExploreUsers={() => setIsExploringUsers(true)}
             />
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
