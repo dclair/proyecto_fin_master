@@ -38,32 +38,80 @@
                             {{ form.caption }}
                         </div>
 
-                        <div class="post-update-file-container mb-4">
-                            <span class="fw-bold small text-muted text-uppercase d-block mb-3 text-start">
-                                <i class="bi bi-image me-1"></i> Imagen de la publicación
-                            </span>
-                            
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Contenido Multimedia Actual</label>
                             {% if object.image %}
-                                <div class="mb-4 text-center" id="current-image-container">
-                                    <img src="{{ object.image.url }}" class="rounded-3 shadow-sm border" style="width: 110px; height: 110px; object-fit: cover;">
+                                <div class="mb-3 text-center">
+                                    <img src="{{ object.image.url }}" class="rounded-3 shadow-sm border" style="width: 150px; height: 150px; object-fit: cover;">
                                     <p class="mt-2 mb-0 small text-muted">Imagen actual</p>
                                 </div>
+                            {% elif object.video %}
+                                <div class="mb-3 text-center">
+                                    <video src="{{ object.video.url }}" controls class="rounded-3 shadow-sm border" style="width: 150px; height: 150px; object-fit: cover;"></video>
+                                    <p class="mt-2 mb-0 small text-muted">Vídeo actual</p>
+                                </div>
+                            {% elif object.video_url %}
+                                <div class="mb-3 text-center">
+                                    <a href="{{ object.video_url }}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="bi bi-play-circle me-2"></i> Ver Enlace Actual</a>
+                                </div>
+                            {% else %}
+                                <p class="small text-muted">No hay contenido multimedia.</p>
                             {% endif %}
+                            
+                            <label class="form-label fw-bold small text-muted text-uppercase mt-3">Cambiar Contenido (Opcional)</label>
+                            <ul class="nav nav-tabs mb-3" id="mediaTabs" role="tablist">
+                              <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="image-tab" data-bs-toggle="tab" data-bs-target="#image-pane" type="button" role="tab" aria-controls="image-pane" aria-selected="true"><i class="bi bi-camera"></i> Foto</button>
+                              </li>
+                              <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-pane" type="button" role="tab" aria-controls="video-pane" aria-selected="false"><i class="bi bi-camera-video"></i> Vídeo</button>
+                              </li>
+                              <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="link-tab" data-bs-toggle="tab" data-bs-target="#link-pane" type="button" role="tab" aria-controls="link-pane" aria-selected="false"><i class="bi bi-link-45deg"></i> Enlace</button>
+                              </li>
+                            </ul>
 
-                            <div id="imageUploadContainer" class="file-upload-label shadow-sm text-center p-4 border rounded-4" style="cursor: pointer;">
-                                
-                                <div id="imagePreview" class="d-none mb-3">
-                                    </div>
+                            <div class="tab-content mb-3" id="mediaTabsContent">
+                              <!-- Image Tab -->
+                              <div class="tab-pane fade show active" id="image-pane" role="tabpanel" aria-labelledby="image-tab">
+                                  <div class="image-upload-container border border-dashed rounded-3 p-3 text-center" 
+                                      id="imageUploadContainer" 
+                                      style="cursor:pointer; background:#f8f9fa; border: 2px dashed var(--hubs-primary) !important;">
+                                      <div id="uploadPlaceholder">
+                                          <i class="bi bi-camera fs-2 text-muted"></i>
+                                          <p class="small text-muted mb-0 d-block">Haz clic para añadir nueva foto</p>
+                                      </div>
+                                      <div id="imagePreview" class="d-none">
+                                          <img id="image-preview" src="#" alt="Previsualización" class="img-fluid rounded-3 shadow-sm mx-auto" style="max-height: 250px; object-fit: cover; width: 100%;">
+                                          <p class="extra-small text-hubs mt-2 mb-0 fw-bold">Click para cambiar imagen</p>
+                                      </div>
+                                      <div class="d-none">{{ form.image }}</div>
+                                  </div>
+                              </div>
 
-                                <div id="uploadPlaceholder">
-                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary" id="upload-icon"></i>
-                                    <span class="d-block fw-bold text-dark mb-1" id="file-status">Haz clic aquí para cambiar la imagen</span>
-                                    <span class="extra-small text-muted d-block" id="file-name-text">O arrastra un nuevo archivo</span>
-                                </div>
-                                
-                                <div class="file-upload-input-hidden django-file-widget d-none">
-                                    {{ form.image }}
-                                </div>
+                              <!-- Video Tab -->
+                              <div class="tab-pane fade" id="video-pane" role="tabpanel" aria-labelledby="video-tab">
+                                  <div class="image-upload-container border border-dashed rounded-3 p-3 text-center" 
+                                      id="videoUploadContainer" 
+                                      style="cursor:pointer; background:#f8f9fa; border: 2px dashed var(--hubs-primary) !important;">
+                                      <div id="videoUploadPlaceholder">
+                                          <i class="bi bi-camera-video fs-2 text-muted"></i>
+                                          <p class="small text-muted mb-0 d-block">Haz clic para subir un nuevo vídeo (Max 20MB)</p>
+                                      </div>
+                                      <div id="videoPreview" class="d-none">
+                                          <video id="video-preview" controls class="img-fluid rounded-3 shadow-sm mx-auto" style="max-height: 250px; width: 100%;"></video>
+                                          <p class="extra-small text-hubs mt-2 mb-0 fw-bold">Click para cambiar vídeo</p>
+                                      </div>
+                                      <div class="d-none">{{ form.video }}</div>
+                                  </div>
+                              </div>
+
+                              <!-- Link Tab -->
+                              <div class="tab-pane fade" id="link-pane" role="tabpanel" aria-labelledby="link-tab">
+                                  <div class="form-group mb-0">
+                                      {{ form.video_url }}
+                                  </div>
+                              </div>
                             </div>
                         </div>
 

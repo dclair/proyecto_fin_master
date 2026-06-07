@@ -794,9 +794,11 @@ class MyParticipationsListView(LoginRequiredMixin, ListView):
 def clicks_gallery(request):
     # 1. Posts usa 'user'
     posts_qs = (
-        Posts.objects.filter(image__isnull=False)
-        .exclude(image="")
-        .select_related("user")
+        Posts.objects.filter(
+            Q(image__isnull=False) & ~Q(image="") |
+            Q(video__isnull=False) & ~Q(video="") |
+            Q(video_url__isnull=False) & ~Q(video_url="")
+        ).select_related("user")
     )
 
     # 2. Event usa 'organizer' (Cambiado de 'user' o 'author')

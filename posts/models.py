@@ -17,6 +17,12 @@ def validate_image_size(image):
     if image.size > max_size:
         raise ValidationError("La imagen no puede pesar más de 5MB")
 
+def validate_video_size(video):
+    """Valida que el vídeo no sea mayor a 20MB"""
+    max_size = 20 * 1024 * 1024  # 20MB
+    if video.size > max_size:
+        raise ValidationError("El vídeo no puede pesar más de 20MB")
+
 
 class Posts(models.Model):
     user = models.ForeignKey(
@@ -39,6 +45,24 @@ class Posts(models.Model):
             validate_image_size,
         ],
         help_text="Formatos soportados: JPG, JPEG, PNG. Tamaño máximo: 5MB",
+    )
+    video = models.FileField(
+        upload_to="posts_videos/%Y/%m/%d/",
+        blank=True,
+        null=True,
+        verbose_name="vídeo",
+        validators=[
+            FileExtensionValidator(allowed_extensions=["mp4", "mov", "avi", "webm"]),
+            validate_video_size,
+        ],
+        help_text="Formatos soportados: MP4, MOV, AVI, WEBM. Tamaño máximo: 20MB",
+    )
+    video_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name="enlace de vídeo",
+        help_text="Enlace a YouTube, Vimeo, etc.",
     )
     caption = models.TextField(
         "descripción",
@@ -117,10 +141,13 @@ class Posts(models.Model):
                 print(f"Error al procesar la imagen: {e}")
 
     def delete(self, *args, **kwargs):
-        """Eliminar la imagen del sistema de archivos al eliminar el post"""
+        """Eliminar la imagen y el vídeo del sistema de archivos al eliminar el post"""
         if self.image:
             if os.path.isfile(self.image.path):
                 os.remove(self.image.path)
+        if self.video:
+            if os.path.isfile(self.video.path):
+                os.remove(self.video.path)
         super().delete(*args, **kwargs)
 
     @property

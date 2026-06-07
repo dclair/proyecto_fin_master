@@ -67,7 +67,19 @@
                     </div>
                 </div>
 
-                {% if post.image %}
+                {% if post.video %}
+                <div class="text-center bg-dark">
+                    <video src="{{ post.video.url }}" controls class="img-fluid" style="max-height: 500px; width: 100%; object-fit: contain;"></video>
+                </div>
+                {% elif post.video_url %}
+                <div class="text-center bg-light border-bottom p-5">
+                    <a href="{{ post.video_url }}" target="_blank" class="text-decoration-none text-center d-flex flex-column align-items-center justify-content-center py-4">
+                        <i class="bi bi-play-circle-fill text-danger mb-3" style="font-size: 4rem;"></i>
+                        <span class="fw-bold text-dark fs-5">Ver vídeo externo</span>
+                        <small class="text-muted mt-2">{{ post.video_url }}</small>
+                    </a>
+                </div>
+                {% elif post.image %}
                 <div class="text-center bg-dark">
                     <img src="{{ post.image.url }}" class="img-fluid" style="max-height: 500px; width: 100%; object-fit: contain;">
                 </div>
