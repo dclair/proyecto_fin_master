@@ -254,6 +254,11 @@ class ConversationDeleteView(APIView):
             if not ConversationParticipant.objects.filter(conversation=conv, user=request.user).exists():
                 return Response({'error': 'You are not a participant in this conversation'}, status=status.HTTP_403_FORBIDDEN)
 
+        # Delete physical files from all messages in the conversation to prevent storage leaks
+        for msg in conv.messages.exclude(attachment=''):
+            if msg.attachment:
+                msg.attachment.delete(save=False)
+
         conv.delete()
         return Response({'status': 'ok'})
 

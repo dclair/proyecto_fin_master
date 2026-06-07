@@ -197,7 +197,19 @@ const ChatApp = () => {
         style={{ cursor: 'pointer' }}
       >
         <div style={{ position: 'relative', display: 'inline-block' }}>
-          <MessageCircle size={20} className={isOpen ? 'text-hubs' : 'text-dark'} />
+          <div 
+            className="d-flex align-items-center justify-content-center text-white shadow-sm" 
+            style={{ 
+              backgroundColor: '#0b5961', 
+              width: '28px', 
+              height: '28px', 
+              borderRadius: '50%',
+              transition: 'transform 0.2s',
+              transform: isOpen ? 'scale(1.05)' : 'scale(1)'
+            }}
+          >
+            <MessageCircle size={16} />
+          </div>
           {unreadCount > 0 && (
             <span 
               className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white"

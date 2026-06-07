@@ -4,8 +4,25 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import { Send, ArrowLeft, Smile, UserPlus, Check, UserCheck, Trash2, Paperclip, X, FileText, Image as ImageIcon, Video } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 
+const renderMessageWithLinks = (text) => {
+  if (!text) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  
+  return parts.map((part, i) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-reset text-decoration-underline" style={{ fontWeight: '500' }}>
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
 const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConversation, onBack, onConversationDeleted, currentUsername }) => {
-  const { messages, sendMessage, setInitialMessages } = useWebSocket(conversationId);
+  const { messages, setMessages, sendMessage, setInitialMessages } = useWebSocket(conversationId);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(true);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -441,7 +458,7 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
                         </video>
                       )}
                       {msg.attachment_type === 'document' && (
-                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center gap-2 p-2 rounded text-decoration-none" style={{backgroundColor: 'rgba(0,0,0,0.05)'}}>
+                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center gap-2 p-2 rounded text-decoration-none text-reset" style={{backgroundColor: 'rgba(0,0,0,0.05)'}}>
                           <FileText size={24} />
                           <span style={{wordBreak: 'break-all', fontSize: '0.85rem'}}>{msg.attachment.split('/').pop()}</span>
                         </a>
@@ -449,11 +466,11 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
                     </div>
                   )}
 
-                  {msg.content && <div className="message-content">{msg.content}</div>}
+                  {msg.content && <div className="message-content" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{renderMessageWithLinks(msg.content)}</div>}
                   
                   <button 
                     className={`btn btn-sm btn-link p-0 position-absolute ${isMe ? 'text-danger' : 'text-secondary'}`}
-                    style={{ [isMe ? 'right' : 'left']: '-25px', top: '5px', opacity: 0.6 }}
+                    style={{ [isMe ? 'left' : 'right']: '-25px', top: '5px', opacity: 0.6 }}
                     onClick={() => handleDeleteMessage(msg.id, isMe)}
                     title={isMe ? "Eliminar mensaje" : "Eliminar para mí"}
                   >

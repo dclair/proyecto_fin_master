@@ -70,5 +70,5 @@ export const useWebSocket = (conversationId) => {
     setMessages(initialMessages);
   }, []);
 
-  return { messages, sendMessage, setInitialMessages };
+  return { messages, setMessages, sendMessage, setInitialMessages };
 };

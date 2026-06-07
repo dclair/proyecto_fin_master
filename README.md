@@ -1,9 +1,9 @@
-🚀 Hubs&Clicks - Red Social de Aficionados
-Hubs&Clicks es una plataforma web diseñada para conectar a personas a través de sus aficiones, permitiéndoles organizar eventos, unirse a quedadas y gestionar su comunidad de forma ágil, moderna y con una identidad visual corporativa única.
+🚀 Hubs&Clicks - Red social de terapias naturales
+Hubs&Clicks es una plataforma web diseñada para conectar a personas a través de sus terapias, permitiéndoles organizar eventos, unirse a quedadas y gestionar su comunidad de forma ágil, moderna y con una identidad visual corporativa única.
 
 🛠️ Características Principales (Features)
 1. Gestión de Eventos 360º
-Creación y Edición: Los usuarios pueden proponer planes detallando lugar, fecha, hobby y límite de asistentes.
+Creación y Edición: Los usuarios pueden proponer planes detallando lugar, fecha, terapia y límite de asistentes.
 
 Sistema de Duplicado: Función inteligente para clonar eventos pasados y ahorrar tiempo al organizador.
 
@@ -14,7 +14,7 @@ Gestión de Estados: Soporte para eventos activos y finalizados.
 Protocolo de Cancelación: Sistema seguro de cancelación que bloquea interacciones y notifica automáticamente a todos los asistentes.
 
 2. Dashboard de Usuario (Perfiles Vitaminados)
-Identidad Social: Perfiles con biografía, ubicación, sitio web y selección de aficiones con niveles.
+Identidad Social: Perfiles con biografía, ubicación, sitio web y selección de terapias con niveles.
 
 Estadísticas en Tiempo Real: Contadores dinámicos de publicaciones, seguidores, siguiendo, eventos y participaciones.
 
@@ -62,13 +62,14 @@ Base de Datos: SQLite (Desarrollo) / MySQL (Producción).
 
 🏗️ Estructura del Proyecto
 Bash
-aficionados_network/
-├── posts/            # Gestión de Eventos, Publicaciones y Likes
-├── profiles/         # Usuarios, Hobbies, Seguidores y Estadísticas
-├── notifications/    # Motor de avisos internos y lógica de alertas
-├── templates/        # UI Global
-│   └── emails/       # Plantillas HTML corporativas para correos
-└── static/           # Recursos estáticos (CSS, JS, Logo Corporativo)
+proyecto_root/
+├── aficionados_network/  # Configuración principal
+├── chat/                 # Sistema de Mensajería (Channels, WebSockets)
+├── frontend/             # Interfaz de Chat en React (Vite)
+├── notifications/        # Motor de avisos internos y lógica de alertas
+├── posts/                # Gestión de Eventos, Publicaciones y Likes
+├── profiles/             # Usuarios, Terapias, Seguidores y Estadísticas
+└── templates/            # UI Global y plantillas de emails
 ⚙️ Instalación y Configuración
 Sigue estos pasos para desplegar Hubs&Clicks en tu entorno local:
 
@@ -150,7 +151,7 @@ DB_ENGINE=mysql python manage.py loaddata db_full_backup.json
 La migración ejecutada en este proyecto está registrada en `.sdd/changes/sqlite-to-mysql-migration/`.
 La guía reutilizable para futuros proyectos está en `.sdd/knowledge/django-sqlite-to-mysql-mariadb.md`.
 5. Crear superusuario (Admin)
-Para gestionar las aficiones y los mensajes de contacto desde el panel:
+Para gestionar las terapias y los mensajes de contacto desde el panel:
 
 Bash
 python manage.py createsuperuser
@@ -175,7 +176,7 @@ CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contac
 
 [ ] Sistema de Valoraciones (Reviews): Puntuación por estrellas tras finalizar un evento (Estructura base iniciada).
 
-[ ] Filtro de "Mis Aficiones": Acceso rápido a eventos que coinciden con los hobbies del perfil.
+[ ] Filtro de "Mis Terapias": Acceso rápido a eventos que coinciden con las terapias del perfil.
 
 [x] Chat en tiempo real: Implementado con WebSockets (React + Django Channels), grupos y chats privados.
 
