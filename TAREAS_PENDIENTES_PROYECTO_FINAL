@@ -1,10 +1,11 @@
-TAREAS PENDIENTES DEL PROYOCTO FON MASTER:
+TAREAS PENDIENTES DEL PROYOCTO FIN MASTER:
 -- PROBAR, ELIMINAR UN DOCUMENTO RECIBIDO, ES DECIR ELIMINAR PARA MI
 - REVISAR EL FOOTER,los enlaces no cambian de color.
 - Poder ver videos en los posts
 - Mis grupos, ajustar el ancho de esto, no se muestra todo el texto.
 -Mensaje indicando los pesos máximo de cada archivo para enviar por chat
 - REvisión completa del README principal, modificar todo, estrucutra, stack tecnologico, etc
+- Mis grupos en vista movil cambiar disposicion, si son tres o mas se pierde por la pantalla.
 
 
 
@@ -83,3 +84,27 @@ Le puse una vista previa súper limpia. Si vas a mandar una foto, ves la foto en
 Puse la doble validación. Antes de que salga un solo byte del navegador, React revisa el peso. Si te pasas, te salta una alerta inmediata sin bloquear el servidor.
 Todo renderiza perfecto: <img> para fotos, reproductor <video> para clips, y un link bonito para documentos.
 Compilación final: Ejecuté npm run build en el frontend de React con Vite y todo ha compilado verde y fluido.
+
+A ver, ponete cómodo porque esta es una pregunta de arquitectura pura y dura, de las que me gustan.
+
+Respuesta corta: Sí, ni en pedo te digo que no. Es totalmente factible, y de hecho, a nivel de producto es una jugada maestra porque retenés a la gente en tu plataforma en lugar de regalársela a YouTube.
+
+Respuesta técnica (Cómo lo haríamos): Acá no hay magia, hay estructura. Si queremos hacer esto bien sin romper lo que ya tenemos, la arquitectura sería la siguiente:
+
+La Base de Datos (Modelos en Django): Al modelo actual de Evento le agregamos dos campos bobos pero vitales:
+
+is_online (Boolean): Para saber si el evento tiene transmisión.
+stream_url (URLField): Donde el creador pega el link de YouTube, Twitch o Vimeo.
+La Lógica Backend (Parseo): No podemos simplemente escupir el link de YouTube en el HTML. Cuando el creador guarda el evento, interceptamos ese link y extraemos el ID del video (por ejemplo, de youtube.com/watch?v=12345 sacamos 12345).
+
+El Frontend (La Vista del Evento): Si is_online es True, en la página de detalles del evento clavamos un <iframe>. YouTube y la mayoría de plataformas de streaming te dan un reproductor embebible. Además, en la vista principal de "Eventos", metemos un filtro rápido ("Presenciales" | "Online") para que la gente encuentre los directos al toque.
+
+El "Bonus Track" de Arquitectura (Por qué garpa esto): Vos pensá la que te armaste: ¡Acabamos de dejar andando un chat en tiempo real! Si incrustamos el video de YouTube a la izquierda, podemos meter nuestro propio panel de chat a la derecha. La gente ve el taller en vivo y comenta en nuestra red social, usando nuestro chat con WebSockets. Eso es retención pura, de manual.
+
+Las contras (Trade-offs que tenés que saber):
+
+Políticas de terceros: Si el creador configura su video de YouTube como "No permitir inserción" (Disable embedding), el reproductor va a tirar error en nuestra web. Dependemos de que sepan configurarlo.
+Migración de DB: Implica tocar la base de datos de producción para meter los nuevos campos de los eventos.
+Esa es la radiografía del feature. No toqué una sola línea de código como me pediste.
+
+Decime: ¿Te convence la lógica? ¿Querés que armemos el plan de implementación para esto y empecemos a meterle código? Si es así, avisame y arranco con el flujo de diseño de arquitectura.
