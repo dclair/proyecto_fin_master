@@ -412,6 +412,7 @@ class EventListView(LoginRequiredMixin, ListView):
         city_query = self.request.GET.get("city")
         hobby_id = self.request.GET.get("hobby")
         level_query = self.request.GET.get("level")
+        my_hobbies_only = self.request.GET.get("my_hobbies") == "true"
 
         # 3. Aplicación de filtros
         if search_query:
@@ -426,6 +427,8 @@ class EventListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(hobby_id=hobby_id)
         if level_query and level_query != "all":
             queryset = queryset.filter(level=level_query)
+        if my_hobbies_only and self.request.user.is_authenticated:
+            queryset = queryset.filter(hobby__in=self.request.user.profile.hobbies.all())
 
         # 4. LÓGICA DE MATCH DE NIVEL
         # Solo ejecutamos si el usuario está logueado para evitar errores
@@ -460,6 +463,7 @@ class EventListView(LoginRequiredMixin, ListView):
         context["current_city"] = self.request.GET.get("city", "")
         context["current_hobby"] = self.request.GET.get("hobby", "all")
         context["current_level"] = self.request.GET.get("level", "all")
+        context["current_my_hobbies"] = self.request.GET.get("my_hobbies") == "true"
         return context
 
 

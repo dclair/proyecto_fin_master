@@ -59,12 +59,23 @@
 
                 <div class="col-md-2 d-flex gap-1">
                     <button type="submit" class="btn btn-hubs btn-sm w-100">Filtrar</button>
-                    {% if current_q or current_city or current_hobby != 'all' or current_level != 'all' %}
+                    {% if current_q or current_city or current_hobby != 'all' or current_level != 'all' or current_my_hobbies %}
                         <a href="{% url 'posts:event_list' %}" class="btn btn-sm btn-outline-secondary" title="Limpiar">
                             <i class="bi bi-trash"></i>
                         </a>
                     {% endif %}
                 </div>
+
+                {% if user.is_authenticated %}
+                <div class="col-12 mt-3">
+                    <div class="form-check form-switch small">
+                        <input class="form-check-input" type="checkbox" role="switch" id="myHobbiesSwitch" name="my_hobbies" value="true" {% if current_my_hobbies %}checked{% endif %} onchange="this.form.submit()">
+                        <label class="form-check-label text-muted fw-bold" for="myHobbiesSwitch">
+                            <i class="bi bi-star-fill text-warning me-1"></i>Mostrar solo mis terapias
+                        </label>
+                    </div>
+                </div>
+                {% endif %}
             </form>
         </div>
     </div>
