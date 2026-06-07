@@ -1,5 +1,5 @@
 TAREAS PENDIENTES DEL PROYOCTO FIN MASTER:
--- PROBAR, ELIMINAR UN DOCUMENTO RECIBIDO, ES DECIR ELIMINAR PARA MI
+-- Cómo se si asite online o en presencia
 - REVISAR EL FOOTER,los enlaces no cambian de color.
 - Poder ver videos en los posts
 - Mis grupos, ajustar el ancho de esto, no se muestra todo el texto.
@@ -108,3 +108,73 @@ Migración de DB: Implica tocar la base de datos de producción para meter los n
 Esa es la radiografía del feature. No toqué una sola línea de código como me pediste.
 
 Decime: ¿Te convence la lógica? ¿Querés que armemos el plan de implementación para esto y empecemos a meterle código? Si es así, avisame y arranco con el flujo de diseño de arquitectura.
+
+Implementación de Eventos Online e Híbridos
+La arquitectura para la creación y visualización de eventos con modalidad virtual y presencial (o ambas a la vez) ha sido completada.
+
+Resumen de Cambios
+1. Modelado y Base de Datos (Backend)
+Se actualizaron los campos en posts/models.py:
+El campo location ahora es opcional (null=True, blank=True).
+Se añadieron is_online (Boolean) y stream_url (URLField).
+Se ejecutó y aplicó la migración 0011_event_is_online_event_stream_url_and_more.py.
+2. Formularios de Creación (Backend + Frontend)
+El EventForm (en posts/forms.py) ahora requiere condicionalmente los campos: si es online, debe incluir un stream_url (o al menos un location). Si es físico, requiere el location. Permite rellenar ambos para eventos Híbridos.
+Se insertó Javascript dinámico en event_form.html que oculta el campo de "Enlace de transmisión" si la casilla de "¿Es Online?" no está marcada, mejorando la UX.
+3. Parseo Seguro de URLs
+Se creó posts/templatetags/youtube_filters.py con dos template tags:
+youtube_embed: Extrae automáticamente el ID de cualquier link de YouTube/YouTu.be y genera el formato embebible (youtube.com/embed/XXXXX).
+is_youtube: Verifica si un enlace pertenece a la plataforma para determinar cómo renderizarlo.
+4. Presentación Visual (Frontend)
+Vista de Lista (event_list.html): Las tarjetas de eventos ahora muestran tres estados distintos:
+📍 Presencial: Si tiene lugar físico pero no es online.
+💻 Online: Si es online sin ubicación física.
+🌐 Híbrido: Si cuenta con ambas (Lugar + Online).
+Detalle de Evento (event_detail.html):
+YouTube: Si el link proporcionado es de YouTube, se incrusta el reproductor oficial (<iframe>) usando proporciones dinámicas de Bootstrap (ratio ratio-16x9), reemplazando la imagen decorativa por el directo.
+Otras Plataformas: Si se sube un enlace a Zoom o Meet, se protege la web evitando el iframe; en su lugar, se superpone un botón azul llamativo de "Unirse a la videollamada" sobre la imagen de cabecera.
+TIP
+
+Prueba crear un nuevo evento marcando la casilla "Online", pega un link de YouTube (ej. https://www.youtube.com/watch?v=dQw4w9WgXcQ) y observa cómo se integra perfectamente en el diseño.
+
+
+A ver, dejame ser claro con esto porque acá es donde la gente mete la pata y rompe cosas por copiar y pegar sin entender.
+
+Tal como lo construí ahora mismo: El reproductor incrustado (<iframe>) es SOLO válido para YouTube.
+
+¿Qué pasa si metés un link de Twitch o Vimeo ahora mismo?
+El sistema no va a fallar ni va a explotar. Gracias al patrón de diseño defensivo que le metí al código (la validación {% if event.stream_url|is_youtube %}), si ponés un link de Vimeo, Twitch, Zoom o Meet, el backend se da cuenta de que "no es YouTube" y hace el fallback seguro:
+
+Te muestra la imagen de portada del evento (o la por defecto si no subiste).
+Te superpone encima un botón azul gigante que dice "Unirse a la videollamada".
+Al darle click, abre Vimeo/Twitch en una pestaña nueva.
+¿Se PUEDE incrustar Vimeo y Twitch en el <iframe> igual que YouTube?
+Sí, por supuesto. Pero cada plataforma tiene sus mañas y no podés simplemente meter la URL cruda en el iframe:
+
+Vimeo: Necesitaríamos agregar una expresión regular nueva para pescar el ID del video y armar la URL así: https://player.vimeo.com/video/ID_DEL_VIDEO
+Twitch: Es más rompebolas. Te obliga por seguridad a pasarle explícitamente en la URL cuál es tu dominio (el famoso parámetro parent), si no, bloquea el reproductor. Quedaría algo como: https://player.twitch.tv/?channel=CANAL&parent=localhost (o el dominio final).
+Mi recomendación como arquitecto: Si los creadores usan MUCHO Twitch o Vimeo para sus terapias online, nos sentamos, armamos las expresiones regulares y extendemos el filtro que hicimos (youtube_filters.py lo renombramos a video_filters.py) para que detecte la plataforma mágicamente y cambie el reproductor.
+
+Si es algo marginal o usan Zoom/Google Meet el 90% de las veces, dejalo como está. El botón azul de "Unirse a la videollamada" es la solución más robusta a prueba de balas para todo lo que no sea YouTube.
+
+¿Qué querés hacer? ¿Lo dejamos blindado solo con YouTube embebido y el resto con botón, o querés que le meta ingeniería para embeber Twitch y Vimeo también?
+
+Implementación del "Modo Cine" (Falso Fullscreen)
+El objetivo de esta fase es permitir al usuario expandir el reproductor de video de un evento al 100% de la ventana del navegador ("Modo Cine"), manteniendo la ventana del Chat Global accesible y por encima del video.
+
+Propuesta Técnica
+1. static/css/style.css
+Añadiremos las siguientes clases CSS para gobernar el estado expandido:
+
+.theater-mode: Forzará al contenedor del video (.detail-banner-wrapper) a tomar position: fixed, top: 0, left: 0, width: 100vw, height: 100vh con un z-index: 1040.
+Como el Chat de React tiene un z-index de 2100, el chat flotará perfectamente por encima del video expandido.
+Se añadirá un fondo negro background: #000; para que la experiencia sea inmersiva.
+2. aficionados_network/templates/posts/event_detail.html
+Inyectaremos un botón flotante semi-transparente en la esquina superior derecha del contenedor del video con un icono de expansión (bi-arrows-fullscreen).
+Este botón solo será visible si hay un reproductor incrustado (YouTube, Vimeo, Twitch).
+Escribiremos un script JavaScript muy ligero al final de la plantilla para:
+Alternar la clase .theater-mode en el detail-banner-wrapper.
+Bloquear el scroll del cuerpo (document.body.style.overflow = 'hidden') para evitar que la página se mueva por debajo mientras se ve el video.
+Alternar el icono del botón a bi-fullscreen-exit.
+User Review Required
+Esta solución es un "falso fullscreen". Significa que el video ocupará toda tu ventana del navegador (cubriendo la barra de navegación y todo el contenido), pero no ocultará la barra de tareas de Windows/Mac ni las pestañas del navegador. ¿Estás de acuerdo con este enfoque para mantener viva la ventana de chat?
