@@ -66,7 +66,34 @@
                     </div>
                 </div>
 
-                {% if post.image %}
+                {% if post.video %}
+                <div class="ratio ratio-4x3 bg-dark position-relative">
+                    {% if user.is_authenticated %}
+                        <video src="{{ post.video.url }}" controls class="w-100 h-100" style="object-fit: cover;"></video>
+                    {% else %}
+                        <a href="{% url 'posts:post_detail' post.pk %}" class="d-block w-100 h-100 text-decoration-none">
+                            <video src="{{ post.video.url }}" class="w-100 h-100" style="object-fit: cover; pointer-events: none;"></video>
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <i class="bi bi-play-circle-fill text-white opacity-75 shadow-sm" style="font-size: 4rem;"></i>
+                            </div>
+                        </a>
+                    {% endif %}
+                </div>
+                {% elif post.video_url %}
+                <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center border-bottom position-relative">
+                    {% if user.is_authenticated %}
+                        <a href="{{ post.video_url }}" target="_blank" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
+                            <i class="bi bi-play-circle-fill text-danger mb-2" style="font-size: 3rem;"></i>
+                            <span class="fw-bold text-dark">Ver vídeo externo</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
+                            <i class="bi bi-play-circle-fill text-danger mb-2" style="font-size: 3rem;"></i>
+                            <span class="fw-bold text-dark">Ver vídeo externo</span>
+                        </a>
+                    {% endif %}
+                </div>
+                {% elif post.image %}
                 <div class="ratio ratio-4x3"> 
                     <a href="{% url 'posts:post_detail' post.pk %}">
                         <img src="{{ post.image.url }}" 

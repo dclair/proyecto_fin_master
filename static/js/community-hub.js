@@ -10,7 +10,9 @@ const CommunityHub = {
         const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
         if (container && input) {
-            container.addEventListener('click', () => input.click());
+            container.addEventListener('click', (e) => {
+                if (e.target !== input) input.click();
+            });
             
             input.addEventListener('change', function() {
                 const file = this.files[0];
@@ -31,6 +33,49 @@ const CommunityHub = {
                             <img id="image-preview" src="${e.target.result}" class="img-fluid rounded shadow-sm mb-2" style="max-height: 250px; width: 100%; object-fit: cover;">
                             <p class="small text-danger mb-0" style="cursor:pointer;"><i class="bi bi-arrow-repeat me-1"></i>Cambiar foto</p>
                         `;
+                        preview.classList.remove('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    },
+
+    // 1.5. Previsualización de Vídeo + Validación de Tamaño
+    initVideoPreview: function() {
+        const input = document.getElementById('id_video');
+        const container = document.getElementById('videoUploadContainer');
+        const preview = document.getElementById('videoPreview');
+        const placeholder = document.getElementById('videoUploadPlaceholder');
+        
+        const MAX_SIZE_MB = 20;
+        const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
+        if (container && input) {
+            container.addEventListener('click', (e) => {
+                if (e.target !== input) input.click();
+            });
+            
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if (file.size > MAX_SIZE_BYTES) {
+                        alert(`¡Vídeo demasiado pesado! El límite es de ${MAX_SIZE_MB}MB.`);
+                        this.value = "";
+                        placeholder.classList.remove('d-none');
+                        preview.classList.add('d-none');
+                        const videoTag = preview.querySelector('video');
+                        if (videoTag) videoTag.src = "";
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        placeholder.classList.add('d-none');
+                        const videoTag = preview.querySelector('video');
+                        if (videoTag) {
+                            videoTag.src = e.target.result;
+                        }
                         preview.classList.remove('d-none');
                     };
                     reader.readAsDataURL(file);
@@ -106,6 +151,7 @@ const CommunityHub = {
 // --- RESTO DEL CODIGO (Masonry, Back to Top, Validation) SE MANTIENE IGUAL ---
 document.addEventListener('DOMContentLoaded', () => {
     CommunityHub.initImagePreview();
+    CommunityHub.initVideoPreview();
     CommunityHub.initCharCounter();
     CommunityHub.initSmartScroll();
     CommunityHub.initLoadingState();

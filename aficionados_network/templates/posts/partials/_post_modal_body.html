@@ -5,6 +5,15 @@
     <div class="col-lg-7 bg-black d-flex align-items-center justify-content-center post-modal-image-col">
         {% if post.image %}
             <img src="{{ post.image.url }}" class="img-fluid post-main-img" style="max-height: 100%; object-fit: contain;">
+        {% elif post.video %}
+            <video src="{{ post.video.url }}" controls class="img-fluid post-main-img" style="max-height: 100%; width: 100%; object-fit: contain;"></video>
+        {% elif post.video_url %}
+            <div class="text-center w-100">
+                <a href="{{ post.video_url }}" target="_blank" class="text-decoration-none d-flex flex-column align-items-center justify-content-center">
+                    <i class="bi bi-play-circle-fill text-danger mb-3" style="font-size: 4rem;"></i>
+                    <span class="fw-bold text-white fs-5">Ver vídeo externo</span>
+                </a>
+            </div>
         {% endif %}
     </div>
 

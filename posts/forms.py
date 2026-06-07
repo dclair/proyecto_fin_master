@@ -24,7 +24,7 @@ class PostCreateForm(forms.ModelForm):
     class Meta:
         model = Posts
         # Añadimos 'location' y organizamos el orden de aparición
-        fields = ["title", "category", "location", "caption", "image"]
+        fields = ["title", "category", "location", "caption", "image", "video", "video_url"]
 
         widgets = {
             "title": forms.TextInput(
@@ -39,10 +39,23 @@ class PostCreateForm(forms.ModelForm):
             ),
             "image": forms.FileInput(
                 attrs={
-                    # Mantenemos 'form-control d-none' y AÑADIMOS 'validate-image'
-                    "class": "form-control d-none validate-image",
+                    "class": "form-control d-none validate-media",
                     "accept": "image/*",
                     "id": "id_image",
+                }
+            ),
+            "video": forms.FileInput(
+                attrs={
+                    "class": "form-control d-none validate-media",
+                    "accept": "video/mp4,video/quicktime,video/x-msvideo,video/webm",
+                    "id": "id_video",
+                }
+            ),
+            "video_url": forms.URLInput(
+                attrs={
+                    "class": "form-control validate-media",
+                    "placeholder": "https://www.youtube.com/watch?v=...",
+                    "id": "id_video_url",
                 }
             ),
         }
@@ -51,10 +64,19 @@ class PostCreateForm(forms.ModelForm):
             "category": {
                 "required": "Debes elegir una terapia para clasificar tu post.",
             },
-            "image": {
-                "required": "Una publicación sin imagen no es un 'Click'. ¡Sube una!",
-            },
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        image = cleaned_data.get("image")
+        video = cleaned_data.get("video")
+        video_url = cleaned_data.get("video_url")
+
+        if not image and not video and not video_url:
+            raise forms.ValidationError(
+                "Debes subir una foto, un vídeo o proporcionar un enlace de vídeo para publicar."
+            )
+        return cleaned_data
 
 
 class ProfileFollowForm(forms.Form):
