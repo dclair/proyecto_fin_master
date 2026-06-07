@@ -7,7 +7,7 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
-            <h2 class="mb-4 text-center">Explorar Usuarios</h2>
+            <h2 class="mb-4 text-center">Explorar Terapeutas</h2>
             
             <form class="mb-4" id="search-form" method="GET">
                 <div class="input-group">
@@ -45,11 +45,11 @@
             <div class="mb-3">
                 <h5 class="text-muted">
                     {% if active_filter == 'following' %}
-                        <i class="bi bi-people-fill me-2"></i>Usuarios que sigues ({{ count_following }})
+                        <i class="bi bi-people-fill me-2"></i>Terapeutas que sigues ({{ count_following }})
                     {% elif active_filter == 'not_following' %}
-                        <i class="bi bi-person-plus-fill me-2"></i>Usuarios que no sigues ({{ count_not_following }})
+                        <i class="bi bi-person-plus-fill me-2"></i>Terapeutas que no sigues ({{ count_not_following }})
                     {% else %}
-                        <i class="bi bi-people me-2"></i>Todos los usuarios ({{ count_all }})
+                        <i class="bi bi-people me-2"></i>Terapeutas en la comunidad ({{ count_all }})
                     {% endif %}
                 </h5>
                 {% if request.GET.q %}
