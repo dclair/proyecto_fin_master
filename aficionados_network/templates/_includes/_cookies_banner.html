@@ -1,4 +1,4 @@
-<div id="cookie-banner" class="cookie-banner-hubs shadow-lg animate__animated animate__fadeInDown">
+<div id="cookie-banner" class="cookie-banner-hubs shadow-lg" style="animation: slideDown 0.5s ease-out;">
     <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between py-3">
         <div class="cookie-content d-flex align-items-center mb-3 mb-md-0">
             <div class="cookie-icon me-3">
@@ -13,11 +13,15 @@
             </div>
         </div>
         <div class="cookie-actions d-flex gap-2">
-            <!-- Botón 1: Rechazar / Necesarias -->
+            <!-- Botón 1: Rechazar Todas -->
+            <button id="reject-all-cookies" class="btn btn-outline-light btn-sm fw-bold px-3 py-2 shadow-sm">
+                Rechazar todas
+            </button>
+            <!-- Botón 2: Solo necesarias -->
             <button id="reject-cookies" class="btn btn-outline-light btn-sm fw-bold px-3 py-2 shadow-sm">
                 Solo necesarias
             </button>
-            <!-- Botón 2: Aceptar -->
+            <!-- Botón 3: Aceptar -->
             <button id="accept-cookies" class="btn btn-light btn-sm fw-bold px-4 py-2 shadow-sm text-dark">
                 Aceptar todas
             </button>

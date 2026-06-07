@@ -5,6 +5,27 @@
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
 
+## 2026-06-07: Hybrid Event Attendance & Infinite Scroll UI Optimization
+
+**Type:** feature / UI
+**Status:** done
+
+What changed:
+- Implemented `EventAttendance` through-model for `Event.participants` to support hybrid event types (Physical vs Online).
+- Updated max_participants validation to only restrict physical attendees, allowing unlimited online participants.
+- Reduced the size of user profile cards in the `Comunidad de Terapeutas` directory (`col-lg-3`, smaller images).
+- Implemented dynamic infinite scrolling for the user directory using HTMX, replacing traditional pagination.
+- Renamed general navigation labels to "Comunidad de Terapeutas" / "Terapia" across the platform.
+
+Why:
+- To allow real-world capacity control for physical events while enabling broader online participation.
+- To improve frontend performance and user experience when browsing a large directory of therapists.
+- To use more accurate and professional terminology aligning with the project's focus on natural therapies.
+
+Impact:
+- Database schema changed (`EventAttendance` through-model introduced and migrated).
+- Backend pagination logic bypassed for HTMX requests to serve partial HTML fragments seamlessly.
+
 ## 2026-06-05: Real-Time Chat with Multimedia and Advanced Deletion
 
 **Type:** feature / architecture

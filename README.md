@@ -7,18 +7,20 @@ Creación y Edición: Los usuarios pueden proponer planes detallando lugar, fech
 
 Sistema de Duplicado: Función inteligente para clonar eventos pasados y ahorrar tiempo al organizador.
 
-Control de Asistencia: Sistema de "Me apunto/Desapuntarme" con validación de plazas en tiempo real.
+Control de Asistencia Híbrida: Sistema de participación que distingue entre asistentes presenciales y online, con validación de aforo exclusivo para plazas físicas.
 
 Gestión de Estados: Soporte para eventos activos y finalizados.
 
 Protocolo de Cancelación: Sistema seguro de cancelación que bloquea interacciones y notifica automáticamente a todos los asistentes.
 
-2. Dashboard de Usuario (Perfiles Vitaminados)
-Identidad Social: Perfiles con biografía, ubicación, sitio web y selección de terapias con niveles.
+2. Dashboard y Comunidad de Terapeutas
+Directorio de Profesionales: Exploración fluida mediante scroll infinito (HTMX) para navegar por la comunidad de terapeutas.
+
+Identidad Social: Perfiles con biografía, ubicación, sitio web y selección de terapias con niveles de especialización.
 
 Estadísticas en Tiempo Real: Contadores dinámicos de publicaciones, seguidores, siguiendo, eventos y participaciones.
 
-Agenda Personal: Visualización de las próximas 3 citas confirmadas directamente en el perfil.
+Agenda Personal: Visualización de las próximas citas confirmadas directamente en el perfil.
 
 3. Sistema de Interacción y Feedback
 Likes Dinámicos: Sistema de "Me gusta" con actualización asíncrona (AJAX/JS) y persistencia en base de datos.
