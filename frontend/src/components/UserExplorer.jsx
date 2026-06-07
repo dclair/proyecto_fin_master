@@ -24,7 +24,8 @@ const UserExplorer = ({ onBack, onStartChat }) => {
     const query = searchQuery.toLowerCase();
     const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
     const username = (user.username || '').toLowerCase();
-    return fullName.includes(query) || username.includes(query);
+    const email = (user.email || '').toLowerCase();
+    return fullName.includes(query) || username.includes(query) || email.includes(query);
   });
 
   return (
@@ -40,7 +41,7 @@ const UserExplorer = ({ onBack, onStartChat }) => {
         <input 
           type="text" 
           className="form-control" 
-          placeholder="Buscar por nombre o usuario..." 
+          placeholder="Buscar por nombre, usuario o email..." 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -61,9 +62,11 @@ const UserExplorer = ({ onBack, onStartChat }) => {
                   className="rounded-circle me-3" 
                   style={{width: '40px', height: '40px', objectFit: 'cover'}} 
                 />
-                <div className="flex-grow-1">
-                  <div className="fw-bold text-dark">{user.first_name || user.username} {user.last_name}</div>
-                  <div className="text-muted" style={{fontSize: '0.8rem'}}>@{user.username}</div>
+                <div className="flex-grow-1 text-truncate pe-2">
+                  <div className="fw-bold text-dark text-truncate">{user.first_name || user.username} {user.last_name}</div>
+                  <div className="text-muted text-truncate" style={{fontSize: '0.8rem'}}>
+                    @{user.username} {user.email && <span className="ms-1 opacity-75">• {user.email}</span>}
+                  </div>
                 </div>
                 <button className="btn btn-sm btn-outline-primary rounded-circle p-2">
                   <MessageSquarePlus size={16} />

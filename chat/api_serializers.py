@@ -8,7 +8,7 @@ class UserBasicSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'profile_picture_url']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile_picture_url']
         
     def get_profile_picture_url(self, obj):
         if hasattr(obj, 'profile'):

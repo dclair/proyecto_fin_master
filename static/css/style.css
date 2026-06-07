@@ -312,9 +312,11 @@ footer a {
     display: inline-block;
 }
 
-footer a:hover {
-    color: #20c997 !important; /* Verde claro / Teal brillante para fondo oscuro */
-    transform: translateX(3px); /* Pequeño desplazamiento a la derecha */
+@media (hover: hover) {
+    footer a:hover {
+        color: #20c997 !important; /* Verde claro / Teal brillante para fondo oscuro */
+        transform: translateX(3px); /* Pequeño desplazamiento a la derecha */
+    }
 }
 
 /* Efecto al hacer click (active) */
