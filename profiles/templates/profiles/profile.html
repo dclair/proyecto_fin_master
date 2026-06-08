@@ -295,9 +295,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
-                <ul class="list-group list-group-flush">
+                <div class="p-3 border-bottom">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0 js-modal-search" 
+                               placeholder="Introduce nombre, email o usuario..." data-target="#followersList">
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush" id="followersList">
                     {% for follower in user_profile.followers.all %}
-                        <li class="list-group-item d-flex align-items-center px-3 border-0">
+                        <li class="list-group-item d-flex align-items-center px-3 border-0" 
+                            data-search="{{ follower.user.username }} {{ follower.user.first_name }} {{ follower.user.last_name }} {{ follower.user.email }}">
                             <img src="{{ follower.profile_picture_url|default:'' }}" class="rounded-circle me-3" style="width: 35px; height: 35px; object-fit: cover;" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
                             <a href="{% url 'profiles:profile' follower.pk %}" class="text-decoration-none text-dark fw-bold small">{{ follower.user.username }}</a>
                         </li>
@@ -317,9 +325,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
-                <ul class="list-group list-group-flush">
+                <div class="p-3 border-bottom">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0 js-modal-search" 
+                               placeholder="Introduce nombre, email o usuario..." data-target="#followingList">
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush" id="followingList">
                     {% for followed in user_profile.following.all %}
-                        <li class="list-group-item d-flex align-items-center px-3 border-0">
+                        <li class="list-group-item d-flex align-items-center px-3 border-0"
+                            data-search="{{ followed.user.username }} {{ followed.user.first_name }} {{ followed.user.last_name }} {{ followed.user.email }}">
                             <img src="{{ followed.profile_picture_url|default:'' }}" class="rounded-circle me-3" style="width: 35px; height: 35px; object-fit: cover;" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
                             <a href="{% url 'profiles:profile' followed.pk %}" class="text-decoration-none text-dark fw-bold small">{{ followed.user.username }}</a>
                         </li>
@@ -329,6 +345,33 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInputs = document.querySelectorAll('.js-modal-search');
+    
+    searchInputs.forEach(input => {
+        input.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const targetListId = input.getAttribute('data-target');
+            const listItems = document.querySelectorAll(`${targetListId} li.list-group-item`);
+            
+            listItems.forEach(item => {
+                const searchData = item.getAttribute('data-search') || '';
+                const searchableString = searchData.toLowerCase();
+                
+                if (searchableString.includes(searchTerm)) {
+                    item.classList.remove('d-none');
+                    item.classList.add('d-flex');
+                } else {
+                    item.classList.remove('d-flex');
+                    item.classList.add('d-none');
+                }
+            });
+        });
+    });
+});
+</script>
 
 <style>
     .bg-light-hover:hover { background-color: #f8f9fa !important; border-color: #0d6efd !important; }
