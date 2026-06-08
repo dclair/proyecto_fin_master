@@ -28,6 +28,11 @@ body {
     padding-top: calc(var(--navbar-height) + 20px) !important;
 }
 
+[data-bs-theme="dark"] body {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
+
 main, .container {
     flex: 1 0 auto;
 }
@@ -103,6 +108,10 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
     border-bottom: 1px solid rgba(11, 89, 97, 0.12);
 }
 
+[data-bs-theme="dark"] .detail-banner-wrapper {
+    background-color: var(--bs-dark);
+}
+
 
 
 .detail-banner-img {
@@ -125,6 +134,15 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 .card-click,
 .sidebar-group {
     background-color: var(--hubs-card-bg) !important;
+}
+
+[data-bs-theme="dark"] .profile-post-card,
+[data-bs-theme="dark"] .post-card,
+[data-bs-theme="dark"] .card-hubs,
+[data-bs-theme="dark"] .card-click,
+[data-bs-theme="dark"] .sidebar-group {
+    background-color: var(--bs-dark) !important;
+    border-color: var(--bs-border-color) !important;
 }
 .profile-post-card, .post-card {
     
@@ -150,6 +168,10 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
     text-overflow: ellipsis;
     color: var(--hubs-dark) !important;
     font-weight: 700;
+}
+
+[data-bs-theme="dark"] .text-truncate-custom {
+    color: var(--bs-light) !important;
 }
 
 /* --- SIDEBAR BADGES & ANIMATIONS --- */
@@ -226,6 +248,10 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
     position: relative !important;
 }
 
+[data-bs-theme="dark"] .img-event-wrapper {
+    background-color: var(--bs-dark) !important;
+}
+
 .img-event-hubs {
     width: 100% !important;
     height: 100% !important;
@@ -251,6 +277,10 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 .text-muted {
     font-size: 0.95rem;
     letter-spacing: -0.2px;
+}
+
+[data-bs-theme="dark"] .text-muted {
+    color: #adb5bd !important;
 }
 
 /* ============================================================
@@ -493,6 +523,15 @@ footer a:active {
     transform: translateX(4px);
 }
 
+[data-bs-theme="dark"] .sidebar-group {
+    background-color: var(--bs-dark) !important;
+    border-color: var(--bs-border-color) !important;
+}
+
+[data-bs-theme="dark"] .sidebar-item:hover {
+    background-color: #343a40 !important;
+}
+
 
 /* --- NAVEGACIÓN DE HOBBIES --- */
 .hobby-name {
@@ -701,6 +740,11 @@ footer a:active {
         white-space: nowrap;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         font-size: 0.95rem;
+    }
+
+    [data-bs-theme="dark"] .mobile-hobby-pill {
+        background-color: #343a40 !important;
+        color: #f8f9fa !important;
     }
 
     .mobile-hobby-pill:hover {
