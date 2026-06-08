@@ -63,16 +63,16 @@
                                 {% elif event.level == 'advanced' %}
                                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle extra-small" style="font-size: 0.65rem;">Avanzado</span>
                                 {% elif event.level == 'expert' %}
-                                    <span class="badge bg-dark text-white border border-dark extra-small" style="font-size: 0.65rem;">Experto</span>
+                                    <span class="badge bg-dark text-white border border-dark extra-small">Experto</span>
                                 {% endif %}
                             </div>
 
                             {# Iconos de Match/Mentor animado #}
                             <div class="d-flex gap-2">
                                 {% if event.is_match %}
-                                    <i class="bi bi-star-fill text-info match-pulse" title="¡Tu nivel!" style="font-size: 0.9rem;"></i>
+                                    <i class="bi bi-star-fill text-info match-pulse fs-6" title="¡Tu nivel!"></i>
                                 {% elif event.is_mentor %}
-                                    <i class="bi bi-mortarboard-fill text-primary mentor-pulse" title="¡Eres un referente!" style="font-size: 0.9rem;"></i>
+                                    <i class="bi bi-mortarboard-fill text-primary mentor-pulse fs-6" title="¡Eres un referente!"></i>
                                 {% endif %}
                             </div>
                         </div>
@@ -113,20 +113,20 @@
                        data-bs-toggle="modal" 
                        data-bs-target="#postModal">
                         {% if post.image %}
-                            <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}" 
-                                style="object-fit: cover; height: 180px; width: 100%;">
+                            <img src="{{ post.image.url }}" class="card-img-top object-fit-cover" alt="{{ post.title }}" 
+                                height="180">
                         {% elif post.video %}
                             <div class="position-relative bg-dark d-flex align-items-center justify-content-center" style="height: 180px;">
-                                <video src="{{ post.video.url }}" class="w-100 h-100" style="object-fit: cover; opacity: 0.7;"></video>
+                                <video src="{{ post.video.url }}" class="w-100 h-100 object-fit-cover opacity-75"></video>
                                 <i class="bi bi-play-circle-fill text-white position-absolute fs-1"></i>
                             </div>
                         {% elif post.video_url %}
                             <div class="bg-dark d-flex align-items-center justify-content-center" style="height: 180px;">
-                                <i class="bi bi-play-btn-fill text-danger" style="font-size: 3rem;"></i>
+                                <i class="bi bi-play-btn-fill text-danger display-3"></i>
                             </div>
                         {% else %}
                             <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
-                                <i class="bi bi-image text-muted fs-1"></i>
+                                <i class="bi bi-image text-muted display-3"></i>
                             </div>
                         {% endif %}
                     </a>

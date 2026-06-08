@@ -35,7 +35,7 @@
             {# Datos del Usuario #}
             <div class="col-md-9">
                 <div class="d-flex align-items-center mb-1 flex-wrap">
-                    <h2 class="mb-0 me-3 fw-bold">{{ user_profile.user.username }}</h2>
+                    <h2 class="mb-0 me-3 fw-bold text-hubs">{{ user_profile.user.username }}</h2>
                     
                     {# Botones de Acción (Editar o Seguir) #}
                     {% if user.is_authenticated %}
@@ -109,7 +109,7 @@
                     {# Link a Mis Planes #}
                     <div>
                         {% if is_own_profile %}
-                            <a href="{% url 'posts:my_events' %}" class="text-decoration-none text-dark text-primary-hover">
+                            <a href="{% url 'posts:my_events' %}" class="text-decoration-none text-body text-primary-hover">
                         {% endif %}
                             <i class="bi bi-megaphone text-primary me-1"></i>
                             <strong>{{ organized_count }}</strong> <span class="text-muted small">organizados</span>
@@ -119,7 +119,7 @@
                     {# Link a Mis Inscripciones #}
                     <div>
                         {% if is_own_profile %}
-                            <a href="{% url 'posts:my_participations' %}" class="text-decoration-none text-dark text-primary-hover">
+                            <a href="{% url 'posts:my_participations' %}" class="text-decoration-none text-body text-primary-hover">
                         {% endif %}
                             <i class="bi bi-check2-circle text-success me-1"></i>
                             <strong>{{ participated_count }}</strong> <span class="text-muted small">participaciones</span>
@@ -128,17 +128,17 @@
                 </div>
                 
                 {# Bio y Terapias #}
-                <div class="bg-white p-3 border rounded shadow-sm mb-4">
+                <div class="bg-white p-3 border border-2 border-hubs rounded shadow-sm mb-4 text-dark">
                     {% if user_profile.bio %}
                         <div class="mb-3">
-                            <h6 class="fw-bold small text-uppercase text-muted mb-1">Sobre mí</h6>
-                            <p class="mb-0 small">{{ user_profile.bio }}</p>
+                            <h6 class="fw-bold small text-uppercase text-dark mb-1">Sobre mí</h6>
+                            <p class="mb-0 small text-dark">{{ user_profile.bio }}</p>
                         </div>
                     {% endif %}
 
                     {# Lista de Hobbies #}
                     <div class="mb-3">
-                        <h6 class="fw-bold small text-uppercase text-muted mb-2">Mis Terapias</h6>
+                        <h6 class="fw-bold small text-uppercase text-dark mb-2">Mis Terapias</h6>
                         <div class="d-flex flex-wrap gap-2">
                             {% for user_hobby in user_profile.userhobby_set.all %}
                                 <span class="badge border text-dark bg-light fw-normal p-2">
@@ -155,7 +155,7 @@
                         </div>
                     </div>
 
-                    {# Datos de Ubicación/Web #}
+                    {# Datos de Ubicación/Web/Contacto #}
                     <div class="row g-2 border-top pt-3">
                         {% if user_profile.location %}
                         <div class="col-sm-6 col-md-4 small text-muted">
@@ -166,6 +166,28 @@
                         <div class="col-sm-6 col-md-4 small">
                             <i class="bi bi-link-45deg me-1"></i> <a href="{{ user_profile.website }}" target="_blank" class="text-decoration-none">{{ user_profile.website|truncatechars:20 }}</a>
                         </div>
+                        {% endif %}
+                        {% if request.user.is_authenticated %}
+                            {% if user_profile.address %}
+                            <div class="col-sm-6 col-md-4 small text-muted">
+                                <i class="bi bi-house-door me-1 text-secondary"></i> {{ user_profile.address }}
+                            </div>
+                            {% endif %}
+                            {% if user_profile.phone %}
+                            <div class="col-sm-6 col-md-4 small text-muted">
+                                <i class="bi bi-telephone me-1 text-secondary"></i> {{ user_profile.phone }}
+                            </div>
+                            {% endif %}
+                            {% if user_profile.mobile %}
+                            <div class="col-sm-6 col-md-4 small text-muted">
+                                <i class="bi bi-phone me-1 text-secondary"></i> {{ user_profile.mobile }}
+                            </div>
+                            {% endif %}
+                            {% if user_profile.user.email %}
+                            <div class="col-sm-6 col-md-4 small text-muted">
+                                <i class="bi bi-envelope me-1 text-secondary"></i> <a href="mailto:{{ user_profile.user.email }}" class="text-decoration-none text-muted">{{ user_profile.user.email }}</a>
+                            </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
@@ -189,7 +211,7 @@
                                                     <div class="fw-bold small">{{ event.event_date|date:"d" }}</div>
                                                     <div class="fs-nano">{{ event.event_date|date:"M"|upper }}</div>
                                                 </div>
-                                                <div class="text-dark fw-bold text-truncate">{{ event.title }}</div>
+                                                <div class="text-body fw-bold text-truncate">{{ event.title }}</div>
                                             </div>
                                             <small class="text-muted small"><i class="bi bi-person me-1"></i>Organiza: {{ event.organizer.username }}</small>
                                         </div>
@@ -239,7 +261,7 @@
                                                     <i class="bi bi-star{% if review.rating >= 5 %}-fill{% endif %}"></i>
                                                 </div>
 
-                                                <p class="text-dark mb-0 small fst-italic">"{{ review.comment|default:'Sin comentarios.' }}"</p>
+                                                <p class="text-body mb-0 small fst-italic">"{{ review.comment|default:'Sin comentarios.' }}"</p>
                                             </div>
                                         </div>
                                     </div>
