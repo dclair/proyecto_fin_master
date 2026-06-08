@@ -1,0 +1,27 @@
+# Tasks: chat-voice-messages
+
+- [x] **1. Backend: Actualizar `MessageUploadView`**
+  - Archivo: `chat/api_views.py`
+  - Añadir soporte para `audio/*` en la validación de MIME types.
+  - Asignar `attachment_type = 'audio'`.
+  - Añadir límite de tamaño de 10MB.
+- [x] **2. Frontend: Implementar Lógica de Grabación en `ChatApp.jsx`**
+  - Archivo: `frontend/src/components/MessageArea.jsx` (corregido)
+  - Añadir estados `isRecording`, `recordingTime`.
+  - Añadir refs `mediaRecorderRef`, `audioChunksRef`, `timerIntervalRef`.
+  - Implementar función `startRecording` (manejo de permisos `getUserMedia`, init de `MediaRecorder`).
+  - Implementar función `stopRecording` y `cancelRecording`.
+  - Implementar temporizador.
+- [x] **3. Frontend: Construir la UI de la barra de grabación**
+  - Archivo: `frontend/src/components/MessageArea.jsx`
+  - Añadir el botón de micrófono en la barra de controles.
+  - Renderizar condicionalmente la barra de grabación activa (ocultando el input normal).
+- [x] **4. Frontend: Conectar la grabación con el envío al servidor**
+  - En `stopRecording` (o al apretar Enviar grabación), convertir los chunks a un `Blob`, luego crear un objeto `File` falso y pasarlo al flujo existente de `uploadFile`/`sendMessage`.
+- [x] **5. Frontend: Renderizar el reproductor de audio**
+  - Archivo: `frontend/src/components/MessageArea.jsx`
+  - Modificar el renderizado de mensajes para mostrar `<audio controls>` cuando `attachment_type === 'audio'`.
+- [x] **6. Estilos (Opcional pero recomendado)**
+  - Archivo: `frontend/src/ChatApp.css`
+  - Añadir animación parpadeante para el punto de grabación.
+  - Ajustar el ancho máximo del reproductor de audio.

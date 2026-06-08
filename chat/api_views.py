@@ -299,6 +299,10 @@ class MessageUploadView(APIView):
                 attachment_type = 'video'
                 if file_size > 15 * MB:
                     return Response({'error': 'Video file size exceeds 15MB limit'}, status=status.HTTP_400_BAD_REQUEST)
+            elif mime_type.startswith('audio/'):
+                attachment_type = 'audio'
+                if file_size > 10 * MB:
+                    return Response({'error': 'Audio file size exceeds 10MB limit'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 attachment_type = 'document'
                 if file_size > 5 * MB:

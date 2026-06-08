@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Send, ArrowLeft, Smile, UserPlus, Check, UserCheck, Trash2, Paperclip, X, FileText, Image as ImageIcon, Video } from 'lucide-react';
+import { Send, ArrowLeft, Smile, UserPlus, Check, UserCheck, Trash2, Paperclip, X, FileText, Image as ImageIcon, Video, Mic, Trash } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 
 const renderMessageWithLinks = (text) => {
@@ -32,6 +32,13 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
   const [previewUrl, setPreviewUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Audio recording states
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const timerIntervalRef = useRef(null);
 
   // States for adding members
   const [showAddMember, setShowAddMember] = useState(false);
@@ -65,6 +72,13 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showEmojiPicker]);
+
+  // Limpiar timer si el componente se desmonta
+  useEffect(() => {
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, []);
 
   // Cerrar add member al hacer clic fuera
   useEffect(() => {
@@ -284,6 +298,71 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
     setPreviewUrl(null);
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType || 'audio/webm' });
+        const ext = mediaRecorder.mimeType && mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
+        const file = new File([audioBlob], `voice_message_${Date.now()}.${ext}`, {
+          type: mediaRecorder.mimeType || 'audio/webm',
+        });
+        
+        setSelectedFile(file);
+        setPreviewUrl('audio');
+        setIsRecording(false);
+        setRecordingTime(0);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      timerIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+      
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      alert("No se pudo acceder al micrófono. Por favor, verifica los permisos.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      clearInterval(timerIntervalRef.current);
+    }
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.onstop = null; // Prevent sending
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      clearInterval(timerIntervalRef.current);
+      setIsRecording(false);
+      setRecordingTime(0);
+      audioChunksRef.current = [];
+    }
+  };
+  
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   const handleSend = (e) => {
     e.preventDefault();
     if (uploading) return;
@@ -463,6 +542,9 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
                           <span style={{wordBreak: 'break-all', fontSize: '0.85rem'}}>{msg.attachment.split('/').pop()}</span>
                         </a>
                       )}
+                      {msg.attachment_type === 'audio' && (
+                        <audio controls src={msg.attachment} className="d-block mt-1" style={{ maxWidth: '100%', height: '40px' }} preload="metadata" />
+                      )}
                     </div>
                   )}
 
@@ -496,11 +578,15 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
             <X size={14} className="text-danger" />
           </button>
           
-          {previewUrl && previewUrl !== 'video' && previewUrl !== 'document' ? (
+          {previewUrl && previewUrl !== 'video' && previewUrl !== 'document' && previewUrl !== 'audio' ? (
             <img src={previewUrl} alt="Preview" style={{ height: '60px', borderRadius: '4px', objectFit: 'cover' }} />
           ) : previewUrl === 'video' ? (
             <div className="d-flex align-items-center justify-content-center bg-secondary text-white rounded" style={{ height: '60px', width: '60px' }}>
               <Video size={24} />
+            </div>
+          ) : previewUrl === 'audio' ? (
+            <div className="d-flex align-items-center justify-content-center bg-secondary text-white rounded" style={{ height: '60px', width: '60px' }}>
+              <Mic size={24} />
             </div>
           ) : (
             <div className="d-flex align-items-center justify-content-center bg-secondary text-white rounded" style={{ height: '60px', width: '60px' }}>
@@ -527,40 +613,66 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
           </div>
         )}
 
-        <button 
-          type="button" 
-          onClick={() => setShowEmojiPicker(val => !val)}
-          style={{ background: 'none', border: 'none', color: showEmojiPicker ? '#0d6efd' : '#6c757d', cursor: 'pointer', padding: '0 8px 0 0', display: 'flex', alignItems: 'center' }}
-          title="Insertar emoji"
-        >
-          <Smile size={24} />
-        </button>
+        {isRecording ? (
+          <div className="d-flex align-items-center justify-content-between w-100 px-2 py-1">
+            <div className="d-flex align-items-center text-danger">
+              <div className="recording-dot me-2" style={{width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'red', animation: 'pulse 1s infinite'}}></div>
+              <span className="fw-bold">{formatTime(recordingTime)}</span>
+            </div>
+            <div className="d-flex align-items-center gap-3">
+              <button type="button" onClick={cancelRecording} className="btn btn-link text-secondary p-0" title="Cancelar grabación">
+                <Trash size={20} />
+              </button>
+              <button type="button" onClick={stopRecording} className="btn btn-danger rounded-circle p-0 d-flex align-items-center justify-content-center text-white" title="Enviar audio" style={{width: '32px', height: '32px'}}>
+                <Send size={16} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <button 
+              type="button" 
+              onClick={() => setShowEmojiPicker(val => !val)}
+              style={{ background: 'none', border: 'none', color: showEmojiPicker ? '#0d6efd' : '#6c757d', cursor: 'pointer', padding: '0 8px 0 0', display: 'flex', alignItems: 'center' }}
+              title="Insertar emoji"
+            >
+              <Smile size={24} />
+            </button>
 
-        <button 
-          type="button" 
-          onClick={() => fileInputRef.current?.click()}
-          style={{ background: 'none', border: 'none', color: '#6c757d', cursor: 'pointer', padding: '0 8px 0 0', display: 'flex', alignItems: 'center' }}
-          title="Adjuntar archivo"
-        >
-          <Paperclip size={24} />
-        </button>
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          style={{ display: 'none' }} 
-          onChange={handleFileChange} 
-        />
+            <button 
+              type="button" 
+              onClick={() => fileInputRef.current?.click()}
+              style={{ background: 'none', border: 'none', color: '#6c757d', cursor: 'pointer', padding: '0 8px 0 0', display: 'flex', alignItems: 'center' }}
+              title="Adjuntar archivo"
+            >
+              <Paperclip size={24} />
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handleFileChange} 
+            />
 
-        <input 
-          type="text" 
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Escribe un mensaje..."
-          className="msg-input"
-        />
-        <button type="submit" className="send-btn" disabled={(uploading || (!inputValue.trim() && !selectedFile))}>
-          <Send size={18} />
-        </button>
+            <input 
+              type="text" 
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Escribe un mensaje..."
+              className="msg-input"
+            />
+            
+            {inputValue.trim() || selectedFile ? (
+              <button type="submit" className="send-btn" disabled={uploading}>
+                <Send size={18} />
+              </button>
+            ) : (
+              <button type="button" className="btn btn-link text-secondary p-0 ms-1" onClick={startRecording} title="Grabar nota de voz" style={{ border: 'none', background: 'none' }}>
+                <Mic size={22} />
+              </button>
+            )}
+          </>
+        )}
       </form>
     </div>
   );
