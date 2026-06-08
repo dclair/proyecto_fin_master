@@ -28,8 +28,7 @@
             {# Foto de Perfil #}
             <div class="col-md-3 text-center mb-3 mb-md-0">
                 <img src="{{ user_profile.profile_picture_url|default:'' }}" 
-                     class="rounded-circle img-thumbnail shadow-sm" 
-                     style="width: 160px; height: 160px; object-fit: cover;"
+                     class="rounded-circle img-thumbnail shadow-sm avatar-xxl" 
                      onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
             </div>
             
@@ -79,12 +78,30 @@
                 <div class="d-flex mb-4 flex-wrap gap-3 gap-md-4">
                     <div><strong>{{ user_profile.user.posts.count }}</strong> <span class="text-muted small">publicaciones</span></div>
                     
-                    <div style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#followersModal">
-                        <span class="text-primary-hover"><strong>{{ followers_count }}</strong> <span class="text-muted small">seguidores</span></span>
+                    {# Seguidores #}
+                    <div>
+                        {% if is_own_profile %}
+                            <div class="cursor-pointer" data-bs-toggle="modal" data-bs-target="#followersModal">
+                                <span class="text-primary-hover"><strong>{{ followers_count }}</strong> <span class="text-muted small">seguidores</span></span>
+                            </div>
+                        {% else %}
+                            <div>
+                                <strong>{{ followers_count }}</strong> <span class="text-muted small">seguidores</span>
+                            </div>
+                        {% endif %}
                     </div>
 
-                    <div style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#followingModal">
-                        <span class="text-primary-hover"><strong>{{ following_count }}</strong> <span class="text-muted small">siguiendo</span></span>
+                    {# Siguiendo #}
+                    <div>
+                        {% if is_own_profile %}
+                            <div class="cursor-pointer" data-bs-toggle="modal" data-bs-target="#followingModal">
+                                <span class="text-primary-hover"><strong>{{ following_count }}</strong> <span class="text-muted small">siguiendo</span></span>
+                            </div>
+                        {% else %}
+                            <div>
+                                <strong>{{ following_count }}</strong> <span class="text-muted small">siguiendo</span>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="border-start ps-3 d-none d-sm-block"></div>
@@ -168,9 +185,9 @@
                                     <a href="{% url 'posts:event_detail' event.pk %}" class="text-decoration-none">
                                         <div class="p-3 border rounded h-100 bg-light-hover transition-all">
                                             <div class="d-flex align-items-center mb-2">
-                                                <div class="bg-primary text-white rounded px-2 py-1 text-center me-3" style="min-width: 45px;">
+                                                <div class="bg-primary text-white rounded px-2 py-1 text-center me-3 min-w-45">
                                                     <div class="fw-bold small">{{ event.event_date|date:"d" }}</div>
-                                                    <div style="font-size: 0.6rem;">{{ event.event_date|date:"M"|upper }}</div>
+                                                    <div class="fs-nano">{{ event.event_date|date:"M"|upper }}</div>
                                                 </div>
                                                 <div class="text-dark fw-bold text-truncate">{{ event.title }}</div>
                                             </div>
@@ -204,17 +221,17 @@
                                     <div class="list-group-item px-0 py-3 border-0 border-bottom">
                                         <div class="d-flex align-items-start">
                                             <img src="{{ review.author.profile.profile_picture_url|default:'' }}" 
-                                                 class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;"
+                                                 class="rounded-circle me-3 avatar-sm"
                                                  onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
                                             
                                             <div class="flex-grow-1">
                                                 <div class="d-flex justify-content-between mb-1">
                                                     <h6 class="mb-0 fw-bold small text-primary">{{ review.author.username }}</h6>
-                                                    <small class="text-muted" style="font-size: 0.75rem;">{{ review.created_at|date:"d M, Y" }}</small>
+                                                    <small class="text-muted fs-xs">{{ review.created_at|date:"d M, Y" }}</small>
                                                 </div>
                                                 
                                                 {# Estrellas de la reseña #}
-                                                <div class="text-warning small mb-2" style="font-size: 0.8rem;">
+                                                <div class="text-warning small mb-2">
                                                     <i class="bi bi-star{% if review.rating >= 1 %}-fill{% endif %}"></i>
                                                     <i class="bi bi-star{% if review.rating >= 2 %}-fill{% endif %}"></i>
                                                     <i class="bi bi-star{% if review.rating >= 3 %}-fill{% endif %}"></i>
@@ -286,6 +303,8 @@
     {% endif %}
 </div>
 
+{# Modales solo para el dueño del perfil #}
+{% if is_own_profile %}
 {# Modal Seguidores #}
 <div class="modal fade" id="followersModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -306,7 +325,7 @@
                     {% for follower in user_profile.followers.all %}
                         <li class="list-group-item d-flex align-items-center px-3 border-0" 
                             data-search="{{ follower.user.username }} {{ follower.user.first_name }} {{ follower.user.last_name }} {{ follower.user.email }}">
-                            <img src="{{ follower.profile_picture_url|default:'' }}" class="rounded-circle me-3" style="width: 35px; height: 35px; object-fit: cover;" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+                            <img src="{{ follower.profile_picture_url|default:'' }}" class="rounded-circle me-3 avatar-xs" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
                             <a href="{% url 'profiles:profile' follower.pk %}" class="text-decoration-none text-dark fw-bold small">{{ follower.user.username }}</a>
                         </li>
                     {% endfor %}
@@ -336,7 +355,7 @@
                     {% for followed in user_profile.following.all %}
                         <li class="list-group-item d-flex align-items-center px-3 border-0"
                             data-search="{{ followed.user.username }} {{ followed.user.first_name }} {{ followed.user.last_name }} {{ followed.user.email }}">
-                            <img src="{{ followed.profile_picture_url|default:'' }}" class="rounded-circle me-3" style="width: 35px; height: 35px; object-fit: cover;" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+                            <img src="{{ followed.profile_picture_url|default:'' }}" class="rounded-circle me-3 avatar-xs" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
                             <a href="{% url 'profiles:profile' followed.pk %}" class="text-decoration-none text-dark fw-bold small">{{ followed.user.username }}</a>
                         </li>
                     {% endfor %}
@@ -345,37 +364,11 @@
         </div>
     </div>
 </div>
+{% endif %}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInputs = document.querySelectorAll('.js-modal-search');
-    
-    searchInputs.forEach(input => {
-        input.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            const targetListId = input.getAttribute('data-target');
-            const listItems = document.querySelectorAll(`${targetListId} li.list-group-item`);
-            
-            listItems.forEach(item => {
-                const searchData = item.getAttribute('data-search') || '';
-                const searchableString = searchData.toLowerCase();
-                
-                if (searchableString.includes(searchTerm)) {
-                    item.classList.remove('d-none');
-                    item.classList.add('d-flex');
-                } else {
-                    item.classList.remove('d-flex');
-                    item.classList.add('d-none');
-                }
-            });
-        });
-    });
-});
-</script>
-
-<style>
-    .bg-light-hover:hover { background-color: #f8f9fa !important; border-color: #0d6efd !important; }
-    .transition-all { transition: all 0.2s ease-in-out; }
-    .text-primary-hover:hover { color: #0d6efd; text-decoration: underline; }
-</style>
+{% block extra_js %}
+{% if is_own_profile %}
+<script src="{% static 'js/profile-search.js' %}?v=1.0"></script>
+{% endif %}
+{% endblock extra_js %}
 {% endblock content %}

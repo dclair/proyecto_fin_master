@@ -160,68 +160,8 @@
    
     {% block extra_js %}{% endblock extra_js %}
 
-    <!-- Script para gestionar el scroll de Mis Grupos en móvil -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const scrollContainer = document.querySelector('.mobile-hobby-scroll');
-        const arrowLeft = document.querySelector('.scroll-arrow-left');
-        const arrowRight = document.querySelector('.scroll-arrow-right');
-
-        if (scrollContainer && arrowRight) {
-            const handleScroll = () => {
-                // Tolerancia de 5px para detectar los bordes
-                const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-                
-                // Mostrar/Ocultar flecha izquierda
-                if (arrowLeft) {
-                    if (scrollContainer.scrollLeft > 5) {
-                        arrowLeft.classList.remove('scroll-arrow-hidden');
-                    } else {
-                        arrowLeft.classList.add('scroll-arrow-hidden');
-                    }
-                }
-
-                // Mostrar/Ocultar flecha derecha y difuminado
-                if (scrollContainer.scrollLeft >= maxScrollLeft - 5) {
-                    arrowRight.classList.add('scroll-arrow-hidden');
-                    scrollContainer.parentElement.classList.add('hide-fade');
-                } else {
-                    arrowRight.classList.remove('scroll-arrow-hidden');
-                    scrollContainer.parentElement.classList.remove('hide-fade');
-                }
-            };
-
-            // Ejecutar al cargar para configurar estado inicial
-            handleScroll();
-
-            // Escuchar eventos
-            scrollContainer.addEventListener('scroll', handleScroll);
-            window.addEventListener('resize', handleScroll);
-        }
-    });
-    </script>
-
-    <!-- Script para Toggle de Tema Oscuro -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        const themeIcon = document.getElementById('themeIcon');
-        
-        if (themeToggleBtn && themeIcon) {
-            // Setea el ícono inicial basado en el tema actual
-            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-            themeIcon.className = currentTheme === 'dark' ? 'bi bi-sun-fill text-warning fs-5' : 'bi bi-moon-stars-fill text-dark fs-5';
-
-            themeToggleBtn.addEventListener('click', () => {
-                const theme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-bs-theme', theme);
-                localStorage.setItem('theme', theme);
-                
-                // Actualiza el ícono
-                themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill text-warning fs-5' : 'bi bi-moon-stars-fill text-dark fs-5';
-            });
-        }
-    });
-    </script>
+    <!-- Scripts extraídos a archivos estáticos -->
+    <script src="{% static 'js/layout-scroll.js' %}?v=1.0"></script>
+    <script src="{% static 'js/theme-toggle.js' %}?v=1.0"></script>
 </body>
 </html>

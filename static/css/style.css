@@ -939,3 +939,88 @@ footer a:active {
     from { transform: translateY(-100%); }
     to { transform: translateY(0); }
 }
+
+/* ============================================================
+   9. CLEAN ARCHITECTURE UTILITIES (GLOBAL)
+   ============================================================ */
+/* Avatares */
+.avatar-xxl { width: 160px; height: 160px; object-fit: cover; }
+.avatar-xl { width: 150px; height: 150px; object-fit: cover; }
+.avatar-lg { width: 130px; height: 130px; object-fit: cover; }
+.avatar-md { width: 80px; height: 80px; object-fit: cover; }
+.avatar-65 { width: 65px; height: 65px; object-fit: cover; }
+.avatar-sm { width: 40px; height: 40px; object-fit: cover; }
+.avatar-xs { width: 35px; height: 35px; object-fit: cover; }
+.avatar-xxs { width: 32px; height: 32px; object-fit: cover; }
+
+/* Tipografía */
+.fs-xs { font-size: 0.75rem !important; }
+.fs-xxs { font-size: 0.7rem !important; }
+.fs-nano { font-size: 0.65rem !important; }
+.fs-micro { font-size: 0.55rem !important; }
+.fs-xl { font-size: 1.5rem !important; }
+.fs-3xl { font-size: 3rem !important; }
+.fs-4xl { font-size: 4rem !important; }
+.ls-1 { letter-spacing: 1px !important; }
+.ls-2 { letter-spacing: 1.5px !important; }
+
+/* Layout y Contenedores */
+.min-w-45 { min-width: 45px !important; }
+.min-w-200 { min-width: 200px !important; }
+.min-w-320 { min-width: 320px !important; }
+.max-h-350 { max-height: 350px !important; overflow-y: auto !important; }
+.logo-hubs { height: 45px; }
+
+/* Media Content */
+.media-max-500 {
+    max-height: 500px !important;
+    width: 100% !important;
+    object-fit: contain !important;
+}
+
+.media-max-250 {
+    max-height: 250px !important;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+
+.object-fit-cover {
+    object-fit: cover !important;
+}
+
+/* Image Preview Específico para Perfiles */
+.avatar-preview img {
+    border-radius: 50% !important;
+    width: 130px;
+    height: 130px;
+    object-fit: cover;
+}
+
+/* Event Form Hubs Styles */
+.image-preview-hubs {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border: 2px solid #0b5961 !important;
+}
+
+.upload-container-hubs {
+    cursor: pointer;
+    background: #f8f9fa;
+    border: 2px dashed #0b5961 !important;
+}
+
+/* Profile List Card */
+.profile-card .card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.profile-card .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Otros */
+.cursor-pointer { cursor: pointer !important; }
+.bg-light-hover:hover { background-color: #f8f9fa !important; border-color: #0d6efd !important; }
+.transition-all { transition: all 0.2s ease-in-out; }
+.text-primary-hover:hover { color: #0d6efd; text-decoration: underline; }

@@ -40,9 +40,9 @@
                     <div class="d-flex align-items-center">
                         <a href="{% url 'profiles:profile' post.user.profile.id %}" class="text-decoration-none text-dark d-flex align-items-center">
                             {% if post.user.profile.profile_picture %}
-                                <img src="{{ post.user.profile.profile_picture.url }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                <img src="{{ post.user.profile.profile_picture.url }}" class="rounded-circle me-2 avatar-sm">
                             {% else %}
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2 avatar-sm">
                                     <i class="bi bi-person text-muted"></i>
                                 </div>
                             {% endif %}
@@ -67,21 +67,20 @@
                     </div>
                 </div>
 
-                {% if post.video %}
                 <div class="text-center bg-dark">
-                    <video src="{{ post.video.url }}" controls class="img-fluid" style="max-height: 500px; width: 100%; object-fit: contain;"></video>
+                    <video src="{{ post.video.url }}" controls class="img-fluid media-max-500"></video>
                 </div>
                 {% elif post.video_url %}
                 <div class="text-center bg-light border-bottom p-5">
                     <a href="{{ post.video_url }}" target="_blank" class="text-decoration-none text-center d-flex flex-column align-items-center justify-content-center py-4">
-                        <i class="bi bi-play-circle-fill text-danger mb-3" style="font-size: 4rem;"></i>
+                        <i class="bi bi-play-circle-fill text-danger mb-3 fs-4xl"></i>
                         <span class="fw-bold text-dark fs-5">Ver vídeo externo</span>
                         <small class="text-muted mt-2">{{ post.video_url }}</small>
                     </a>
                 </div>
                 {% elif post.image %}
                 <div class="text-center bg-dark">
-                    <img src="{{ post.image.url }}" class="img-fluid" style="max-height: 500px; width: 100%; object-fit: contain;">
+                    <img src="{{ post.image.url }}" class="img-fluid media-max-500">
                 </div>
                 {% endif %}
 
@@ -100,12 +99,12 @@
                             <button type="button" class="like-button border-0 bg-transparent p-0" 
                                     data-post-id="{{ post.pk }}" 
                                     data-like-url="{% url 'posts:toggle_like' post.pk %}">
-                                <i class="bi {% if request.user in post.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}" style="font-size: 1.5rem;"></i>
+                                <i class="bi {% if request.user in post.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %} fs-xl"></i>
                             </button>
                             <span class="like-count ms-2 fw-bold">{{ post.likes.count }}</span>
                         </div>
                         <a href="#comments-section" class="text-decoration-none text-dark">
-                            <i class="bi bi-chat" style="font-size: 1.5rem;"></i>
+                            <i class="bi bi-chat fs-xl"></i>
                             <span class="ms-2 fw-bold">{{ post.comments.count }}</span>
                         </a>
                     </div>
@@ -137,9 +136,9 @@
                             {# ... Resto del listado de comentarios igual a la original ... #}
                             <div class="flex-shrink-0">
                                 {% if comment.user.profile.profile_picture %}
-                                    <img src="{{ comment.user.profile.profile_picture.url }}" class="rounded-circle" width="40" height="40" style="object-fit: cover;">
+                                    <img src="{{ comment.user.profile.profile_picture.url }}" class="rounded-circle avatar-sm">
                                 {% else %}
-                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center avatar-sm">
                                         <i class="bi bi-person text-muted"></i>
                                     </div>
                                 {% endif %}
@@ -169,20 +168,10 @@
     </div>
 </div>
 
-<script>
-    function responderComentario(username) {
-        const textarea = document.querySelector('textarea[name="comment"]');
-        if (textarea) {
-            textarea.value = `@${username} `;
-            textarea.focus();
-            document.querySelector('#comment-form').scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-</script>
-
 {% block extra_js %}
 <script src="{% static 'js/likes.js' %}"></script>
 <script src="{% static 'js/spinner.js' %}"></script>
+<script src="{% static 'js/post-detail.js' %}?v=1.0"></script>
 {% endblock %}
 
 {% endblock content %}

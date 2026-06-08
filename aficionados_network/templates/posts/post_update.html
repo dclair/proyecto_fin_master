@@ -42,12 +42,12 @@
                             <label class="form-label fw-bold small text-muted text-uppercase">Contenido Multimedia Actual</label>
                             {% if object.image %}
                                 <div class="mb-3 text-center">
-                                    <img src="{{ object.image.url }}" class="rounded-3 shadow-sm border" style="width: 150px; height: 150px; object-fit: cover;">
+                                    <img src="{{ object.image.url }}" class="rounded-3 shadow-sm border avatar-xl">
                                     <p class="mt-2 mb-0 small text-muted">Imagen actual</p>
                                 </div>
                             {% elif object.video %}
                                 <div class="mb-3 text-center">
-                                    <video src="{{ object.video.url }}" controls class="rounded-3 shadow-sm border" style="width: 150px; height: 150px; object-fit: cover;"></video>
+                                    <video src="{{ object.video.url }}" controls class="rounded-3 shadow-sm border avatar-xl"></video>
                                     <p class="mt-2 mb-0 small text-muted">Vídeo actual</p>
                                 </div>
                             {% elif object.video_url %}
@@ -74,15 +74,14 @@
                             <div class="tab-content mb-3" id="mediaTabsContent">
                               <!-- Image Tab -->
                               <div class="tab-pane fade show active" id="image-pane" role="tabpanel" aria-labelledby="image-tab">
-                                  <div class="image-upload-container border border-dashed rounded-3 p-3 text-center" 
-                                      id="imageUploadContainer" 
-                                      style="cursor:pointer; background:#f8f9fa; border: 2px dashed var(--hubs-primary) !important;">
+                                  <div class="image-upload-container rounded-3 p-3 text-center upload-container-hubs" 
+                                      id="imageUploadContainer">
                                       <div id="uploadPlaceholder">
                                           <i class="bi bi-camera fs-2 text-muted"></i>
                                           <p class="small text-muted mb-0 d-block">Haz clic para añadir nueva foto</p>
                                       </div>
                                       <div id="imagePreview" class="d-none">
-                                          <img id="image-preview" src="#" alt="Previsualización" class="img-fluid rounded-3 shadow-sm mx-auto" style="max-height: 250px; object-fit: cover; width: 100%;">
+                                          <img id="image-preview" src="#" alt="Previsualización" class="img-fluid rounded-3 shadow-sm mx-auto media-max-250">
                                           <p class="extra-small text-hubs mt-2 mb-0 fw-bold">Click para cambiar imagen</p>
                                       </div>
                                       <div class="d-none">{{ form.image }}</div>
@@ -91,15 +90,14 @@
 
                               <!-- Video Tab -->
                               <div class="tab-pane fade" id="video-pane" role="tabpanel" aria-labelledby="video-tab">
-                                  <div class="image-upload-container border border-dashed rounded-3 p-3 text-center" 
-                                      id="videoUploadContainer" 
-                                      style="cursor:pointer; background:#f8f9fa; border: 2px dashed var(--hubs-primary) !important;">
+                                  <div class="image-upload-container rounded-3 p-3 text-center upload-container-hubs" 
+                                      id="videoUploadContainer">
                                       <div id="videoUploadPlaceholder">
                                           <i class="bi bi-camera-video fs-2 text-muted"></i>
                                           <p class="small text-muted mb-0 d-block">Haz clic para subir un nuevo vídeo (Max 20MB)</p>
                                       </div>
                                       <div id="videoPreview" class="d-none">
-                                          <video id="video-preview" controls class="img-fluid rounded-3 shadow-sm mx-auto" style="max-height: 250px; width: 100%;"></video>
+                                          <video id="video-preview" controls class="img-fluid rounded-3 shadow-sm mx-auto media-max-250"></video>
                                           <p class="extra-small text-hubs mt-2 mb-0 fw-bold">Click para cambiar vídeo</p>
                                       </div>
                                       <div class="d-none">{{ form.video }}</div>
@@ -139,7 +137,7 @@
                         <div class="card border-0 shadow-sm rounded-4 overflow-hidden card-hubs h-100">
                             {% if d_post.image %}
                                 <div class="ratio ratio-16x9">
-                                    <img src="{{ d_post.image.url }}" class="card-img-top" style="object-fit: cover;">
+                                    <img src="{{ d_post.image.url }}" class="card-img-top object-fit-cover">
                                 </div>
                             {% endif %}
                             <div class="card-body p-3">
