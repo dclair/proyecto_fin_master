@@ -19,7 +19,7 @@ from notifications.models import Notification
 
 
 # --- LISTADO DE PERFILES ---
-class ProfilesListView(ListView):
+class ProfilesListView(LoginRequiredMixin, ListView):
     model = UserProfile
     template_name = "profiles/profile_list.html"
     context_object_name = "profiles"
