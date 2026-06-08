@@ -1,5 +1,5 @@
 {% load static %}
-<nav class="navbar navbar-expand-xl navbar-hubs fixed-top shadow-sm bg-white navbar-light">
+<nav class="navbar navbar-expand-xl navbar-hubs fixed-top shadow-sm bg-body-tertiary">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
             <img src="{% if logo_url %}{{ logo_url }}{% else %}{% static 'img/logo_hubs.png' %}{% endif %}" 
@@ -103,10 +103,17 @@
                         {% endif %}
                     </li>
 
+                    <!-- Dark Mode Toggle -->
+                    <li class="nav-item px-2 d-flex align-items-center">
+                        <button id="themeToggleBtn" class="btn btn-link nav-link p-0 border-0" aria-label="Cambiar tema">
+                            <i id="themeIcon" class="bi bi-moon-stars-fill text-dark fs-5"></i>
+                        </button>
+                    </li>
+
                     <li class="nav-item dropdown px-2">
                         <a class="nav-link d-flex align-items-center text-nowrap position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
                            title="Tus avisos y actividad reciente">
-                            <i class="bi bi-bell-fill {% if unread_notifications_count > 0 %}text-danger animate-bell{% else %}text-dark{% endif %}"></i>
+                            <i class="bi bi-bell-fill {% if unread_notifications_count > 0 %}text-danger animate-bell{% else %}text-body{% endif %}"></i>
                             <span id="notification-badge" 
                                   hx-get="{% url 'notifications:api_unread_count' %}" 
                                   hx-trigger="load, every 30s"

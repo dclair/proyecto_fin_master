@@ -19,6 +19,19 @@
     });
     </script>
 
+    <!-- Previene el FOUC (Flash of Unstyled Content) seteando el tema antes de renderizar -->
+    <script>
+      (function() {
+        const storedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+          document.documentElement.setAttribute('data-bs-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-bs-theme', 'light');
+        }
+      })();
+    </script>
+
     <title>{% block head_title %}Hubs & Clicks{% endblock head_title %}</title>
     {% block extra_css %}{% endblock extra_css %}
     
@@ -184,6 +197,29 @@
             // Escuchar eventos
             scrollContainer.addEventListener('scroll', handleScroll);
             window.addEventListener('resize', handleScroll);
+        }
+    });
+    </script>
+
+    <!-- Script para Toggle de Tema Oscuro -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+        
+        if (themeToggleBtn && themeIcon) {
+            // Setea el ícono inicial basado en el tema actual
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            themeIcon.className = currentTheme === 'dark' ? 'bi bi-sun-fill text-warning fs-5' : 'bi bi-moon-stars-fill text-dark fs-5';
+
+            themeToggleBtn.addEventListener('click', () => {
+                const theme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-bs-theme', theme);
+                localStorage.setItem('theme', theme);
+                
+                // Actualiza el ícono
+                themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill text-warning fs-5' : 'bi bi-moon-stars-fill text-dark fs-5';
+            });
         }
     });
     </script>
