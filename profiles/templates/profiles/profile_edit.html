@@ -20,25 +20,21 @@
 
             <div class="text-center mb-4">
               <div
-                class="position-relative d-inline-block"
+                class="position-relative d-inline-block cursor-pointer"
                 id="imageUploadContainer"
-                style="cursor: pointer"
               >
                 <div id="uploadPlaceholder">
                   {% if user_profile.profile_picture %}
                   <img
                     src="{{ user_profile.profile_picture.url }}"
-                    class="rounded-circle shadow"
-                    style="width: 130px; height: 130px; object-fit: cover"
+                    class="rounded-circle shadow avatar-lg"
                   />
                   {% else %}
                   <div
-                    class="rounded-circle shadow bg-light d-flex align-items-center justify-content-center"
-                    style="width: 130px; height: 130px"
+                    class="rounded-circle shadow bg-light d-flex align-items-center justify-content-center avatar-lg"
                   >
                     <i
-                      class="bi bi-person-fill text-muted"
-                      style="font-size: 3rem"
+                      class="bi bi-person-fill text-muted fs-3xl"
                     ></i>
                   </div>
                   {% endif %}
@@ -51,17 +47,8 @@
 
                 <div
                   id="imagePreview"
-                  class="d-none"
-                  style="width: 130px; height: 130px"
+                  class="d-none avatar-preview avatar-lg"
                 >
-                  <style>
-                    #imagePreview img {
-                      border-radius: 50% !important;
-                      width: 130px;
-                      height: 130px;
-                      object-fit: cover;
-                    }
-                  </style>
                 </div>
 
                 <div class="d-none">

@@ -65,35 +65,7 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchForm = document.getElementById('search-form');
-    
-    // Al enviar el formulario, asegurarse de mantener el filtro activo
-    searchForm.addEventListener('submit', function(e) {
-        const currentFilter = new URLSearchParams(window.location.search).get('filter');
-        if (currentFilter && !searchForm.querySelector('input[name="filter"]')) {
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'filter';
-            hiddenInput.value = currentFilter;
-            searchForm.appendChild(hiddenInput);
-        }
-    });
-});
-</script>
-
-<style>
-    .profile-card .card {
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .profile-card .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .btn-outline-primary.active {
-        background-color: #0d6efd;
-        color: white;
-    }
-</style>
+{% block extra_js %}
+<script src="{% static 'js/profile-list.js' %}?v=1.0"></script>
+{% endblock extra_js %}
 {% endblock content %}

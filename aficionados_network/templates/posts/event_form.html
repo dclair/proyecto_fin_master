@@ -39,14 +39,12 @@
                                     {% if form.instance.image %}
                                         <div class="text-center mb-3">
                                             <img src="{{ form.instance.image.url }}" 
-                                                 class="rounded-4 shadow-sm border" 
-                                                 style="width: 100%; max-height: 200px; object-fit: cover; border: 2px solid #0b5961 !important;">
+                                                 class="rounded-4 shadow-sm image-preview-hubs">
                                             <p class="extra-small text-muted mt-2">Imagen actual del evento</p>
                                         </div>
                                     {% endif %}
 
-                                    <div id="imageUploadContainer" class="border border-dashed rounded-3 p-3 text-center" 
-                                         style="cursor:pointer; background:#f8f9fa; border: 2px dashed #0b5961 !important;">
+                                    <div id="imageUploadContainer" class="rounded-3 p-3 text-center upload-container-hubs">
                                         
                                         <div id="uploadPlaceholder">
                                             <i class="bi bi-camera fs-2 text-muted"></i>
@@ -120,25 +118,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const isOnlineCheckbox = document.getElementById('id_is_online');
-        const streamUrlContainer = document.getElementById('id_stream_url');
-        
-        if (isOnlineCheckbox && streamUrlContainer) {
-            const containerRow = streamUrlContainer.closest('.mb-4');
-            function toggleStreamUrl() {
-                if (isOnlineCheckbox.checked) {
-                    containerRow.style.display = 'block';
-                } else {
-                    containerRow.style.display = 'none';
-                    // Optional: clear out the value when hidden
-                    // streamUrlContainer.value = '';
-                }
-            }
-            isOnlineCheckbox.addEventListener('change', toggleStreamUrl);
-            toggleStreamUrl(); // Initial state
-        }
-    });
-</script>
+<script src="{% static 'js/event-form.js' %}?v=1.0"></script>
 {% endblock extra_js %}

@@ -22,13 +22,11 @@
                                 {# Intentamos acceder al perfil de forma segura #}
                                 {% if request.user.profile and request.user.profile.profile_picture %}
                                     <img src="{{ request.user.profile.profile_picture.url }}" 
-                                         class="rounded-circle border border-2 border-white shadow-sm" 
-                                         style="width: 65px; height: 65px; object-fit: cover;" 
+                                         class="rounded-circle border border-2 border-white shadow-sm avatar-65" 
                                          alt="Perfil de {{ request.user.username }}">
                                 {% else %}
                                     {# Icono por defecto si el perfil no tiene imagen o no existe #}
-                                    <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center border border-2 border-white shadow-sm" 
-                                         style="width: 65px; height: 65px;">
+                                    <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center border border-2 border-white shadow-sm avatar-65">
                                         <i class="bi bi-person-fill fs-2"></i>
                                     </div>
                                 {% endif %}
@@ -99,9 +97,8 @@
                             <div class="tab-content mb-3" id="mediaTabsContent">
                               <!-- Image Tab -->
                               <div class="tab-pane fade show active" id="image-pane" role="tabpanel" aria-labelledby="image-tab">
-                                  <div class="image-upload-container border border-dashed rounded-3 p-3 text-center" 
-                                      id="imageUploadContainer" 
-                                      style="cursor:pointer; background:#f8f9fa; border: 2px dashed var(--hubs-primary) !important;">
+                                  <div class="image-upload-container rounded-3 p-3 text-center upload-container-hubs" 
+                                      id="imageUploadContainer">
                                       
                                       <div id="uploadPlaceholder">
                                           <i class="bi bi-camera fs-2 text-muted"></i>
@@ -110,8 +107,7 @@
 
                                       <div id="imagePreview" class="d-none">
                                           <img id="image-preview" src="#" alt="Previsualización" 
-                                              class="img-fluid rounded-3 shadow-sm mx-auto" 
-                                              style="max-height: 250px; object-fit: cover; width: 100%;">
+                                              class="img-fluid rounded-3 shadow-sm mx-auto media-max-250">
                                           <p class="extra-small text-hubs mt-2 mb-0 fw-bold">Click para cambiar imagen</p>
                                       </div>
 
@@ -123,9 +119,8 @@
 
                               <!-- Video Tab -->
                               <div class="tab-pane fade" id="video-pane" role="tabpanel" aria-labelledby="video-tab">
-                                  <div class="image-upload-container border border-dashed rounded-3 p-3 text-center" 
-                                      id="videoUploadContainer" 
-                                      style="cursor:pointer; background:#f8f9fa; border: 2px dashed var(--hubs-primary) !important;">
+                                  <div class="image-upload-container rounded-3 p-3 text-center upload-container-hubs" 
+                                      id="videoUploadContainer">
                                       
                                       <div id="videoUploadPlaceholder">
                                           <i class="bi bi-camera-video fs-2 text-muted"></i>
@@ -133,7 +128,7 @@
                                       </div>
 
                                       <div id="videoPreview" class="d-none">
-                                          <video id="video-preview" controls class="img-fluid rounded-3 shadow-sm mx-auto" style="max-height: 250px; width: 100%;"></video>
+                                          <video id="video-preview" controls class="img-fluid rounded-3 shadow-sm mx-auto media-max-250"></video>
                                           <p class="extra-small text-hubs mt-2 mb-0 fw-bold">Click para cambiar vídeo</p>
                                       </div>
 
@@ -171,7 +166,7 @@
                             {% for cat in trending_categories %}
                             <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-2">
                                 <div class="d-flex align-items-center">
-                                    <div class="rounded-circle bg-light-hubs text-hubs d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
+                                    <div class="rounded-circle bg-light-hubs text-hubs d-flex align-items-center justify-content-center me-3 avatar-xxs">
                                         <i class="bi bi-hash"></i>
                                     </div>
                                     <div>

@@ -11,8 +11,7 @@
                 <a href="{% url 'profiles:profile' profile.pk %}" class="text-decoration-none">
                     <div class="position-relative d-inline-block">
                         <img src="{{ profile.profile_picture_url }}" 
-                             class="rounded-circle img-thumbnail" 
-                             style="width: 80px; height: 80px; object-fit: cover;"
+                             class="rounded-circle img-thumbnail avatar-md" 
                              alt="{{ profile.user.username }}">
                         {% if profile.user.is_online %}
                         <span class="position-absolute bottom-0 end-0 bg-success rounded-circle p-2 border border-3 border-white"></span>
@@ -29,27 +28,27 @@
                 </a>
             </h6>
             
-            <p class="text-muted text-truncate mb-2" style="font-size: 0.75rem;" title="{{ profile.user.email }}">
+            <p class="text-muted text-truncate mb-2 fs-xs" title="{{ profile.user.email }}">
                 <i class="bi bi-envelope me-1"></i>{{ profile.user.email }}
             </p>
 
             <div class="mb-2">
                 {% if user.is_authenticated %}
                     {% if user == profile.user %}
-                        <span class="badge bg-secondary" style="font-size: 0.7em;">Tú</span>
+                        <span class="badge bg-secondary fs-xxs">Tú</span>
                     {% elif profile.is_followed %}
-                        <span class="badge bg-success" style="font-size: 0.7em;">
+                        <span class="badge bg-success fs-xxs">
                             <i class="bi bi-check-circle-fill"></i> Siguiendo
                         </span>
                     {% else %}
-                        <span class="badge bg-light text-dark border" style="font-size: 0.7em;">
+                        <span class="badge bg-light text-dark border fs-xxs">
                             <i class="bi bi-person-plus"></i> No sigues
                         </span>
                     {% endif %}
                 {% endif %}
             </div>
 
-            <div class="mt-2 text-muted" style="font-size: 0.75rem;">
+            <div class="mt-2 text-muted fs-xs">
                 <div><i class="bi bi-postcard me-1"></i>{{ profile.user.posts.count }} pub.</div>
                 <div><i class="bi bi-people me-1"></i>{{ profile.followers_count }} seg.</div>
             </div>
