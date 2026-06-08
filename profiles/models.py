@@ -61,6 +61,15 @@ class UserProfile(models.Model):
     website = models.URLField(
         "sitio web", blank=True, null=True, help_text="Ej: https://tusitio.com"
     )
+    phone = models.CharField(
+        "teléfono fijo", max_length=20, blank=True, null=True, help_text="Teléfono de la consulta"
+    )
+    mobile = models.CharField(
+        "teléfono móvil", max_length=20, blank=True, null=True, help_text="Móvil de contacto"
+    )
+    address = models.CharField(
+        "dirección", max_length=255, blank=True, null=True, help_text="Dirección de la consulta"
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="creado el")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="actualizado el")
 

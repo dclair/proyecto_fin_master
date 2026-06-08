@@ -19,6 +19,8 @@ Protocolo de Cancelación: Sistema seguro de cancelación que bloquea interaccio
 
 Identidad Social: Perfiles con biografía, ubicación, sitio web y selección de terapias con niveles de especialización.
 
+Privacidad de Contacto: Campos sensibles (teléfono, móvil, dirección y email) protegidos y visibles únicamente para usuarios registrados de la comunidad.
+
 Estadísticas en Tiempo Real: Contadores dinámicos de publicaciones, seguidores, siguiendo, eventos y participaciones.
 
 Agenda Personal: Visualización de las próximas citas confirmadas directamente en el perfil.
