@@ -8,6 +8,7 @@ const GroupCreator = ({ onBack, onGroupCreated }) => {
   const [groupName, setGroupName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     // Cargar la lista de usuarios elegibles para el grupo
@@ -18,6 +19,14 @@ const GroupCreator = ({ onBack, onGroupCreated }) => {
         setError("Error al cargar la lista de usuarios.");
       });
   }, []);
+
+  const filteredUsers = users.filter(user => {
+    const query = searchQuery.toLowerCase();
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
+    const username = (user.username || '').toLowerCase();
+    const email = (user.email || '').toLowerCase();
+    return fullName.includes(query) || username.includes(query) || email.includes(query);
+  });
 
   const toggleUser = (userId) => {
     setSelectedUserIds(prev => {
@@ -97,11 +106,20 @@ const GroupCreator = ({ onBack, onGroupCreated }) => {
           <label className="form-label fw-bold text-muted" style={{fontSize: '0.85rem'}}>
             Participantes ({selectedUserIds.length} seleccionados)
           </label>
+          <div className="mb-2">
+            <input 
+              type="text" 
+              className="form-control form-control-sm" 
+              placeholder="Buscar por nombre, usuario o email..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <div className="list-group list-group-flush border rounded" style={{maxHeight: '200px', overflowY: 'auto'}}>
-            {users.length === 0 ? (
-              <div className="p-3 text-center text-muted" style={{fontSize: '0.85rem'}}>No hay usuarios disponibles.</div>
+            {filteredUsers.length === 0 ? (
+              <div className="p-3 text-center text-muted" style={{fontSize: '0.85rem'}}>No se encontraron usuarios.</div>
             ) : (
-              users.map(user => {
+              filteredUsers.map(user => {
                 const isSelected = selectedUserIds.includes(user.id);
                 return (
                   <button

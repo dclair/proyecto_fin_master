@@ -144,7 +144,7 @@
                     {{ event.title }}
                 </h2>
 
-                <div class="bg-light p-3 rounded-4 border-start border-4 border-hubs">
+                <div class="bg-light p-3 rounded-4 border-start border-4 border-hubs dark-mode-text-dark">
                     <div class="mb-2 d-flex align-items-center">
                         <i class="bi bi-calendar3 me-2 text-hubs"></i>
                         <strong>{{ event.event_date|date:"l, d F" }}</strong>
@@ -215,10 +215,10 @@
             <div class="d-flex mb-3">
                 <img src="{% if comment.user.profile.profile_picture %}{{ comment.user.profile.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ comment.user.username }}&background=0b5961&color=fff{% endif %}"
                      class="rounded-circle border shadow-sm" style="width:45px;height:45px;object-fit:cover;">
-                <div class="ms-3 bg-white p-3 rounded-4 shadow-sm flex-grow-1">
+                <div class="ms-3 bg-white p-3 rounded-4 shadow-sm flex-grow-1 dark-mode-text-dark dark-mode-border">
                     <div class="d-flex justify-content-between mb-1">
                         <strong class="text-hubs">@{{ comment.user.username }}</strong>
-                        <small class="text-muted">{{ comment.created_at|timesince }}</small>
+                        <small class="text-muted dark-mode-text-dark">{{ comment.created_at|timesince }}</small>
                     </div>
                     <p class="mb-0">{{ comment.content|linebreaksbr }}</p>
                 </div>

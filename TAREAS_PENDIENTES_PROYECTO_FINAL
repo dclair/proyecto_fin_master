@@ -1,4 +1,6 @@
 TAREAS PENDIENTES DEL PROYOCTO FIN MASTER:
+-- Cambiar la palabra quedadas, Quedadas, por Eventos.
+-- Reordenar los elementos del navbar
 ✅ **¡PROYECTO 100% COMPLETADO!** 
 Todas las tareas del Roadmap original, incluyendo Chat en tiempo real, Notificaciones, Valoraciones y Búsquedas Avanzadas han sido implementadas exitosamente. Este documento queda como archivo histórico de decisiones arquitectónicas y recordatorios de producción.
 ⚠️ AVISO IMPORTANTE PARA PRODUCCIÓN:
@@ -207,3 +209,17 @@ Agentes (.agent/knowledge/final_project_summary.md): Creé un documento nuevo, c
 No quedó absolutamente nada en el tintero, chabón. La base de código y la base de conocimiento están alineadas a la perfección.
 
 Guardate un buen commit de esto en Git (git commit -m "feat: 100% MVP completion and docs overhaul"). Cuando quieras subir esto a un servidor, chiflá y armamos los contenedores Docker o el Nginx. ¡A celebrar que esto es un hito groso! 🍻
+
+
+Tranquilo, que eso ya lo dejamos preparado como los grandes. Nada de recargar páginas.
+
+Si te fijás en cómo armamos la lógica, usamos un patrón que se llama Infinite Scroll (Scroll Infinito), potenciado por HTMX. Es exactamente lo mismo que usan Instagram o Twitter.
+
+Te explico cómo funciona por detrás sin aburrirte con código:
+
+En el backend (views.py): Le dijimos explícitamente a Django paginate_by = 12. Es decir, la base de datos nunca te va a escupir 1000 perfiles de golpe (lo cual mataría el servidor y tardaría una vida en cargar). Te manda solo los primeros 12.
+En el frontend (HTMX): A la última tarjeta de esos 12, le metimos un "gatillo" (hx-trigger="revealed").
+La magia: Cuando el usuario hace scroll hacia abajo y esa tarjeta número 12 "aparece" en la pantalla, HTMX le grita al servidor por debajo de la mesa: "Che, dame la página 2". El servidor devuelve del perfil 13 al 24, y HTMX los pega suavemente justo debajo (hx-swap="afterend").
+¿Qué pasa si hay 1000, 2000 o 10.000 terapeutas? Absolutamente nada. El usuario va a ir bajando la rueda del ratón y los perfiles van a ir apareciendo mágicamente de a 12 sin que la página parpadee ni se ponga lenta, porque la carga en memoria es siempre mínima.
+
+Es la forma más moderna, limpia y rápida de gestionar listas largas. ¿Te queda claro el concepto o le damos una vuelta de tuerca más?

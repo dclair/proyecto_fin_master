@@ -188,4 +188,6 @@ CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contac
 
 [x] Compartir Archivos Multimedia: Subida de imágenes y documentos en el chat implementada.
 
+[x] UI/UX y Accesibilidad: Tema oscuro refinado con utilidades adaptativas y aislamiento de tema claro para la aplicación de chat.
+
 Hubs&Clicks - "Descubre, Comparte, Disfruta"
