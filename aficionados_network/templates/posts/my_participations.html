@@ -5,7 +5,7 @@
     
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0"><i class="bi bi-ticket-perforated me-2 text-info"></i>Mis Citas</h2>
+            <h2 class="fw-bold mb-0 text-dark-mode-white"><i class="bi bi-ticket-perforated me-2 text-info"></i>Mis Citas</h2>
             <p class="text-muted small d-none d-md-block">Gestiona los planes a los que has asistido o asistirás.</p>
         </div>
         <a href="{% url 'posts:event_list' %}" class="btn btn-outline-primary btn-sm shadow-sm">
@@ -29,13 +29,13 @@
                     {% for event in participations %}
                     <tr>
                         <td class="ps-4">
-                            <div class="fw-bold text-dark text-truncate event-title-truncate">
+                            <div class="fw-bold text-dark text-dark-mode-white text-truncate event-title-truncate">
                                 {{ event.title }}
                             </div>
                         </td>
 
                         <td class="d-none d-sm-table-cell">
-                            <span class="small text-dark">{{ event.organizer.username }}</span>
+                            <span class="small text-dark text-dark-mode-white">{{ event.organizer.username }}</span>
                         </td>
 
                         <td class="text-center">
@@ -44,7 +44,7 @@
                                 <span class="badge rounded-pill bg-info-subtle text-info extra-small mb-1 animate__animated animate__pulse animate__infinite" style="font-size: 0.65rem;">¡HOY!</span>
                                 <div class="small fw-bold text-info">{{ event.event_date|date:"d M Y" }}</div>
                             {% else %}
-                                <div class="small fw-bold text-dark">{{ event.event_date|date:"d M Y" }}</div>
+                                <div class="small fw-bold text-dark text-dark-mode-white">{{ event.event_date|date:"d M Y" }}</div>
                             {% endif %}
                             <div class="extra-small text-muted">{{ event.event_date|date:"H:i" }}h</div>
                         </td>

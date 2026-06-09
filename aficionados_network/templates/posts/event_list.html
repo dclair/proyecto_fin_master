@@ -4,7 +4,7 @@
 {% block page_title %}
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h2 class="mb-0"><i class="bi bi-calendar-event me-2 text-hubs"></i>Explorar Quedadas</h2>
+            <h2 class="mb-0 text-dark-mode-white"><i class="bi bi-calendar-event me-2 text-hubs"></i>Explorar Quedadas</h2>
             <p class="text-muted small mb-0">Busca por nombre, nivel o terapia</p>
         </div>
         <a href="{% url 'posts:event_create' %}" class="btn btn-hubs shadow-sm">
@@ -21,7 +21,7 @@
         <div class="card-body bg-light rounded border-start border-hubs border-4">
             <form method="GET" action="{% url 'posts:event_list' %}" class="row g-2 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold text-muted">¿Qué buscas?</label>
+                    <label class="form-label small fw-bold text-muted dark-mode-text-dark">¿Qué buscas?</label>
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-hubs"></i></span>
                         <input type="text" name="q" class="form-control border-start-0" placeholder="Título..." value="{{ current_q }}">
@@ -29,7 +29,7 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label small fw-bold text-muted">Ciudad</label>
+                    <label class="form-label small fw-bold text-muted dark-mode-text-dark">Ciudad</label>
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-geo-alt text-hubs"></i></span>
                         <input type="text" name="city" class="form-control border-start-0" placeholder="Ej: Madrid..." value="{{ current_city }}">
@@ -37,7 +37,7 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label small fw-bold text-muted">Categoría</label>
+                    <label class="form-label small fw-bold text-muted dark-mode-text-dark">Categoría</label>
                     <select name="hobby" class="form-select form-select-sm">
                         <option value="all">Todas</option>
                         {% for hobby in hobbies %}
@@ -47,9 +47,10 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold text-muted">Nivel de la actividad</label>
+                    <label class="form-label small fw-bold text-muted dark-mode-text-dark">Nivel de la actividad</label>
                     <select name="level" class="form-select form-select-sm">
-                        <option value="all">Cualquier nivel</option>
+                        <option value="any" {% if current_level == 'any' %}selected{% endif %}>Cualquier nivel</option>
+                        <option value="all" {% if current_level == 'all' %}selected{% endif %}>Para todos</option>
                         <option value="beginner" {% if current_level == 'beginner' %}selected{% endif %}>Principiante</option>
                         <option value="intermediate" {% if current_level == 'intermediate' %}selected{% endif %}>Intermedio</option>
                         <option value="advanced" {% if current_level == 'advanced' %}selected{% endif %}>Avanzado</option>
@@ -70,7 +71,7 @@
                 <div class="col-12 mt-3">
                     <div class="form-check form-switch small">
                         <input class="form-check-input" type="checkbox" role="switch" id="myHobbiesSwitch" name="my_hobbies" value="true" {% if current_my_hobbies %}checked{% endif %} onchange="this.form.submit()">
-                        <label class="form-check-label text-muted fw-bold" for="myHobbiesSwitch">
+                        <label class="form-check-label text-muted fw-bold dark-mode-text-dark" for="myHobbiesSwitch">
                             <i class="bi bi-star-fill text-warning me-1"></i>Mostrar solo mis terapias
                         </label>
                     </div>
@@ -141,7 +142,7 @@
                     </h5>
                     <p class="text-muted small mb-3">{{ event.description|truncatechars:80 }}</p>
                     
-                    <div class="bg-light p-3 rounded mb-3 small border-start border-hubs border-3">
+                    <div class="bg-light p-3 rounded mb-3 small border-start border-hubs border-3 dark-mode-text-dark">
                         {% if event.is_online and event.location %}
                             <div class="mb-1"><span class="badge bg-primary me-2"><i class="bi bi-globe me-1"></i>Híbrido</span><strong>{{ event.location }} y Online</strong></div>
                         {% elif event.is_online %}

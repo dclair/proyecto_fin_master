@@ -36,8 +36,8 @@ Este documento sirve como anclaje de conocimiento para cualquier agente que anal
 - El chat está compilado con Vite. Los assets se generan en `static/chat/`.
 - La Base de Datos principal en producción es MySQL/MariaDB (`DB_ENGINE=mysql`).
 - Las dependencias asíncronas para el chat están limitadas en versiones (`redis<5.0.0`) para evitar bugs documentados.
+- **Modo Oscuro:** Gestionado de forma global en Django vía `[data-bs-theme="dark"]` en `style.css`. La aplicación de Chat en React está explícitamente aislada en modo claro (`data-bs-theme="light"`) para evitar colisiones de diseño con sus componentes hardcodeados.
 
 **Next Steps Posibles (Mantenimiento):**
 - Optimización de queries (Select_related).
 - Configuración de SSL (WSS/HTTPS) para producción.
-- Ajustes finos de CSS si el cliente lo requiere.

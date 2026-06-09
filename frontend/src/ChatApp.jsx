@@ -244,6 +244,7 @@ const ChatApp = () => {
         <div 
           ref={panelRef}
           className="chat-panel shadow-lg"
+          data-bs-theme="light"
           style={{
             position: 'fixed',
             top: isMobile ? '10vh' : 'auto',

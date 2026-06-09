@@ -22,7 +22,7 @@
                                 <div class="d-flex flex-column">
                                     <span class="fw-bold extra-small lh-1">{{ post.user.username }}</span>
                                     {% if post.location %}
-                                        <small class="text-muted extra-small mt-1" style="font-size: 0.65rem;">
+                                        <small class="text-dark extra-small mt-1" style="font-size: 0.65rem;">
                                             <i class="bi bi-geo-alt-fill text-danger opacity-75"></i> {{ post.location }}
                                         </small>
                                     {% endif %}
@@ -32,13 +32,13 @@
 
                         {% if post.category %}
                             <span class="badge-hobby-post ms-1">
-                                <i class="bi bi-tag-fill"></i>
-                                <strong>{{ post.category.name|upper }}</strong>
+                                <i class="bi bi-tag-fill text-hubs"></i>
+                                <strong class="text-hubs">{{ post.category.name|upper }}</strong>
                             </span>
                         {% endif %}
 
                         <div class="ms-auto d-flex align-items-center gap-2">
-                            <small class="text-muted" style="font-size: 0.7rem;">
+                            <small class="text-dark" style="font-size: 0.7rem;">
                                 {{ post.created_at|date:"d M" }}
                             </small>
 

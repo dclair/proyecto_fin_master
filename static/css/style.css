@@ -28,6 +28,17 @@ body {
     padding-top: calc(var(--navbar-height) + 20px) !important;
 }
 
+[data-bs-theme="dark"] {
+    /* Verde principal más claro para asegurar contraste contra el fondo oscuro */
+    --hubs-primary: #2ba1ab; /* Un pelín más oscuro que el anterior, pero legible */
+    --hubs-primary-hover: #35b6c0;
+    --hubs-primary-subtle: rgba(43, 161, 171, 0.15);
+    
+    /* Override Bootstrap primary variables just in case */
+    --bs-primary: #2ba1ab;
+    --bs-primary-rgb: 43, 161, 171;
+}
+
 [data-bs-theme="dark"] body {
     background-color: var(--bs-body-bg);
     color: var(--bs-body-color);
@@ -143,13 +154,13 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 [data-bs-theme="dark"] .card-click,
 [data-bs-theme="dark"] .sidebar-group {
     background-color: var(--bs-dark) !important;
-    border-color: var(--bs-border-color) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important; /* Fuerza el borde visible y sólido */
 }
 
 /* En modo oscuro, las sombras no se ven, por lo que las cards sin borde (border-0) parecen flotar. 
    Les forzamos un borde sutil para delimitar su espacio. */
 [data-bs-theme="dark"] .card.border-0 {
-    border: 1px solid var(--bs-border-color) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 .profile-post-card, .post-card {
     
@@ -290,8 +301,49 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
     color: #adb5bd !important;
 }
 
+[data-bs-theme="dark"] .text-dark-mode-white {
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .text-dark-mode-hubs {
+    color: var(--hubs-primary) !important;
+}
+
+[data-bs-theme="dark"] .dark-mode-text-dark {
+    color: #212529 !important;
+}
+
+[data-bs-theme="dark"] .dark-mode-text-navbar {
+    color: #2b3035 !important; /* Gris del navbar en tema oscuro */
+}
+
+[data-bs-theme="dark"] .dark-mode-border {
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
 /* ============================================================
-   7. UTILIDADES Y ANIMACIÓN
+   7. UTILIDADES Y SCROLL
+   ============================================================ */
+
+/* Scroll independiente para columnas sticky muy altas */
+.sticky-sidebar-scroll {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+.sticky-sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+.sticky-sidebar-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+[data-bs-theme="dark"] .sticky-sidebar-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================
+   8. UTILIDADES Y ANIMACIÓN
    ============================================================ */
 .bg-light-hover:hover {
     background-color: var(--hubs-primary-subtle) !important;
@@ -1036,4 +1088,27 @@ footer a:active {
     border-color: var(--hubs-primary) !important;
 }
 .transition-all { transition: all 0.2s ease-in-out; }
+
+/* ============================================================
+   10. NAV-TABS MODO OSCURO
+   ============================================================ */
+[data-bs-theme="dark"] .nav-tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link {
+    border-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) transparent rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link:hover {
+    border-color: rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.4) transparent rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link.active {
+    color: var(--hubs-primary) !important;
+    border-color: var(--hubs-primary) var(--hubs-primary) var(--bs-card-bg, #212529) var(--hubs-primary) !important;
+    background-color: var(--bs-card-bg, #212529) !important;
+}
 .text-primary-hover:hover { color: #0d6efd; text-decoration: underline; }

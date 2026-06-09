@@ -5,6 +5,26 @@
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
 
+## 2026-06-09: Dark Mode UI/UX Accessibility & Chat Isolation
+
+**Type:** feature / UI / accessibility
+**Status:** done
+
+What changed:
+- Audited and refined dark mode across the platform to fix low-contrast text on light backgrounds (especially in Event Cards, User Profiles, and "Últimos Clicks" badges).
+- Implemented adaptive utility classes in CSS (`.text-dark-mode-hubs`, `.dark-mode-text-dark`, etc.) scoped under `[data-bs-theme="dark"]`.
+- Added sticky-sidebar scrolling fixes for the Event Creation layout.
+- Added real-time user search functionality to the `GroupCreator.jsx` React component.
+- Isolated the React Chat panel from the global dark mode by wrapping it with `data-bs-theme="light"`, preventing unreadable text interactions with its hardcoded background colors.
+
+Why:
+- To ensure professional accessibility standards and visual consistency regardless of the user's theme preference.
+- To prevent UI conflicts in the complex chat DOM without requiring a complete CSS rewrite of the React components.
+
+Impact:
+- Users now have a pristine dark mode experience on all standard Django views.
+- The Chat application functions flawlessly in permanent light mode, avoiding text invisibility issues.
+
 ## 2026-06-07: Search Enhancements, Reviews, and Therapy Filters
 
 **Type:** feature / UI
