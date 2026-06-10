@@ -35,6 +35,31 @@
                     </a>
                 </li>
                 
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown px-2">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center text-nowrap {% if request.resolver_match.url_name == 'my_participations' or request.resolver_match.url_name == 'my_events' %}active fw-bold text-hubs{% endif %}" 
+                       href="#" id="agendaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Gestiona tu agenda personal">
+                        <i class="bi bi-journal-bookmark-fill me-1 text-secondary"></i> Agenda
+                    </a>
+                    <ul class="dropdown-menu shadow-sm border-0 mt-1 rounded-3 min-w-200" aria-labelledby="agendaDropdown">
+                        <li>
+                            <a href="{% url 'posts:my_participations' %}" 
+                               class="dropdown-item d-flex align-items-center py-2 {% if request.resolver_match.url_name == 'my_participations' %}bg-light text-dark fw-bold{% endif %}"
+                               title="Gestiona tus encuentros y citas confirmadas">
+                                <i class="bi bi-bookmark-check-fill me-2 text-success"></i> Mis Citas
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'posts:my_events' %}" 
+                               class="dropdown-item d-flex align-items-center py-2 {% if request.resolver_match.url_name == 'my_events' %}bg-light text-dark fw-bold{% endif %}"
+                               title="Administra tus propuestas y planes creados">
+                                <i class="bi bi-calendar-plus-fill me-2 text-primary"></i> Mis Planes
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %}
+                
                 <li class="nav-item">
                     <a class="nav-link px-2 d-flex align-items-center text-nowrap {% if 'profiles' in request.resolver_match.app_name %}active fw-bold text-hubs{% endif %}" 
                        href="{% url 'profiles:profile_list' %}"
@@ -42,6 +67,19 @@
                         <i class="bi bi-people me-1"></i> Comunidad de Terapeutas
                     </a>
                 </li>
+
+                {% if user.is_authenticated %}
+                <!-- REACT CHAT ROOT -->
+                <li class="nav-item px-2 position-relative" id="react-chat-root"></li>
+
+                <li class="nav-item ms-xl-2">
+                    <a href="{% url 'posts:post_create' %}" 
+                       class="nav-link px-3 d-flex align-items-center text-nowrap rounded-pill border border-hubs-subtle {% if request.resolver_match.url_name == 'post_create' %}active fw-bold bg-light{% endif %}" 
+                       title="Añadir publicaciones y descubrir la comunidad">
+                        <i class="bi bi-plus-circle-fill me-1 text-hubs"></i> Nueva Publicación
+                    </a>
+                </li>
+                {% endif %}
 
                 <li class="nav-item">
                     <a class="nav-link px-2 d-flex align-items-center text-nowrap {% if request.resolver_match.url_name == 'clicks_list' %}active fw-bold text-hubs{% endif %}" 
@@ -59,39 +97,6 @@
                         </a>
                     </li>
                 {% else %}
-                    <hr class="d-xl-none my-2 text-muted opacity-25">
-
-                    <li class="nav-item dropdown px-2">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center text-nowrap {% if request.resolver_match.url_name == 'my_participations' or request.resolver_match.url_name == 'my_events' %}active fw-bold text-hubs{% endif %}" 
-                           href="#" id="agendaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Gestiona tu agenda personal">
-                            <i class="bi bi-journal-bookmark-fill me-1 text-secondary"></i> Agenda
-                        </a>
-                        <ul class="dropdown-menu shadow-sm border-0 mt-1 rounded-3 min-w-200" aria-labelledby="agendaDropdown">
-                            <li>
-                                <a href="{% url 'posts:my_participations' %}" 
-                                   class="dropdown-item d-flex align-items-center py-2 {% if request.resolver_match.url_name == 'my_participations' %}bg-light text-dark fw-bold{% endif %}"
-                                   title="Gestiona tus encuentros y citas confirmadas">
-                                    <i class="bi bi-bookmark-check-fill me-2 text-success"></i> Mis Citas
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'posts:my_events' %}" 
-                                   class="dropdown-item d-flex align-items-center py-2 {% if request.resolver_match.url_name == 'my_events' %}bg-light text-dark fw-bold{% endif %}"
-                                   title="Administra tus propuestas y planes creados">
-                                    <i class="bi bi-calendar-plus-fill me-2 text-primary"></i> Mis Planes
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    
-                    <li class="nav-item ms-xl-2">
-                        <a href="{% url 'posts:post_create' %}" 
-                           class="nav-link px-3 d-flex align-items-center text-nowrap rounded-pill border border-hubs-subtle {% if request.resolver_match.url_name == 'post_create' %}active fw-bold bg-light{% endif %}" 
-                           title="Añadir publicaciones y descubrir la comunidad">
-                            <i class="bi bi-plus-circle-fill me-1 text-hubs"></i> Nueva Publicación
-                        </a>
-                    </li>
-
                     <li class="nav-item">
                         {% if user.profile %}
                             <a href="{% url 'profiles:profile' user.profile.pk %}" 
@@ -101,61 +106,50 @@
                             </a>
                         {% endif %}
                     </li>
+                {% endif %}
 
-                    <!-- Dark Mode Toggle -->
-                    <li class="nav-item px-2 d-flex align-items-center">
-                        <button id="themeToggleBtn" class="btn btn-link nav-link p-0 border-0" aria-label="Cambiar tema">
-                            <i id="themeIcon" class="bi bi-moon-stars-fill text-dark fs-5"></i>
-                        </button>
-                    </li>
+                <li class="nav-item px-2 d-flex align-items-center">
+                    <button id="themeToggleBtn" class="btn btn-link nav-link p-0 border-0" aria-label="Cambiar tema">
+                        <i id="themeIcon" class="bi bi-moon-stars-fill text-dark fs-5"></i>
+                    </button>
+                </li>
 
-                    <li class="nav-item dropdown px-2">
-                        <a class="nav-link d-flex align-items-center text-nowrap position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-                           title="Tus avisos y actividad reciente">
-                            <i class="bi bi-bell-fill {% if unread_notifications_count > 0 %}text-danger animate-bell{% else %}text-body{% endif %}"></i>
-                            <span id="notification-badge" 
-                                  hx-get="{% url 'notifications:api_unread_count' %}" 
-                                  hx-trigger="load, every 30s"
-                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white fs-micro px-1 py-1 {% if unread_notifications_count == 0 %}d-none{% endif %}">
-                                {{ unread_notifications_count }}
-                            </span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0 overflow-hidden min-w-320 rounded-4">
-                            <li class="bg-light p-3 border-bottom"><span class="small fw-bold text-uppercase text-muted">Avisos Recientes</span></li>
-                            <div class="list-group list-group-flush max-h-350">
-                                {% for n in user.notifications.all|slice:":5" %}
-                                    <a href="{% url 'notifications:read_and_redirect' n.id %}" class="list-group-item list-group-item-action py-3">
-                                        <div class="d-flex align-items-start">
-                                            <div class="flex-shrink-0 me-3">
-                                                {% if n.notification_type == 'like' %}<i class="bi bi-heart-fill text-danger"></i>
-                                                {% elif n.notification_type == 'comment' %}<i class="bi bi-chat-dots-fill text-hubs"></i>
-                                                {% else %}<i class="bi bi-info-circle text-info"></i>{% endif %}
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <p class="mb-0 small text-dark text-dark-mode-white"><span class="fw-bold">{{ n.sender.username }}</span> {{ n.text|default:n.get_notification_type_display }}</p>
-                                                <small class="text-muted fs-xxs">{{ n.created_at|timesince }}</small>
-                                            </div>
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown px-2">
+                    <a class="nav-link d-flex align-items-center text-nowrap position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                       title="Tus avisos y actividad reciente">
+                        <i class="bi bi-bell-fill {% if unread_notifications_count > 0 %}text-danger animate-bell{% else %}text-body{% endif %}"></i>
+                        <span id="notification-badge" 
+                              hx-get="{% url 'notifications:api_unread_count' %}" 
+                              hx-trigger="load, every 30s"
+                              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white fs-micro px-1 py-1 {% if unread_notifications_count == 0 %}d-none{% endif %}">
+                            {{ unread_notifications_count }}
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0 overflow-hidden min-w-320 rounded-4">
+                        <li class="bg-light p-3 border-bottom"><span class="small fw-bold text-uppercase text-muted">Avisos Recientes</span></li>
+                        <div class="list-group list-group-flush max-h-350">
+                            {% for n in user.notifications.all|slice:":5" %}
+                                <a href="{% url 'notifications:read_and_redirect' n.id %}" class="list-group-item list-group-item-action py-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0 me-3">
+                                            {% if n.notification_type == 'like' %}<i class="bi bi-heart-fill text-danger"></i>
+                                            {% elif n.notification_type == 'comment' %}<i class="bi bi-chat-dots-fill text-hubs"></i>
+                                            {% else %}<i class="bi bi-info-circle text-info"></i>{% endif %}
                                         </div>
-                                    </a>
-                                {% empty %}
-                                    <div class="text-center py-4"><p class="small text-muted mb-0">Sin notificaciones</p></div>
-                                {% endfor %}
-                            </div>
-                            <li><a class="dropdown-item text-center py-2 small fw-bold text-primary bg-light" href="{% url 'notifications:list' %}">Ver historial</a></li>
-                        </ul>
-                    </li>
-
-                    <!-- REACT CHAT ROOT (Opción Híbrida) -->
-                    <li class="nav-item px-2 position-relative" id="react-chat-root"></li>
-
-                    <li class="nav-item d-xl-none mt-3">
-                        <form method="post" action="{% url 'logout' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger w-100 rounded-pill btn-sm fw-medium" title="Cerrar sesión y salir de tu cuenta">
-                                <i class="bi bi-power me-1"></i> Salir
-                            </button>
-                        </form>
-                    </li>
+                                        <div class="flex-grow-1">
+                                            <p class="mb-0 small text-dark text-dark-mode-white"><span class="fw-bold">{{ n.sender.username }}</span> {{ n.text|default:n.get_notification_type_display }}</p>
+                                            <small class="text-muted fs-xxs">{{ n.created_at|timesince }}</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% empty %}
+                                <div class="text-center py-4"><p class="small text-muted mb-0">Sin notificaciones</p></div>
+                            {% endfor %}
+                        </div>
+                        <li><a class="dropdown-item text-center py-2 small fw-bold text-primary bg-light" href="{% url 'notifications:list' %}">Ver historial</a></li>
+                    </ul>
+                </li>
                 {% endif %}
 
                 <li class="nav-item">
@@ -165,12 +159,13 @@
                         <i class="bi bi-envelope me-1"></i> Contacto
                     </a>
                 </li>
+                
                 {% if user.is_authenticated %}
-                <li class="nav-item d-none d-xl-block ms-xl-2">
-                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                <li class="nav-item ms-xl-2">
+                    <form method="post" action="{% url 'logout' %}" class="d-inline w-100">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-link nav-link text-muted small px-2 border-0 text-decoration-none text-nowrap fw-medium" title="Cerrar sesión y salir de tu cuenta">
-                            <i class="bi bi-power text-danger me-1"></i> Salir
+                        <button type="submit" class="btn btn-link nav-link px-2 border-0 text-decoration-none text-nowrap fw-medium d-flex align-items-center w-100 text-danger" title="Cerrar sesión y salir de tu cuenta">
+                            <i class="bi bi-power me-1"></i> Salir
                         </button>
                     </form>
                 </li>

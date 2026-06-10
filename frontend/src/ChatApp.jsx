@@ -209,12 +209,13 @@ const ChatApp = () => {
     <>
       <a 
         id="chat-toggle-link"
-        className="nav-link d-flex align-items-center text-nowrap position-relative" 
+        className="nav-link px-2 d-flex align-items-center text-nowrap position-relative" 
         href="#" 
         onClick={(e) => { e.preventDefault(); setIsOpen(!isOpen); }}
         title="Chat de la comunidad"
         style={{ cursor: 'pointer' }}
       >
+        <span className="me-2 fw-medium">Chat</span>
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <div 
             className="d-flex align-items-center justify-content-center text-white shadow-sm" 
