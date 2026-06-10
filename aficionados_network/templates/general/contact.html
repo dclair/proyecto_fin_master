@@ -29,7 +29,7 @@
                     {% endif %}
                     {# --- FIN DIAGNÓSTICO --- #}
 
-                    <form method="post" action="{% url 'contact' %}" enctype="multipart/form-data" class="needs-validation">
+                    <form method="post" action="{% url 'contact' %}" enctype="multipart/form-data" class="needs-validation" novalidate>
                         {% csrf_token %}
 
 
