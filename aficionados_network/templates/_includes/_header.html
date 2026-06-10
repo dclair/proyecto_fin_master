@@ -132,7 +132,7 @@
                                                 {% else %}<i class="bi bi-info-circle text-info"></i>{% endif %}
                                             </div>
                                             <div class="flex-grow-1">
-                                                <p class="mb-0 small text-dark"><span class="fw-bold">{{ n.sender.username }}</span> {{ n.text|default:n.get_notification_type_display }}</p>
+                                                <p class="mb-0 small text-dark text-dark-mode-white"><span class="fw-bold">{{ n.sender.username }}</span> {{ n.text|default:n.get_notification_type_display }}</p>
                                                 <small class="text-muted fs-xxs">{{ n.created_at|timesince }}</small>
                                             </div>
                                         </div>

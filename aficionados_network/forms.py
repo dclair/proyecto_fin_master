@@ -94,27 +94,42 @@ class ProfileFollowForm(forms.Form):
 
 class ContactForm(forms.ModelForm):
 
+    attachment = forms.FileField(
+        required=False,
+        label="Archivo adjunto (opcional)",
+        widget=forms.FileInput(attrs={"class": "form-control"})
+    )
+
     class Meta:
         model = ContactMessage
         fields = ["name", "email", "subject", "message"]
         widgets = {
             "name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Tu nombre"}
+                attrs={"class": "form-control", "placeholder": "Tu nombre", "required": "required", "maxlength": "100"}
             ),
             "email": forms.EmailInput(
-                attrs={"class": "form-control", "placeholder": "Tu correo"}
+                attrs={"class": "form-control", "placeholder": "Tu correo", "required": "required", "maxlength": "254"}
             ),
             "subject": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Asunto"}
+                attrs={"class": "form-control", "placeholder": "Asunto", "required": "required", "maxlength": "200"}
             ),
             "message": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 5,
                     "placeholder": "Escribe tu mensaje",
+                    "required": "required"
                 }
             ),
         }
+
+    def clean_attachment(self):
+        attachment = self.cleaned_data.get('attachment')
+        if attachment:
+            max_size = 20 * 1024 * 1024  # 20MB
+            if attachment.size > max_size:
+                raise forms.ValidationError("El archivo no puede superar los 20 MB.")
+        return attachment
 
 
 class AddHobbyForm(forms.ModelForm):
