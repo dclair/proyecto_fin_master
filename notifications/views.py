@@ -1,11 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Notification
-from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.http import HttpResponse
+
+from .models import Notification
 
 
 # Esta función debe estar FUERA de la clase NotificationListView
@@ -107,3 +107,42 @@ def read_and_redirect(request, notification_id):
 
     # Por si acaso no coincide con nada, volvemos al historial
     return redirect("notifications:list")
+
+
+@login_required
+def delete_notification(request, pk):
+    """
+    Borra una notificación específica mediante HTMX.
+    Devuelve un string vacío para eliminar el nodo del DOM y lanza
+    un evento al frontend para actualizar el badge de notificaciones.
+    """
+    if request.method == "DELETE" or request.method == "POST":
+        notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
+        notification.delete()
+        
+        response = HttpResponse("")
+        response["HX-Trigger"] = "updateNotificationCount"
+        return response
+    return HttpResponse(status=400)
+
+
+@login_required
+def delete_all_notifications(request):
+    """
+    Borra todas las notificaciones del usuario mediante HTMX.
+    Devuelve el mensaje de 'No tienes notificaciones' y actualiza el contador a 0.
+    """
+    if request.method == "DELETE" or request.method == "POST":
+        Notification.objects.filter(recipient=request.user).delete()
+        
+        # Plantilla mínima que reemplaza al div contenedor
+        empty_html = '''
+        <div class="list-group-item p-4 text-center text-muted" id="notifications-empty">
+            <i class="bi bi-bell-slash fs-1 mb-2 d-block"></i>
+            <p class="mb-0">No tienes notificaciones en este momento.</p>
+        </div>
+        '''
+        response = HttpResponse(empty_html)
+        response["HX-Trigger"] = "updateNotificationCount"
+        return response
+    return HttpResponse(status=400)

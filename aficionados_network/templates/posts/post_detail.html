@@ -67,6 +67,7 @@
                     </div>
                 </div>
 
+                {% if post.video %}
                 <div class="text-center bg-dark">
                     <video src="{{ post.video.url }}" controls class="img-fluid media-max-500"></video>
                 </div>
@@ -169,7 +170,6 @@
 </div>
 
 {% block extra_js %}
-<script src="{% static 'js/likes.js' %}"></script>
 <script src="{% static 'js/spinner.js' %}"></script>
 <script src="{% static 'js/post-detail.js' %}?v=1.0"></script>
 {% endblock %}

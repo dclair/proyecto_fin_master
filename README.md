@@ -30,7 +30,7 @@ Agenda Personal: Visualización de las próximas citas confirmadas directamente 
 
 Conversaciones Inteligentes: Hilos de comentarios tanto en publicaciones como en eventos, con lógica de detección de autor para evitar spam.
 
-Notificaciones en Tiempo Real: Sistema de "campana" con contadores dinámicos (HTMX) para avisos de likes, comentarios, seguidores y alertas de eventos.
+Notificaciones en Tiempo Real y Gestión (HTMX): Sistema de "campana" con contadores dinámicos para avisos de likes, comentarios, seguidores y alertas de eventos. Incluye funcionalidad avanzada de borrado individual y masivo (Limpiar historial) de notificaciones directamente desde el menú o pantalla completa, actualizando la interfaz asíncronamente vía `HX-Trigger`.
 
 4. Sistema de Mensajería en Tiempo Real (Chat) 💬
    Chats Privados y Grupales: Creación de conversaciones 1 a 1 y salas de grupo temáticas.
@@ -55,16 +55,14 @@ Lógica de Notificación Dual: Cada interacción crítica genera un aviso intern
 
 Formulario de Contacto Pro: Integración de mensajes de usuario con guardado en base de datos y aviso automático por email al administrador.
 
-💻 Stack Tecnológico
-Backend: Django 6.0 + Python 3.12.
-
-Frontend: HTML5, CSS3, Bootstrap 5.3, React 18 (para la interfaz de Chat).
-
-Interactividad: HTMX & JavaScript Vanilla (AJAX) y WebSockets para el chat en tiempo real.
-
-Comunicaciones: Django Mail (EmailMultiAlternatives) + Channels (ASGI).
-
-Base de Datos: SQLite (Desarrollo) / MySQL (Producción).
+💻 Stack Tecnológico (Cumplimiento de Requisitos PFM)
+Este proyecto cumple estrictamente con los requisitos universitarios del Proyecto Final de Máster:
+- **Backend (30%):** Django 6.0 + Python 3.12. Modelos, vistas, plantillas, autenticación y persistencia de datos.
+- **Frontend (15%):** HTML5, CSS3, Bootstrap 5.3, integrando **React 18** (para la interfaz completa de mensajería en tiempo real que consume los datos del backend vía API REST y WebSockets).
+- **Interactividad y Tiempo Real:** HTMX & JavaScript Vanilla (AJAX) y Channels (ASGI).
+- **Comunicaciones:** Django Mail (EmailMultiAlternatives).
+- **Base de Datos:** SQLite (Desarrollo) / MySQL (Producción).
+- **Arquitectura y Seguridad (30%):** Protección CSRF, autenticación robusta, validación de formularios y estructura de código mantenible (MVP).
 
 🏗️ Estructura del Proyecto
 Bash
@@ -175,7 +173,7 @@ EMAIL_BACKEND: Define el motor de envío.
 
 CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contacto.
 
-🏆 Roadmap Completado (MVP 100% Funcional)
+🏆 Roadmap Completado (MVP 100% Funcional y Listo para Producción)
 [x] Sistema de Notificaciones: Implementado (Likes, Comentarios, Eventos).
 
 [x] Identidad Corporativa: Emails y diseño unificado.
@@ -188,6 +186,6 @@ CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contac
 
 [x] Compartir Archivos Multimedia: Subida de imágenes y documentos en el chat implementada.
 
-[x] UI/UX y Accesibilidad: Tema oscuro refinado con utilidades adaptativas y aislamiento de tema claro para la aplicación de chat.
+[x] UI/UX y Accesibilidad: Tema oscuro refinado con utilidades adaptativas, estandarización de spinners de carga en todos los formularios, y navbar totalmente unificado.
 
 Hubs&Clicks - "Descubre, Comparte, Disfruta"

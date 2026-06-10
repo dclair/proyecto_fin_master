@@ -1,8 +1,6 @@
 TAREAS PENDIENTES DEL PROYOCTO FIN MASTER:
 -- Cambiar la palabra quedadas, Quedadas, por Eventos.
-Todos los H1 verde principal tema oscuro.
--- Poder borrar las notificaciones
--- Reordenar los elementos del navbar
+
 ✅ **¡PROYECTO 100% COMPLETADO!** 
 Todas las tareas del Roadmap original, incluyendo Chat en tiempo real, Notificaciones, Valoraciones y Búsquedas Avanzadas han sido implementadas exitosamente. Este documento queda como archivo histórico de decisiones arquitectónicas y recordatorios de producción.
 ⚠️ AVISO IMPORTANTE PARA PRODUCCIÓN:
@@ -225,3 +223,33 @@ La magia: Cuando el usuario hace scroll hacia abajo y esa tarjeta número 12 "ap
 ¿Qué pasa si hay 1000, 2000 o 10.000 terapeutas? Absolutamente nada. El usuario va a ir bajando la rueda del ratón y los perfiles van a ir apareciendo mágicamente de a 12 sin que la página parpadee ni se ponga lenta, porque la carga en memoria es siempre mínima.
 
 Es la forma más moderna, limpia y rápida de gestionar listas largas. ¿Te queda claro el concepto o le damos una vuelta de tuerca más?
+
+Tienes muy buena memoria, pero te actualizo sobre cómo quedó finalmente estructurado ese tema tras el rollback, porque logramos darle una vuelta de tuerca para que fuera a prueba de balas:
+
+El Rollback fue real: Efectivamente, dimos marcha atrás porque intentar meter el spinner de forma global alterando forms.js bloqueaba el envío de los formularios y chocaba con las validaciones nativas de Bootstrap.
+Solución Híbrida (La actual):
+Formularios con validación estricta (Contacto y Registro): Los dejamos tranquilos y controlados por forms.js (usando la clase .needs-validation). El spinner aquí funciona perfectamente porque respeta la validación de campos obligatorios antes de girar.
+El resto de la plataforma (Eventos, Publicaciones, Perfiles): En lugar de meter el código en los botones a machete, creé un sistema centralizado en community-hub.js (initLoadingState). Este sistema "escucha" únicamente a los formularios que lleven la clase .js-form-loading o al identificador #submit-btn.
+Conclusión: Logramos tener spinners funcionales en todos los formularios del proyecto (tanto los nuevos como los viejos) sin que el código colisione y sin bloquear los envíos. Así que tu recuerdo del rollback es 100% exacto, pero luego lo resolvimos por otra vía más arquitectónica para que la experiencia de usuario fuera total de cara a producción.
+
+¡Está todo atado 
+
+
+
+¡Implementado de golpe y sin anestesia!
+
+Tal como propusimos en el plan, ya está inyectado el código y funcionando de forma totalmente asíncrona. Aquí te resumo lo que tienes listo para probar:
+
+Borrado en el menú desplegable (Campanita):
+
+Ahora, al pasar el ratón por encima de cada aviso, verás una "X" a la derecha. Si le das, esa notificación se borra con un pequeño desvanecimiento gracias a HTMX.
+En la cabecera del desplegable, tienes un nuevo botón rojo: Limpiar. Pulsa ahí y se borra la lista completa al instante, sustituyéndose por un mensaje de "Sin notificaciones".
+Borrado en pantalla completa (/notifications/):
+
+La misma lógica de la "X" está aplicada a cada ítem grande del historial.
+Arriba, justo al lado del H2 principal, aparece un botón "Limpiar historial" que vacía la tabla entera con un click.
+Lógica inteligente del Contador:
+
+Todo está sincronizado con el globo rojo de la campana. Cada vez que borras (sea uno o todos), el servidor devuelve un HX-Trigger. La campanita lo capta, recalcula si tienes algo sin leer, y si llegas a cero notificaciones, desaparece el globo rojo por completo (para mantener la barra superior visualmente limpia).
+Y lo más importante: Cero recargas de página.
+Tienes el resumen completo en el artefacto walkthrough.md. Puedes probarlo recargando el servidor local y borrando algunas notificaciones (créate un par de avisos entrando con otra cuenta o dándote likes si necesitas munición).

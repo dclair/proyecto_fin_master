@@ -121,33 +121,53 @@
                         <i class="bi bi-bell-fill {% if unread_notifications_count > 0 %}text-danger animate-bell{% else %}text-body{% endif %}"></i>
                         <span id="notification-badge" 
                               hx-get="{% url 'notifications:api_unread_count' %}" 
-                              hx-trigger="load, every 30s"
+                              hx-trigger="load, every 30s, updateNotificationCount from:body"
                               class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white fs-micro px-1 py-1 {% if unread_notifications_count == 0 %}d-none{% endif %}">
                             {{ unread_notifications_count }}
                         </span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0 overflow-hidden min-w-320 rounded-4">
-                        <li class="bg-light p-3 border-bottom"><span class="small fw-bold text-uppercase text-muted">Avisos Recientes</span></li>
-                        <div class="list-group list-group-flush max-h-350">
+                        <li class="bg-light p-3 border-bottom d-flex justify-content-between align-items-center">
+                            <span class="small fw-bold text-uppercase text-muted">Avisos Recientes</span>
+                            <button hx-delete="{% url 'notifications:delete_all_notifications' %}" 
+                                    hx-target="#dropdown-notifications-list" 
+                                    hx-swap="innerHTML"
+                                    class="btn btn-sm btn-link text-danger p-0 text-decoration-none shadow-none fw-bold"
+                                    title="Borrar todas">
+                                Limpiar
+                            </button>
+                        </li>
+                        <div class="list-group list-group-flush max-h-350" id="dropdown-notifications-list">
                             {% for n in user.notifications.all|slice:":5" %}
-                                <a href="{% url 'notifications:read_and_redirect' n.id %}" class="list-group-item list-group-item-action py-3">
+                                <div class="list-group-item list-group-item-action py-3 position-relative">
                                     <div class="d-flex align-items-start">
                                         <div class="flex-shrink-0 me-3">
                                             {% if n.notification_type == 'like' %}<i class="bi bi-heart-fill text-danger"></i>
                                             {% elif n.notification_type == 'comment' %}<i class="bi bi-chat-dots-fill text-hubs"></i>
                                             {% else %}<i class="bi bi-info-circle text-info"></i>{% endif %}
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <p class="mb-0 small text-dark text-dark-mode-white"><span class="fw-bold">{{ n.sender.username }}</span> {{ n.text|default:n.get_notification_type_display }}</p>
-                                            <small class="text-muted fs-xxs">{{ n.created_at|timesince }}</small>
+                                        <div class="flex-grow-1 pe-4">
+                                            <a href="{% url 'notifications:read_and_redirect' n.id %}" class="text-decoration-none stretched-link">
+                                                <p class="mb-0 small text-dark text-dark-mode-white"><span class="fw-bold">{{ n.sender.username }}</span> {{ n.text|default:n.get_notification_type_display }}</p>
+                                                <small class="text-muted fs-xxs">{{ n.created_at|timesince }}</small>
+                                            </a>
                                         </div>
                                     </div>
-                                </a>
+                                    <!-- Botón de borrado con z-index alto para quedar por encima del stretched-link -->
+                                    <button hx-delete="{% url 'notifications:delete_notification' n.id %}" 
+                                            hx-target="closest .list-group-item" 
+                                            hx-swap="outerHTML swap:0.5s"
+                                            class="btn btn-sm btn-link text-muted position-absolute top-50 end-0 translate-middle-y shadow-none"
+                                            style="z-index: 2;"
+                                            title="Borrar aviso">
+                                        <i class="bi bi-x fs-5"></i>
+                                    </button>
+                                </div>
                             {% empty %}
                                 <div class="text-center py-4"><p class="small text-muted mb-0">Sin notificaciones</p></div>
                             {% endfor %}
                         </div>
-                        <li><a class="dropdown-item text-center py-2 small fw-bold text-primary bg-light" href="{% url 'notifications:list' %}">Ver historial</a></li>
+                        <li><a class="dropdown-item text-center py-2 small fw-bold text-primary bg-light position-relative" style="z-index: 3;" href="{% url 'notifications:list' %}">Ver historial</a></li>
                     </ul>
                 </li>
                 {% endif %}
@@ -174,3 +194,16 @@
         </div>
     </div>
 </nav>
+
+<!-- Lógica para ocultar/mostrar el badge rojo de notificaciones -->
+<script>
+document.body.addEventListener('htmx:afterSettle', function(evt) {
+    if (evt.target.id === 'notification-badge') {
+        if (evt.target.innerHTML.trim() === '') {
+            evt.target.classList.add('d-none');
+        } else {
+            evt.target.classList.remove('d-none');
+        }
+    }
+});
+</script>

@@ -151,3 +151,36 @@ class NotificationRouteTests(TestCase):
             follow_response,
             reverse("profiles:profile", kwargs={"pk": self.sender.profile.pk}),
         )
+
+    def test_delete_single_notification(self):
+        notification = Notification.objects.create(
+            recipient=self.recipient,
+            sender=self.sender,
+            notification_type="follow",
+        )
+        self.client.force_login(self.recipient)
+        
+        response = self.client.delete(
+            reverse("notifications:delete_notification", kwargs={"pk": notification.pk})
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["HX-Trigger"], "updateNotificationCount")
+        self.assertFalse(Notification.objects.filter(pk=notification.pk).exists())
+
+    def test_delete_all_notifications(self):
+        Notification.objects.create(
+            recipient=self.recipient, sender=self.sender, notification_type="follow"
+        )
+        Notification.objects.create(
+            recipient=self.recipient, sender=self.sender, notification_type="like", post=self.post
+        )
+        
+        self.client.force_login(self.recipient)
+        
+        response = self.client.delete(reverse("notifications:delete_all_notifications"))
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["HX-Trigger"], "updateNotificationCount")
+        self.assertIn("No tienes notificaciones en este momento", response.content.decode())
+        self.assertEqual(Notification.objects.filter(recipient=self.recipient).count(), 0)
