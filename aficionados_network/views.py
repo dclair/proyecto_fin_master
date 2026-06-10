@@ -413,12 +413,12 @@ class ContactFormView(FormView):
         )
         text_content = strip_tags(html_content)
 
-        # 3. Creamos el objeto Email
         email = EmailMultiAlternatives(
             subject,
             text_content,
             settings.DEFAULT_FROM_EMAIL,
             [recipient_email],
+            cc=[contact_message.email],
         )
         email.attach_alternative(html_content, "text/html")
 
@@ -429,6 +429,11 @@ class ContactFormView(FormView):
                 logo_image = MIMEImage(f.read())
                 logo_image.add_header("Content-ID", "<logo_hubs>")
                 email.attach(logo_image)
+
+        # 4.5 Adjuntamos el archivo si el usuario lo subió
+        attachment = form.cleaned_data.get('attachment')
+        if attachment:
+            email.attach(attachment.name, attachment.read(), attachment.content_type)
 
         # 5. Enviar
         email.send(fail_silently=False)

@@ -1,5 +1,5 @@
-
 {% extends "general/layout.html" %}
+{% load static %}
 
 
 {% block page_title %}
@@ -11,14 +11,7 @@
 {% block content %}
 <div class="container mt-4">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+
 
     <p>Rellena los campos y te responderemos lo antes posible.</p>
 
@@ -36,12 +29,10 @@
                     {% endif %}
                     {# --- FIN DIAGNÓSTICO --- #}
 
-                    <form method="post" action="{% url 'contact' %}" novalidate>
+                    <form method="post" action="{% url 'contact' %}" enctype="multipart/form-data" class="needs-validation">
                         {% csrf_token %}
 
-                        {# Renderizado automático para asegurar que los campos existan #}
-                        {# Si esto aparece pero lo de abajo no, es que los nombres de los campos son diferentes #}
-                        <div class="d-none"> {{ form.as_p }} </div>
+
 
                         <div class="mb-3">
                             <label class="form-label">{{ form.name.label }}</label>
@@ -75,8 +66,20 @@
                             {% endif %}
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.attachment.label }}</label>
+                            {{ form.attachment }}
+                            {% if form.attachment.errors %}
+                                <div class="text-danger small">{{ form.attachment.errors }}</div>
+                            {% endif %}
+                            <div class="form-text small text-muted">Formatos permitidos: imágenes, PDFs, documentos. Máx: 20MB.</div>
+                        </div>
+
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">Enviar Mensaje</button>
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                                <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                                <span>Enviar Mensaje</span>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -84,4 +87,22 @@
         </div>
     </div>
 </div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/forms.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('{{ form.attachment.id_for_label }}') || document.querySelector('input[name="attachment"]');
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                const maxSize = 20 * 1024 * 1024; // 20 MB en bytes
+                if (this.files && this.files[0] && this.files[0].size > maxSize) {
+                    alert('El archivo supera el tamaño máximo permitido de 20 MB. Por favor, selecciona un archivo más ligero.');
+                    this.value = ''; // Resetea el input para forzar al usuario a subir otro
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
