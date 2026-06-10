@@ -58,14 +58,7 @@
                     <h6 class="sidebar-label px-1">MIS GRUPOS</h6>
                     <div class="mobile-hobby-wrapper position-relative">
                         <div class="mobile-hobby-scroll d-flex pb-2 pt-2">
-                            <!-- Link "Inicio" -->
-                            <a href="{% url 'home' %}" class="mobile-hobby-pill position-relative text-decoration-none {% if not current_hub %}active{% endif %}">
-                                <div class="hobby-dot-sm bg-hubs flex-shrink-0">
-                                    <i class="bi bi-house-fill"></i>
-                                </div>
-                                <span class="d-inline-block">Inicio</span>
-                            </a>
-                            
+
                             {% for hobby in my_hobbies %}
                                 <a href="{% url 'posts:hobby_hub' hobby.slug %}" class="mobile-hobby-pill position-relative text-decoration-none {% if current_hub == hobby %}active{% endif %}" title="{{ hobby.name }}">
                                     <div class="hobby-dot-sm bg-hubs flex-shrink-0">
