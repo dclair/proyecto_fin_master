@@ -13,4 +13,6 @@ urlpatterns = [
     path(
         "go/<int:notification_id>/", views.read_and_redirect, name="read_and_redirect"
     ),
+    path("delete/<int:pk>/", views.delete_notification, name="delete_notification"),
+    path("delete-all/", views.delete_all_notifications, name="delete_all_notifications"),
 ]

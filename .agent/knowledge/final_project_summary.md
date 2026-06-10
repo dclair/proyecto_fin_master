@@ -25,11 +25,12 @@ Este documento sirve como anclaje de conocimiento para cualquier agente que anal
    - Cancelaciones con notificaciones automáticas y clonado de eventos pasados.
    - Filtro avanzado por Ciudad, Categoría, Nivel y el botón especial "Mis Terapias".
 
-5. **Interacción Social:**
+5. **Interacción Social y Notificaciones (HTMX):**
    - Comentarios y Likes (gestionados por Ajax nativo en `likes.js` y `comentarios.js`).
    - Seguimiento (Follows) entre usuarios.
-   - Notificaciones in-app y por Email corporativo.
    - Sistema de Valoraciones (Reseñas con estrellas tras asistir a eventos).
+   - Notificaciones in-app y por Email corporativo.
+   - **NUEVO:** Sistema de gestión de notificaciones asíncrono. Borrado individual y masivo sin recarga de página, integrado tanto en el dropdown de navegación como en la vista de historial (`HTMX` + `HX-Trigger`). Completamente respaldado por pruebas unitarias.
 
 ## Detalles de Arquitectura y Despliegue
 - El proyecto corre sobre Python 3.12 y Django 6.0.
@@ -37,7 +38,9 @@ Este documento sirve como anclaje de conocimiento para cualquier agente que anal
 - La Base de Datos principal en producción es MySQL/MariaDB (`DB_ENGINE=mysql`).
 - Las dependencias asíncronas para el chat están limitadas en versiones (`redis<5.0.0`) para evitar bugs documentados.
 - **Modo Oscuro:** Gestionado de forma global en Django vía `[data-bs-theme="dark"]` en `style.css`. La aplicación de Chat en React está explícitamente aislada en modo claro (`data-bs-theme="light"`) para evitar colisiones de diseño con sus componentes hardcodeados.
+- **UI/UX y Formularios:** Estandarización completa del sistema de *spinners* de carga para evitar reenvíos, corrección de z-index y márgenes en alertas de mensajes (`_messages.html`), y unificación total del navbar (`_header.html`) para todos los dispositivos con flujos lógicos para los usuarios.
 
 **Next Steps Posibles (Mantenimiento):**
-- Optimización de queries (Select_related).
+- Optimización de queries (Select_related y Prefetch_related).
 - Configuración de SSL (WSS/HTTPS) para producción.
+- Despliegue final en servidor (Render, Railway, VPS).
