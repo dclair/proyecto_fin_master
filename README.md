@@ -1,5 +1,5 @@
 🚀 Hubs&Clicks - Red social de terapias naturales
-Hubs&Clicks es una plataforma web diseñada para conectar a personas a través de sus terapias, permitiéndoles organizar eventos, unirse a quedadas y gestionar su comunidad de forma ágil, moderna y con una identidad visual corporativa única.
+Hubs&Clicks es una plataforma web diseñada para conectar a personas a través de sus terapias, permitiéndoles organizar eventos, unirse a eventos y gestionar su comunidad de forma ágil, moderna y con una identidad visual corporativa única.
 
 🛠️ Características Principales (Features)
 

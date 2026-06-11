@@ -5,6 +5,42 @@
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
 
+## 2026-06-11: UI Refinements, "Quedada" to "Evento" Migration & Select2 Integration
+
+**Type:** feature / UI
+**Status:** done
+
+What changed:
+- Migrated the "Quedada" terminology to "Evento" across the codebase and user interface for better clarity.
+- Implemented smooth hover effects for navbar elements.
+- Integrated a searchable dropdown menu for categories in the event discovery view to improve navigation efficiency.
+
+Why:
+- Standardize terminology to something more universally understood and professional.
+- Enhance the overall look and feel of the platform with subtle animations and better form controls.
+
+Impact:
+- Improved user experience and interface consistency.
+
+## 2026-06-10: Notification HTMX Deletion, Like Bug Fix & Modal Contrast
+
+**Type:** feature / bug fix
+**Status:** done
+
+What changed:
+- Finalized the notification system by implementing individual and bulk deletion capabilities using HTMX (`hx-delete`, `hx-target`).
+- Resolved a JavaScript bug preventing "Like" functionality in the event detail view by fixing the toggle logic.
+- Fixed text contrast issues inside modal dialogs to ensure readability across different themes.
+
+Why:
+- Provide users with full control over their notification history without page reloads.
+- Ensure core interaction features (Likes) function flawlessly.
+- Maintain high accessibility standards in all UI components, including modals.
+
+Impact:
+- Users can seamlessly manage notifications.
+- The event interaction loop is fully restored.
+
 ## 2026-06-09: Dark Mode UI/UX Accessibility & Chat Isolation
 
 **Type:** feature / UI / accessibility
@@ -227,7 +263,7 @@ Feature areas already present:
 - Follows.
 - Clicks/posts with images.
 - Likes and comments.
-- Quedadas/events.
+- Events.
 - Event participation.
 - Event cancellation/reactivation/duplication.
 - Event comments.

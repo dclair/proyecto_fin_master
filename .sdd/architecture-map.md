@@ -70,7 +70,7 @@ Relations:
 
 ### `posts`
 
-Owns both content posts and event/quedada workflows.
+Owns both content posts and event workflows.
 
 Key models:
 

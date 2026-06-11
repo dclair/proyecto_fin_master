@@ -14,7 +14,7 @@ Hubs&Clicks lets users:
 - Maintain a social profile with photo, bio, location, website, age, hobbies, and experience levels.
 - Follow/unfollow other profiles.
 - Publish image-based posts called Clicks, assign them to a hobby, like them, and comment on them.
-- Create and manage hobby-based events called Quedadas.
+- Create and manage hobby-based events.
 - Join or leave events when allowed by date, ownership, and capacity rules.
 - Cancel, reactivate, duplicate, edit, and list their own events.
 - See personal participation history and review event organizers after attended events.
@@ -271,7 +271,7 @@ Validation:
 
 ### `posts.Event`
 
-Hobby-based event/quedada.
+Hobby-based event.
 
 Fields:
 
