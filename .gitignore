@@ -7,3 +7,6 @@ db_full_backup.json
 env/
 staticfiles/
 media/
+
+# Documentos locales
+Proyecto_Final_Docs_varios/
