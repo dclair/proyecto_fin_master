@@ -14,21 +14,13 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4 p-md-5">
-                    <p>
-                        En Hubs&Clicks tratamos los datos necesarios para crear cuentas, gestionar perfiles, publicar contenido, organizar eventos y enviar notificaciones relacionadas con la actividad de la plataforma.
-                    </p>
-                    <h2 class="h5 mt-4">Datos que se pueden tratar</h2>
-                    <p>
-                        Nombre de usuario, correo electronico, datos de perfil, terapias, publicaciones, comentarios, participaciones en eventos y mensajes enviados mediante el formulario de contacto.
-                    </p>
-                    <h2 class="h5 mt-4">Finalidad</h2>
-                    <p>
-                        Usamos estos datos para prestar el servicio, permitir la interaccion entre usuarios, proteger la seguridad de la plataforma y responder solicitudes de soporte.
-                    </p>
-                    <h2 class="h5 mt-4">Derechos</h2>
-                    <p>
-                        Puedes solicitar informacion, rectificacion o eliminacion de tus datos desde el formulario de contacto.
-                    </p>
+                    {% load flatpages %}
+                    {% get_flatpages '/privacy/' as privacy_pages %}
+                    {% for page in privacy_pages %}
+                        {{ page.content|safe }}
+                    {% empty %}
+                        <p>La política de privacidad se está actualizando. Por favor, vuelve más tarde.</p>
+                    {% endfor %}
                     <div class="mt-4">
                         <a href="{% url 'contact' %}" class="btn btn-outline-secondary btn-sm">Contactar</a>
                     </div>

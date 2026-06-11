@@ -14,21 +14,13 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4 p-md-5">
-                    <p>
-                        Hubs&Clicks utiliza cookies tecnicas y almacenamiento local para recordar tus preferencias y mantener una experiencia de navegacion adecuada.
-                    </p>
-                    <h2 class="h5 mt-4">Cookies necesarias</h2>
-                    <p>
-                        Son imprescindibles para funciones basicas como la sesion de usuario, la seguridad CSRF y el funcionamiento normal de los formularios.
-                    </p>
-                    <h2 class="h5 mt-4">Preferencias de cookies</h2>
-                    <p>
-                        El banner de cookies guarda tu eleccion en el navegador para no volver a preguntarte en cada visita.
-                    </p>
-                    <h2 class="h5 mt-4">Cambiar la configuracion</h2>
-                    <p>
-                        Puedes borrar los datos del sitio desde la configuracion de tu navegador para volver a elegir tus preferencias.
-                    </p>
+                    {% load flatpages %}
+                    {% get_flatpages '/cookies/' as cookie_pages %}
+                    {% for page in cookie_pages %}
+                        {{ page.content|safe }}
+                    {% empty %}
+                        <p>La política de cookies se está actualizando. Por favor, vuelve más tarde.</p>
+                    {% endfor %}
                     <div class="mt-4">
                         <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">Volver al inicio</a>
                     </div>

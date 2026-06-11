@@ -18,7 +18,7 @@
     </div>
 
     {# 3. Quitamos h-100 y usamos post-modal-content-col para repartir el espacio restante #}
-    <div class="col-lg-5 d-flex flex-column bg-white post-modal-content-col">
+    <div class="col-lg-5 d-flex flex-column bg-white post-modal-content-col dark-mode-text-dark">
         
         <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
@@ -33,7 +33,7 @@
         <div class="flex-grow-1 p-3 post-comments-scroll" id="scroll-container-{{ post.id }}" style="background-color: #f8f9fa;">
             <div class="mb-3">
                 <p class="small mb-0"><strong>{{ post.title }}</strong></p>
-                <p class="text-muted small">{{ post.caption }}</p>
+                <p class="text-muted small dark-mode-text-dark">{{ post.caption }}</p>
                 <hr>
             </div>
 
@@ -41,7 +41,7 @@
                 {% for comment_obj in post.comments.all reversed %}
                     {% include 'posts/partials/_comment_single.html' %}
                 {% empty %}
-                    <p class="text-muted small text-center py-3" id="no-comments-{{ post.id }}">
+                    <p class="text-muted small text-center py-3 dark-mode-text-dark" id="no-comments-{{ post.id }}">
                         No hay comentarios aún.
                     </p>
                 {% endfor %}

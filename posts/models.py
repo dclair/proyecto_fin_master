@@ -202,7 +202,7 @@ class Comment(models.Model):
     class Meta:
         verbose_name = "comentario"
         verbose_name_plural = "comentarios"
-        ordering = ["created_at"]
+        ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["created_at"]),
         ]
@@ -330,7 +330,7 @@ class EventComment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["created_at"]  # Los más antiguos primero (orden de conversación)
+        ordering = ["-created_at"]  # Los más nuevos primero
 
     def __str__(self):
         return f"Comentario de {self.user.username} en {self.event.title}"
