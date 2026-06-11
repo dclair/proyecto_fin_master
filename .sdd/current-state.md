@@ -17,7 +17,7 @@ Current user-facing capabilities:
 - Follow and unfollow other profiles.
 - Create image-based posts called Clicks.
 - Like and comment on posts.
-- Create hobby-based events called Quedadas.
+- Create hobby-based events.
 - Join or leave events when allowed.
 - Cancel, reactivate, duplicate, edit, and list owned events.
 - View personal event participations.
@@ -78,7 +78,7 @@ Main project package and app:
 Domain apps:
 
 - `profiles/`: profiles, hobbies, follows, reviews, profile routes, profile signals.
-- `posts/`: Clicks, comments, Quedadas, event comments, event routes, likes, attendance, hub/gallery flows.
+- `posts/`: Clicks, comments, Eventos, event comments, event routes, likes, attendance, hub/gallery flows.
 - `notifications/`: notification model, follow signal, unread context, list and redirect routes.
 - `chat/`: Models (`Conversation`, `Message`, `GroupJoinRequest`), DRF API views, and Channels WebSockets consumers.
 
@@ -91,7 +91,7 @@ Assets and data:
 ## Active Truths
 
 - The app is server-rendered Django, not a SPA.
-- `posts` owns both social posts and event/quedada workflows.
+- `posts` owns both social posts and event workflows.
 - `profiles.Hobby` is the shared category model for posts, events, and user interests.
 - `profiles.UserHobby` stores a user's level per hobby and powers match/mentor logic.
 - `notifications.Notification` is generic and can point to a post, event, comment, or review.

@@ -1,6 +1,6 @@
 Hubs&Clicks
 📝 Descripción
-Hubs&Clicks es una plataforma social dinámica desarrollada con Django, diseñada para conectar a personas a través de sus pasiones. Más allá de compartir momentos, la aplicación organiza el contenido en Hobby Hubs (comunidades temáticas) donde los usuarios pueden interactuar, seguir aficiones específicas y participar en un sistema inteligente de Quedadas (Eventos) basado en niveles de habilidad.
+Hubs&Clicks es una plataforma social dinámica desarrollada con Django, diseñada para conectar a personas a través de sus pasiones. Más allá de compartir momentos, la aplicación organiza el contenido en Hobby Hubs (comunidades temáticas) donde los usuarios pueden interactuar, seguir aficiones específicas y participar en un sistema inteligente de Eventos basado en niveles de habilidad.
 
 Este proyecto forma parte del portafolio de proyectos del Máster Full Stack de Conquer Blocks.
 
@@ -21,8 +21,8 @@ Sistema de Seguimiento: Únete a comunidades específicas para personalizar tu e
 
 Navegación Inteligente: Sidebar dinámica con contadores de eventos activos que coinciden con tu perfil.
 
-🎯 Sistema Inteligente de Quedadas (Eventos)
-Gestión de Eventos: Creación y organización de quedadas con control de aforo, fechas y estados (activo, pasado o cancelado).
+🎯 Sistema Inteligente de Eventos
+Gestión de Eventos: Creación y organización de eventos con control de aforo, fechas y estados (activo, pasado o cancelado).
 
 Algoritmo de Level Matching: El sistema compara automáticamente tu nivel en un hobby con el del evento:
 

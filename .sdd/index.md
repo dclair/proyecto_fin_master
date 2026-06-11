@@ -84,7 +84,7 @@ Posts/Clicks:
 - Read `posts/tests.py`.
 - Preserve image validation/cleanup, likes, comments, notifications, and email behavior.
 
-Events/Quedadas:
+Events:
 
 - Read event lifecycle in `current-state.md` and `architecture-map.md`.
 - Read `posts/tests.py`.
