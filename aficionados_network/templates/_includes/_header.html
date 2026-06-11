@@ -74,9 +74,9 @@
 
                 <li class="nav-item ms-xl-2">
                     <a href="{% url 'posts:post_create' %}" 
-                       class="nav-link px-3 d-flex align-items-center text-nowrap rounded-pill border border-hubs-subtle {% if request.resolver_match.url_name == 'post_create' %}active fw-bold bg-light{% endif %}" 
+                       class="nav-link px-3 d-flex align-items-center text-nowrap rounded-pill border border-hubs-subtle text-hubs {% if request.resolver_match.url_name == 'post_create' %}active fw-bold bg-light{% endif %}" 
                        title="Añadir publicaciones y descubrir la comunidad">
-                        <i class="bi bi-plus-circle-fill me-1 text-hubs"></i> Nueva Publicación
+                        <i class="bi bi-plus-circle-fill me-1"></i> Nueva Publicación
                     </a>
                 </li>
                 {% endif %}

@@ -451,6 +451,10 @@ footer a:active {
     background: linear-gradient(90deg, var(--hubs-primary) 0%, #14a2b1 100%) !important;
 }
 
+[data-bs-theme="dark"] .bg-hubs {
+    background: linear-gradient(135deg, #0b5961 0%, #35b6c0 100%) !important;
+}
+
 /* Animación de carga al entrar o filtrar */
 .progress-bar {
     transition: width 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -1112,3 +1116,42 @@ footer a:active {
     background-color: var(--bs-card-bg, #212529) !important;
 }
 .text-primary-hover:hover { color: #0d6efd; text-decoration: underline; }
+
+/* ============================================================
+   EFECTO HOVER LÍNEA NAVBAR
+   ============================================================ */
+.navbar-nav .nav-link:not(.rounded-pill):not(.btn) {
+    position: relative;
+}
+
+.navbar-nav .nav-link:not(.rounded-pill):not(.btn)::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 3px;
+    bottom: 0px;
+    left: 50%;
+    background-color: var(--hubs-primary);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    transform: translateX(-50%);
+    border-radius: 3px 3px 0 0;
+}
+
+.navbar-nav .nav-link:not(.rounded-pill):not(.btn):hover::after {
+    width: 70%;
+}
+
+/* ============================================================
+   EFECTO HUNDIRSE AL HOVER (Botones especiales navbar)
+   ============================================================ */
+.navbar-nav .nav-link.rounded-pill,
+#themeToggleBtn,
+.navbar-nav button.nav-link[type="submit"] {
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.navbar-nav .nav-link.rounded-pill:hover,
+#themeToggleBtn:hover,
+.navbar-nav button.nav-link[type="submit"]:hover {
+    transform: translateY(2px) scale(0.98);
+}
