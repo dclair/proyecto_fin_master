@@ -1,4 +1,5 @@
 {% load static %}
+{% load marketplace_tags %}
 <nav class="navbar navbar-expand-xl navbar-hubs fixed-top shadow-sm bg-body-tertiary">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
@@ -26,13 +27,38 @@
                         <i class="bi bi-house-door me-1"></i> Inicio
                     </a>
                 </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link px-2 d-flex align-items-center text-nowrap {% if 'posts' in request.resolver_match.app_name and 'event' in request.resolver_match.url_name %}active fw-bold text-hubs{% endif %}" 
-                       href="{% url 'posts:event_list' %}"
-                       title="Explora y únete a eventos de la comunidad">
-                        <i class="bi bi-calendar3 me-1"></i> Eventos
+                <li class="nav-item dropdown px-2">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center text-nowrap {% if 'posts' in request.resolver_match.app_name and 'event' in request.resolver_match.url_name or 'marketplace' in request.resolver_match.app_name or 'profiles' in request.resolver_match.app_name %}active fw-bold text-hubs{% endif %}" 
+                       href="#" id="directorioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Explora el ecosistema de la red">
+                        <i class="bi bi-compass me-1"></i> Directorio
                     </a>
+                    <ul class="dropdown-menu shadow-sm border-0 mt-1 rounded-3 min-w-200" aria-labelledby="directorioDropdown">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'posts' in request.resolver_match.app_name and 'event' in request.resolver_match.url_name %}bg-light text-dark fw-bold{% endif %}" 
+                               href="{% url 'posts:event_list' %}"
+                               title="Explora y únete a eventos de la comunidad">
+                                <i class="bi bi-calendar3 me-2 text-warning"></i> Eventos
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'profiles' in request.resolver_match.app_name %}bg-light text-dark fw-bold{% endif %}" 
+                               href="{% url 'profiles:profile_list' %}"
+                               title="Encuentra a cualquier terapeuta de la comunidad">
+                                <i class="bi bi-people me-2 text-primary"></i> Profesionales
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'marketplace' in request.resolver_match.app_name %}bg-light text-dark fw-bold{% endif %}" 
+                               href="{% url 'marketplace:listing_list' %}"
+                               title="Compra, venta y alquiler de material o espacios">
+                                <i class="bi bi-shop me-2 text-success"></i> Mercadillo
+                                {% get_active_listings_count as listings_count %}
+                                {% if listings_count != '0' %}
+                                    <span class="badge bg-success rounded-pill ms-auto" style="font-size: 0.65rem;">{{ listings_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 
                 {% if user.is_authenticated %}
@@ -60,13 +86,7 @@
                 </li>
                 {% endif %}
                 
-                <li class="nav-item">
-                    <a class="nav-link px-2 d-flex align-items-center text-nowrap {% if 'profiles' in request.resolver_match.app_name %}active fw-bold text-hubs{% endif %}" 
-                       href="{% url 'profiles:profile_list' %}"
-                       title="Encuentra a cualquier terapeuta de la comunidad">
-                        <i class="bi bi-people me-1"></i> Comunidad de Terapeutas
-                    </a>
-                </li>
+
 
                 {% if user.is_authenticated %}
                 <!-- REACT CHAT ROOT -->

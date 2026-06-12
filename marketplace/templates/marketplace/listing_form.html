@@ -1,0 +1,81 @@
+{% extends "general/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if object %}Editar Anuncio{% else %}Publicar Anuncio{% endif %} | Mercadillo
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white p-4">
+                    <h2 class="h4 mb-0">
+                        <i class="fas {% if object %}fa-edit{% else %}fa-plus-circle{% endif %} me-2"></i>
+                        {% if object %}Editar Anuncio: {{ object.title }}{% else %}Publicar Nuevo Anuncio{% endif %}
+                    </h2>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            {% if object %}
+                                <a href="{% url 'marketplace:listing_detail' object.slug %}" class="btn btn-outline-secondary">Cancelar</a>
+                            {% else %}
+                                <a href="{% url 'marketplace:listing_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary px-4">
+                                {% if object %}Guardar Cambios{% else %}Publicar Anuncio{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Tom Select CSS for Searchable Dropdown -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+/* Ajustes para modo oscuro y visualización consistente */
+[data-bs-theme="dark"] .ts-control {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-color: var(--bs-border-color);
+}
+[data-bs-theme="dark"] .ts-dropdown {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-color: var(--bs-border-color);
+}
+[data-bs-theme="dark"] .ts-dropdown .option:hover,
+[data-bs-theme="dark"] .ts-dropdown .active {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Tom Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    new TomSelect("#id_hobby", {
+        create: false,
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        placeholder: "Buscar terapia...",
+        maxOptions: null
+    });
+});
+</script>
+{% endblock %}

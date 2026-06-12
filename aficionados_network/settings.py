@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "aficionados_network",  # App para mensajes de contacto
     "notifications",  # App para notificaciones
     "chat",  # App para chat en vivo
+    "marketplace",  # App de mercadillo
     
     # Nuevas dependencias
     "rest_framework",
