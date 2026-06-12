@@ -28,7 +28,7 @@ class ProfileViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.other.username)
-        self.assertNotContains(response, self.user.username)
+        self.assertNotIn(self.user.profile, response.context["profiles"])
         self.assertEqual(response.context["count_all"], 1)
         self.assertEqual(response.context["count_following"], 0)
         self.assertEqual(response.context["count_not_following"], 1)

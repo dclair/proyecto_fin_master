@@ -1,5 +1,6 @@
 {% extends "general/layout.html" %}
 {% load static %}
+{% load event_tags %}
 
 {% block content %}
 <div class="container-fluid">
@@ -45,6 +46,7 @@
 
     <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
         {% for event in events %}
+            {% get_match_status event user_levels_map as match_status %}
             <div class="col">
                 <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
                     {% if event.image %}
@@ -69,9 +71,9 @@
 
                             {# Iconos de Match/Mentor animado #}
                             <div class="d-flex gap-2">
-                                {% if event.is_match %}
+                                {% if match_status.is_match %}
                                     <i class="bi bi-star-fill text-info match-pulse fs-6" title="¡Tu nivel!"></i>
-                                {% elif event.is_mentor %}
+                                {% elif match_status.is_mentor %}
                                     <i class="bi bi-mortarboard-fill text-primary mentor-pulse fs-6" title="¡Eres un referente!"></i>
                                 {% endif %}
                             </div>
