@@ -48,6 +48,15 @@ Notificaciones Visuales: Sistema de badges y reordenación inteligente de la lis
 
 Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección de rutas.
 
+5. Mercadillo de Profesionales 🛒
+   Directorio de Anuncios: Espacio para compra, venta, alquiler e intercambio de material o espacios terapéuticos.
+
+   Integración Nativa con Chat: La comunicación entre compradores y vendedores se realiza a través de la mensajería en tiempo real ya existente, manteniendo la privacidad absoluta de los tratos.
+
+   Sistema de Confianza: Valoraciones (reviews de 1 a 5 estrellas) para medir la reputación y fiabilidad de los profesionales en la plataforma.
+
+   Gestión Autónoma: Cada usuario puede administrar (editar/eliminar) sus propios anuncios y aplicar filtros por terapias o tipos de artículos.
+
 5. Ecosistema de Comunicación & Branding 📧
    Emails HTML Corporativos: Notificaciones de sistema con diseño "Visión de Empresa", incluyendo logotipos incrustados (CID) y botones de acción.
 
@@ -182,9 +191,9 @@ CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contac
 
 [x] Filtro de "Mis Terapias": Acceso rápido a eventos que coinciden con las terapias del perfil.
 
-[x] Chat en tiempo real: Implementado con WebSockets (React + Django Channels), grupos y chats privados.
-
 [x] Compartir Archivos Multimedia: Subida de imágenes y documentos en el chat implementada.
+
+[x] Mercadillo de Profesionales: Implementado (Directorio de anuncios, CRUD completo, sistema de valoraciones).
 
 [x] UI/UX y Accesibilidad: Tema oscuro refinado con utilidades adaptativas, estandarización de spinners de carga en todos los formularios, y navbar totalmente unificado.
 
