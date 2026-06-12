@@ -1,5 +1,5 @@
 {% for profile in profiles %}
-<div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 profile-card"
+<div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 profile-card"
      {% if forloop.last and page_obj.has_next %}
      hx-get="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.filter %}&filter={{ request.GET.filter }}{% endif %}"
      hx-trigger="revealed"
@@ -31,6 +31,14 @@
             <p class="text-muted text-truncate mb-2 fs-xs" title="{{ profile.user.email }}">
                 <i class="bi bi-envelope me-1"></i>{{ profile.user.email }}
             </p>
+
+            <div class="mb-2 d-flex flex-wrap justify-content-center gap-1" style="min-height: 20px;">
+                {% for hobby in profile.hobbies.all|slice:":2" %}
+                    <span class="badge bg-info text-dark fw-normal fs-xxs" title="{{ hobby.name }}">{{ hobby.name|truncatechars:20 }}</span>
+                {% empty %}
+                    <span class="text-muted fs-xxs fst-italic">Sin terapias especificadas</span>
+                {% endfor %}
+            </div>
 
             <div class="mb-2">
                 {% if user.is_authenticated %}

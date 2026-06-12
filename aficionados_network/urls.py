@@ -19,9 +19,8 @@ urlpatterns = [
     path("", HomeView.as_view(), name="home"),
     # path("", include("posts.urls")),  # Incluye las URLs de la app posts
     path("events/", include("posts.urls")),
-    path(
-        "profile/", include("profiles.urls")
-    ),  # Esto delega las rutas a la app profiles
+    path("profile/", include("profiles.urls")),  # Esto delega las rutas a la app profiles
+    path("mercadillo/", include("marketplace.urls", namespace="marketplace")),
     # urls autenticación
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),

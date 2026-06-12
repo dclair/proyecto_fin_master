@@ -1,0 +1,128 @@
+{% extends "general/layout.html" %}
+{% load static %}
+
+{% block title %}Mercadillo de Profesionales | Hubs&Clicks{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2"><i class="fas fa-store text-primary me-2"></i> Mercadillo</h1>
+        <div>
+            {% if request.GET.seller == 'me' %}
+                <a href="{% url 'marketplace:listing_list' %}" class="btn btn-outline-secondary rounded-pill me-2">
+                    <i class="fas fa-list me-1"></i> Ver Todos
+                </a>
+            {% else %}
+                <a href="?seller=me" class="btn btn-outline-success rounded-pill me-2">
+                    <i class="fas fa-user-tag me-1"></i> Mis Anuncios
+                </a>
+            {% endif %}
+            <a href="{% url 'marketplace:listing_create' %}" class="btn btn-primary rounded-pill">
+                <i class="fas fa-plus me-1"></i> Publicar Anuncio
+            </a>
+        </div>
+    </div>
+
+    <!-- Buscador y Filtros -->
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label text-muted small">Buscar</label>
+                    <input type="text" name="q" class="form-control" placeholder="Camilla, aceites, box..." value="{{ request.GET.q }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small">Tipo de Anuncio</label>
+                    <select name="type" class="form-select">
+                        <option value="">Todos los tipos</option>
+                        {% for value, label in listing_types %}
+                            <option value="{{ value }}" {% if request.GET.type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small">Terapia relacionada</label>
+                    <select name="hobby" class="form-select">
+                        <option value="">Todas las terapias</option>
+                        {% for h in hobbies %}
+                            <option value="{{ h.id }}" {% if request.GET.hobby == h.id|stringformat:"s" %}selected{% endif %}>{{ h.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100">Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for listing in listings %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm transition-hover">
+                {% if listing.image %}
+                    <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 200px;">
+                        <i class="fas fa-image fa-3x"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="card-body position-relative">
+                    <span class="badge bg-{{ listing.status|yesno:'success,warning,secondary' }} position-absolute top-0 end-0 m-3">{{ listing.get_status_display }}</span>
+                    <span class="badge bg-info text-dark mb-2">{{ listing.get_listing_type_display }}</span>
+                    
+                    <h5 class="card-title text-truncate">
+                        <a href="{% url 'marketplace:listing_detail' listing.slug %}" class="text-decoration-none text-dark">{{ listing.title }}</a>
+                    </h5>
+                    
+                    <p class="card-text text-muted small mb-3">
+                        <i class="fas fa-user-circle me-1"></i> {{ listing.seller.username }}<br>
+                        {% if listing.hobby %}<i class="fas fa-tag me-1"></i> {{ listing.hobby.name }}{% endif %}
+                    </p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="fs-5 fw-bold text-primary">
+                            {% if listing.price == 0 %}A convenir{% else %}{{ listing.price }} €{% endif %}
+                        </span>
+                        <a href="{% url 'marketplace:listing_detail' listing.slug %}" class="btn btn-sm btn-outline-primary stretched-link">Ver detalles</a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top-0 text-muted small text-end">
+                    Publicado hace {{ listing.created_at|timesince }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="text-muted mb-3"><i class="fas fa-box-open fa-3x"></i></div>
+            <h4>No hay anuncios disponibles</h4>
+            <p>Se el primero en publicar algo en el mercadillo.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Anterior</a></li>
+            {% endif %}
+            
+            <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+            
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<style>
+.transition-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.transition-hover:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+</style>
+{% endblock %}

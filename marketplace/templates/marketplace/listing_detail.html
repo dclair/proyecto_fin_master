@@ -1,0 +1,153 @@
+{% extends "general/layout.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ listing.title }} | Mercadillo{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Navegación -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'marketplace:listing_list' %}" class="text-decoration-none">Mercadillo</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ listing.title|truncatechars:30 }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Columna Principal -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                {% if listing.image %}
+                    <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title }}" style="max-height: 500px; object-fit: contain; background: #f8f9fa;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 400px;">
+                        <i class="fas fa-image fa-5x"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-info text-dark mb-2">{{ listing.get_listing_type_display }}</span>
+                            {% if listing.hobby %}
+                                <span class="badge bg-secondary mb-2"><i class="fas fa-tag me-1"></i> {{ listing.hobby.name }}</span>
+                            {% endif %}
+                            <h1 class="h3 fw-bold mb-0">{{ listing.title }}</h1>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-{{ listing.status|yesno:'success,warning,secondary' }} fs-6">{{ listing.get_status_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-primary fw-bold mb-4">
+                        {% if listing.price == 0 %}A convenir / Intercambio{% else %}{{ listing.price }} €{% endif %}
+                    </h3>
+
+                    <h5 class="fw-bold mb-3">Descripción</h5>
+                    <div class="text-muted" style="white-space: pre-line;">
+                        {{ listing.description }}
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-white border-top text-muted py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small>Publicado: {{ listing.created_at|date:"d M Y" }}</small>
+                        <small>Actualizado: {{ listing.updated_at|date:"d M Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Administrador de su propio anuncio -->
+            {% if request.user == listing.seller %}
+            <div class="card shadow-sm border-0 border-top border-primary border-3 mb-4">
+                <div class="card-body d-flex justify-content-between align-items-center p-4">
+                    <div>
+                        <h5 class="mb-1"><i class="fas fa-cog text-primary me-2"></i>Gestión del anuncio</h5>
+                        <p class="text-muted small mb-0">Eres el dueño de este anuncio. Puedes editar sus datos o retirarlo.</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'marketplace:listing_update' listing.slug %}" class="btn btn-outline-primary me-2">Editar</a>
+                        <a href="{% url 'marketplace:listing_delete' listing.slug %}" class="btn btn-outline-danger">Eliminar</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Columna Vendedor -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 100px;">
+                <div class="card-body p-4 text-center">
+                    <h5 class="card-title fw-bold border-bottom pb-3 mb-3">Información del Vendedor</h5>
+                    
+                    <img src="{{ listing.seller.profile.profile_picture_url }}" class="rounded-circle mb-3" width="100" height="100" style="object-fit: cover; border: 3px solid #e9ecef;">
+                    <h5 class="fw-bold mb-1"><a href="{% url 'profiles:profile' listing.seller.pk %}" class="text-dark text-decoration-none">{{ listing.seller.username }}</a></h5>
+                    
+                    <!-- Estrellas -->
+                    <div class="mb-3">
+                        <div class="text-warning mb-1">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= avg_rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">{{ avg_rating|floatformat:1 }} de 5 ({{ reviews.count }} valoraciones)</small>
+                    </div>
+
+                    {% if request.user != listing.seller %}
+                        <button onclick="openChatWithSeller({{ listing.seller.id }})" class="btn btn-primary w-100 mb-3 rounded-pill">
+                            <i class="fas fa-comment-dots me-2"></i> Mensaje Privado
+                        </button>
+                    {% endif %}
+                    
+                    {% if request.user != listing.seller and not has_reviewed %}
+                        <hr>
+                        <h6 class="fw-bold mb-3 text-start">Valorar Vendedor</h6>
+                        <form action="{% url 'marketplace:add_seller_review' listing.seller.username %}" method="POST" class="text-start">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            {{ review_form|crispy }}
+                            <button type="submit" class="btn btn-sm btn-outline-success w-100 mt-2">Enviar Valoración</button>
+                        </form>
+                    {% endif %}
+                    
+                    {% if reviews %}
+                    <div class="text-start mt-4">
+                        <h6 class="fw-bold border-bottom pb-2">Últimas opiniones</h6>
+                        {% for review in reviews|slice:":3" %}
+                        <div class="mb-3 border-bottom pb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="fw-bold">{{ review.reviewer.username }}</small>
+                                <small class="text-warning">
+                                    {% for i in "12345"|make_list %}
+                                        <i class="fa{% if forloop.counter <= review.rating %}s{% else %}r{% endif %} fa-star small"></i>
+                                    {% endfor %}
+                                </small>
+                            </div>
+                            <small class="text-muted d-block">{{ review.comment }}</small>
+                            <small class="text-muted" style="font-size: 0.7rem;">{{ review.created_at|date:"d M Y" }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openChatWithSeller(userId) {
+    window.dispatchEvent(new CustomEvent('openChatWith', {
+        detail: {
+            userId: userId,
+            username: "{{ listing.seller.username }}"
+        }
+    }));
+}
+</script>
+{% endblock %}
