@@ -31,8 +31,7 @@ These rules apply to EVERY user request, not just SDD workflows.
 SDD is the structured planning layer for substantial changes.
 
 ### Artifact Store Policy
-- `artifact_store.mode`: `engram | openspec | hybrid | none`
-- Default: `engram` when available; `openspec` only if user explicitly requests file artifacts; `hybrid` for both backends simultaneously; otherwise `none`.
+- `artifact_store.mode`: `openspec` (Forzado por el usuario para guardar archivos locales)
 - `hybrid` persists to BOTH Engram and OpenSpec. Provides cross-session recovery + local file artifacts. Consumes more tokens per operation.
 - In `none`, do not write project files. Return results inline and recommend enabling `engram` or `openspec`.
 
