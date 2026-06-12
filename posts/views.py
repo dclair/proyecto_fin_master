@@ -430,30 +430,6 @@ class EventListView(LoginRequiredMixin, ListView):
         if my_hobbies_only and self.request.user.is_authenticated:
             queryset = queryset.filter(hobby__in=self.request.user.profile.hobbies.all())
 
-        # 4. LÓGICA DE MATCH DE NIVEL
-        # Solo ejecutamos si el usuario está logueado para evitar errores
-        if self.request.user.is_authenticated:
-            # Filtramos a través de profile__user porque UserHobby apunta al Profile
-            user_levels_qs = UserHobby.objects.filter(
-                profile__user=self.request.user  # <--- CAMBIO AQUÍ
-            ).values("hobby_id", "level")
-
-            # Creamos el mapa: {id_del_hobby: 'nivel'}
-            levels_map = {item["hobby_id"]: item["level"] for item in user_levels_qs}
-
-            # Marcamos los eventos que coinciden
-            for event in queryset:
-                user_level_in_this_hobby = levels_map.get(event.hobby.id)
-
-                # Comparamos el nivel del evento con el del usuario
-                # También es match si el evento es para "todos" (all)
-                event.is_match = (event.level == "all") or (
-                    event.level == user_level_in_this_hobby
-                )
-        else:
-            for event in queryset:
-                event.is_match = False
-
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -464,6 +440,15 @@ class EventListView(LoginRequiredMixin, ListView):
         context["current_hobby"] = self.request.GET.get("hobby", "all")
         context["current_level"] = self.request.GET.get("level", "any")
         context["current_my_hobbies"] = self.request.GET.get("my_hobbies") == "true"
+        
+        if self.request.user.is_authenticated:
+            user_levels_qs = UserHobby.objects.filter(
+                profile__user=self.request.user
+            ).values("hobby_id", "level")
+            context["user_levels_map"] = {item["hobby_id"]: item["level"] for item in user_levels_qs}
+        else:
+            context["user_levels_map"] = {}
+            
         return context
 
 
@@ -868,28 +853,15 @@ def hobby_hub(request, hobby_slug):
     else:
         my_hobbies = None
 
-    # --- 2. LÓGICA DE TAGS PARA LOS EVENTOS DEL HUB ---
     events = Event.objects.filter(hobby=hobby, is_canceled=False).order_by("event_date")
-
-    if user.is_authenticated:
-        level_order = {"beginner": 0, "intermediate": 1, "advanced": 2, "expert": 3}
-        # Nivel del usuario para este hobby específico
-        u_level_code = levels_map.get(hobby.id)
-
-        for event in events:
-            # Match: mismo nivel o 'all'
-            event.is_match = (event.level == "all") or (event.level == u_level_code)
-            # Mentor: nivel usuario > nivel evento (y no es 'all')
-            if event.level != "all" and u_level_code:
-                event.is_mentor = level_order.get(u_level_code, 0) > level_order.get(
-                    event.level, -1
-                )
 
     context = {
         "hobby": hobby,
         "is_member": is_member,
         "member_count": hobby.profiles.count(),
         "my_hobbies": my_hobbies,  # Añadimos esto para la sidebar
+        "user_levels_map": levels_map if user.is_authenticated else {},
+
         "events": events,
         "clicks": Posts.objects.filter(category=hobby).order_by("-created_at")[:12],
     }

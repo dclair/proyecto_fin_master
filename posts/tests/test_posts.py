@@ -241,7 +241,7 @@ class EventRouteTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["events"][0].pk, self.event.pk)
-        self.assertTrue(response.context["events"][0].is_match)
+        self.assertEqual(response.context["user_levels_map"][self.hobby.id], "beginner")
 
         response = self.client.get(
             reverse("posts:event_detail", kwargs={"pk": self.event.pk})

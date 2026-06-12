@@ -1,5 +1,6 @@
 {% extends "general/layout.html" %}
 {% load static %}
+{% load event_tags %}
 
 {% block page_title %}
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -84,8 +85,9 @@
     {# CUADRÍCULA DE EVENTOS #}
     <div class="row g-4">
         {% for event in events %}
+        {% get_match_status event user_levels_map as match_status %}
         <div class="col-md-6 col-lg-4">
-            <div class="card h-100 card-hubs border-0 {% if event.is_canceled %}opacity-75{% endif %} {% if event.is_match %}card-match-level{% endif %}">
+            <div class="card h-100 card-hubs border-0 {% if event.is_canceled %}opacity-75{% endif %} {% if match_status.is_match %}card-match-level{% endif %}">
                 
                 <a href="{% url 'posts:event_detail' event.id %}" class="text-decoration-none">
                     <div class="img-event-wrapper">
@@ -128,7 +130,7 @@
                             {% endif %}
 
                             {# Match Personalizado #}
-                            {% if request.user.is_authenticated and event.is_match %}
+                            {% if request.user.is_authenticated and match_status.is_match %}
                                 <span class="badge rounded-pill bg-info text-dark shadow-sm badge-level-text">
                                     <i class="bi bi-star-fill"></i> Tu nivel
                                 </span>

@@ -14,8 +14,7 @@ from django.utils import timezone
 from django.views import View
 from django.contrib.auth import login, authenticate, logout, logout as auth_logout
 from django.http import Http404, HttpResponseRedirect
-from .forms import RegisterForm, LoginForm, UserUpdateForm, ProfileUpdateForm
-from posts.forms import ProfileFollowForm
+from .forms import RegisterForm, LoginForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import redirect, render, get_object_or_404
@@ -46,12 +45,7 @@ from django.utils.http import urlsafe_base64_decode
 
 User = get_user_model()
 
-
-class HomeView(TemplateView):
-    template_name = "general/home.html"
-
-    # aficionados_network/views.py
-
+# aficionados_network/views.py
 
 from profiles.models import (
     UserProfile,
@@ -131,15 +125,7 @@ class HomeView(TemplateView):
                 )[:5]
                 context["filtered_by_hobbies"] = False
 
-            # --- LÓGICA DE MATCH PARA LAS TARJETAS (NUEVO) ---
-            level_order = {"beginner": 0, "intermediate": 1, "advanced": 2, "expert": 3}
-            for event in upcoming_events:
-                u_level = levels_map.get(event.hobby.id)
-                event.is_match = (event.level == "all") or (event.level == u_level)
-                if event.level != "all" and u_level:
-                    event.is_mentor = level_order.get(u_level, 0) > level_order.get(
-                        event.level, -1
-                    )
+            context["user_levels_map"] = levels_map
         context["upcoming_events"] = upcoming_events
         return context
 
@@ -278,107 +264,6 @@ def activate(request, uidb64, token):
     else:
         return render(request, "registration/activation_invalid.html")
 
-
-
-
-class ProfileUpdateView(LoginRequiredMixin, View):
-    template_name = "general/profile_edit.html"
-    login_url = "login"
-
-    def get_profile(self, user):
-        """Obtiene o crea un perfil para el usuario de forma segura."""
-        try:
-            # Primero intentamos obtener el perfil existente
-            return user.profile
-        except UserProfile.DoesNotExist:
-            # Si no existe, lo creamos sin acceder a relaciones many-to-many
-            profile = UserProfile(user=user)
-            profile.save()  # Guardamos para obtener un ID
-            messages.info(
-                self.request, "Por favor, completa la información de tu perfil."
-            )
-            return profile
-
-    def get(self, request, *args, **kwargs):
-        try:
-            # Obtener o crear el perfil del usuario
-            profile = self.get_profile(request.user)
-
-            # Inicializar los formularios
-            user_form = UserUpdateForm(instance=request.user)
-            profile_form = ProfileUpdateForm(instance=profile)
-
-            return render(
-                request,
-                self.template_name,
-                {
-                    "user_form": user_form,
-                    "profile_form": profile_form,
-                    "user_profile": profile,
-                },
-            )
-        except Exception as e:
-            messages.error(request, f"Error al cargar el perfil: {str(e)}")
-            return redirect("home")
-
-    def post(self, request, *args, **kwargs):
-        try:
-            # Obtener el perfil existente o crear uno nuevo
-            profile = self.get_profile(request.user)
-
-            # Inicializar los formularios con los datos del request
-            user_form = UserUpdateForm(request.POST, instance=request.user)
-            profile_form = ProfileUpdateForm(
-                request.POST, request.FILES, instance=profile
-            )
-
-            if user_form.is_valid() and profile_form.is_valid():
-                with transaction.atomic():
-                    # 1. Guardar el usuario
-                    user = user_form.save(commit=False)
-                    user.save()
-
-                    # 2. Guardar el perfil
-                    profile = profile_form.save(commit=False)
-                    profile.user = user
-                    profile.save()
-
-                    # 3. Manejar manualmente los campos many-to-many
-                    for field_name, value in profile_form.cleaned_data.items():
-                        if hasattr(profile, field_name) and hasattr(
-                            getattr(profile, field_name), "set"
-                        ):
-                            getattr(profile, field_name).set(value)
-
-                messages.success(request, "Perfil actualizado correctamente.")
-                return redirect("profile_edit")
-            else:
-                # Mostrar errores de validación
-                for field, errors in user_form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"Error en {field}: {error}")
-                for field, errors in profile_form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"Error en {field}: {error}")
-
-                # Volver a mostrar el formulario con los errores
-                return render(
-                    request,
-                    self.template_name,
-                    {
-                        "user_form": user_form,
-                        "profile_form": profile_form,
-                        "user_profile": profile,
-                    },
-                )
-
-        except Exception as e:
-            # Manejar cualquier error inesperado
-            messages.error(
-                request, f"Se produjo un error al guardar el perfil: {str(e)}"
-            )
-            # Redirigir a la misma página para volver a intentar
-            return redirect("profile_edit")
 
 
 class ContactFormView(FormView):
