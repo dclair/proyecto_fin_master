@@ -1,0 +1,202 @@
+{% extends "general/layout.html" %}
+{% load static %}
+{% block head_title %}Publicar Artículo | Aficionados{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h2 class="fw-bold mb-4 text-dark-mode-white">{% if object %}Editar Artículo{% else %}Nuevo Caso Clínico / Artículo{% endif %}</h2>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form id="articleForm" method="POST" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row g-4">
+                            <!-- Title -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Título del Artículo</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors }}</div>{% endif %}
+                            </div>
+
+                            <!-- Categories -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Terapia (Existente)</label>
+                                {{ form.hobby }}
+                                <small class="text-muted d-block mt-1">Selecciona la rama a la que pertenece.</small>
+                                {% if form.hobby.errors %}<div class="text-danger small">{{ form.hobby.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">O nueva terapia</label>
+                                {{ form.custom_hobby }}
+                                <small class="text-muted d-block mt-1">{{ form.custom_hobby.help_text }}</small>
+                                {% if form.custom_hobby.errors %}<div class="text-danger small">{{ form.custom_hobby.errors }}</div>{% endif %}
+                            </div>
+
+                            <!-- Non Field Errors -->
+                            {% if form.non_field_errors %}
+                                <div class="col-12">
+                                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Content -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Contenido Principal</label>
+                                {{ form.content }}
+                                {% if form.content.errors %}<div class="text-danger small">{{ form.content.errors }}</div>{% endif %}
+                            </div>
+
+                            <!-- Media Uploads -->
+                            <h5 class="fw-bold mt-5 mb-0 border-bottom pb-2">Archivos Adjuntos y Portada</h5>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Imagen de Portada</label>
+                                {{ form.cover_image }}
+                                <small class="text-muted d-block mt-1">{{ form.cover_image.help_text }}</small>
+                                {% if form.cover_image.errors %}<div class="text-danger small">{{ form.cover_image.errors }}</div>{% endif %}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Video Corto (Max 15MB)</label>
+                                {{ form.attached_video }}
+                                <small class="text-muted d-block mt-1">{{ form.attached_video.help_text }}</small>
+                                {% if form.attached_video.errors %}<div class="text-danger small">{{ form.attached_video.errors }}</div>{% endif %}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Documento (PDF/Word)</label>
+                                {{ form.attached_document }}
+                                <small class="text-muted d-block mt-1">{{ form.attached_document.help_text }}</small>
+                                {% if form.attached_document.errors %}<div class="text-danger small">{{ form.attached_document.errors }}</div>{% endif %}
+                            </div>
+
+                            <!-- External Links -->
+                            <h5 class="fw-bold mt-5 mb-0 border-bottom pb-2">Enlaces Externos (Para archivos muy grandes)</h5>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Link a Video (YouTube, Vimeo...)</label>
+                                {{ form.external_video_url }}
+                                <small class="text-muted d-block mt-1">{{ form.external_video_url.help_text }}</small>
+                                {% if form.external_video_url.errors %}<div class="text-danger small">{{ form.external_video_url.errors }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Link a Documento (Drive, Dropbox...)</label>
+                                {{ form.external_document_url }}
+                                <small class="text-muted d-block mt-1">{{ form.external_document_url.help_text }}</small>
+                                {% if form.external_document_url.errors %}<div class="text-danger small">{{ form.external_document_url.errors }}</div>{% endif %}
+                            </div>
+
+                            <!-- Botón Submit -->
+                            <div class="d-grid mt-5">
+                                <button type="submit" id="submitBtn" class="btn btn-primary btn-lg rounded-pill shadow-sm fw-bold">
+                                    <span id="btnText">{% if object %}Guardar Cambios{% else %}Publicar Artículo{% endif %}</span>
+                                    <span id="btnSpinner" class="d-none">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        {% if object %}Guardando...{% else %}Publicando...{% endif %}
+                                    </span>
+                                </button>
+                                <a href="{% url 'library:article_list' %}" class="btn btn-link text-muted w-100 mt-2">Cancelar</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TinyMCE CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+  tinymce.init({
+    selector: '#tinymce-editor',
+    height: 500,
+    menubar: false,
+    plugins: [
+      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+      'insertdatetime', 'media', 'table', 'help', 'wordcount'
+    ],
+    toolbar: 'undo redo | blocks | ' +
+    'bold italic textcolor | alignleft aligncenter ' +
+    'alignright alignjustify | bullist numlist outdent indent | ' +
+    'link image media table | removeformat | help',
+    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }',
+    // Bloqueamos que la gente pegue imágenes directo para evitar el colapso de Base64
+    paste_data_images: false,
+    image_advtab: false, // Desactiva pestañas avanzadas de imagen para mantenerlo simple
+  });
+</script>
+
+<style>
+    /* Styling for standard Django forms if we didn't use crispy forms */
+    input[type=text], input[type=url], select, textarea {
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+    input[type=file] {
+        display: block;
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+</style>
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      new TomSelect("#id_hobby", {
+          create: false,
+          sortField: {
+              field: "text",
+              direction: "asc"
+          },
+          placeholder: "Busca una terapia..."
+      });
+  });
+
+  const articleForm = document.getElementById('articleForm');
+  if (articleForm) {
+      articleForm.addEventListener('submit', function() {
+          // Sync TinyMCE before submission to ensure validation goes through smoothly
+          if (typeof tinymce !== 'undefined') {
+              tinymce.triggerSave();
+          }
+          
+          const submitBtn = document.getElementById('submitBtn');
+          const btnText = document.getElementById('btnText');
+          const btnSpinner = document.getElementById('btnSpinner');
+          
+          if (submitBtn && btnText && btnSpinner) {
+              btnText.classList.add('d-none');
+              btnSpinner.classList.remove('d-none');
+              submitBtn.style.pointerEvents = 'none';
+              submitBtn.classList.add('opacity-75');
+          }
+      });
+  }
+</script>
+{% endblock %}

@@ -1,5 +1,8 @@
 {% load static %}
 {% load marketplace_tags %}
+{% load library_tags %}
+{% load profile_tags %}
+{% load event_tags %}
 <nav class="navbar navbar-expand-xl navbar-hubs fixed-top shadow-sm bg-body-tertiary">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
@@ -34,10 +37,25 @@
                     </a>
                     <ul class="dropdown-menu shadow-sm border-0 mt-1 rounded-3 min-w-200" aria-labelledby="directorioDropdown">
                         <li>
+                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'library' in request.resolver_match.app_name %}bg-light text-dark fw-bold{% endif %}" 
+                               href="{% url 'library:article_list' %}"
+                               title="Artículos, casos clínicos y recursos de la comunidad">
+                                <i class="bi bi-book me-2 text-info"></i> Biblioteca
+                                {% get_articles_count as articles_count %}
+                                {% if articles_count != '0' %}
+                                    <span class="badge bg-success rounded-pill ms-auto" style="font-size: 0.65rem;">{{ articles_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li>
                             <a class="dropdown-item d-flex align-items-center py-2 {% if 'posts' in request.resolver_match.app_name and 'event' in request.resolver_match.url_name %}bg-light text-dark fw-bold{% endif %}" 
                                href="{% url 'posts:event_list' %}"
                                title="Explora y únete a eventos de la comunidad">
                                 <i class="bi bi-calendar3 me-2 text-warning"></i> Eventos
+                                {% get_events_count as events_count %}
+                                {% if events_count != '0' %}
+                                    <span class="badge bg-success rounded-pill ms-auto" style="font-size: 0.65rem;">{{ events_count }}</span>
+                                {% endif %}
                             </a>
                         </li>
                         <li>
@@ -45,6 +63,10 @@
                                href="{% url 'profiles:profile_list' %}"
                                title="Encuentra a cualquier terapeuta de la comunidad">
                                 <i class="bi bi-people me-2 text-primary"></i> Profesionales
+                                {% get_professionals_count as profs_count %}
+                                {% if profs_count != '0' %}
+                                    <span class="badge bg-success rounded-pill ms-auto" style="font-size: 0.65rem;">{{ profs_count }}</span>
+                                {% endif %}
                             </a>
                         </li>
                         <li>
@@ -96,7 +118,7 @@
                     <a href="{% url 'posts:post_create' %}" 
                        class="nav-link px-3 d-flex align-items-center text-nowrap rounded-pill border border-hubs-subtle text-hubs {% if request.resolver_match.url_name == 'post_create' %}active fw-bold bg-light{% endif %}" 
                        title="Añadir publicaciones y descubrir la comunidad">
-                        <i class="bi bi-plus-circle-fill me-1"></i> Nueva Publicación
+                        <i class="bi bi-plus-circle-fill me-1"></i> Publicación Rápida
                     </a>
                 </li>
                 {% endif %}

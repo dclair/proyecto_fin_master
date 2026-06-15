@@ -1,0 +1,86 @@
+{% extends "general/layout.html" %}
+{% load static %}
+{% block head_title %}Biblioteca de Casos y Artículos | Aficionados{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0 text-dark-mode-white"><i class="bi bi-book text-primary me-2"></i>Biblioteca y Casos de Estudio</h2>
+        {% if user.is_authenticated %}
+            <a href="{% url 'library:article_create' %}" class="btn btn-primary shadow-sm"><i class="bi bi-pencil-square me-2"></i>Publicar Artículo</a>
+        {% endif %}
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-5">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por título..." value="{{ request.GET.q }}">
+                </div>
+                <div class="col-md-5">
+                    <select name="hobby" class="form-select">
+                        <option value="">Todas las terapias</option>
+                        {% for hobby in hobbies %}
+                            <option value="{{ hobby.slug }}" {% if request.GET.hobby == hobby.slug %}selected{% endif %}>{{ hobby.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-dark w-100">Buscar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- List -->
+    <div class="row g-4">
+        {% for article in articles %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm article-card">
+                    {% if article.cover_image %}
+                        <img src="{{ article.cover_image.url }}" class="card-img-top object-fit-cover" style="height: 200px;" alt="{{ article.title }}">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-journal-text text-muted display-1"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <span class="badge bg-primary-subtle text-primary mb-2">{{ article.hobby.name }}</span>
+                        <h5 class="card-title fw-bold text-truncate-custom"><a href="{{ article.get_absolute_url }}" class="text-decoration-none text-dark">{{ article.title }}</a></h5>
+                        <div class="small text-muted mb-3 d-flex align-items-center">
+                            <i class="bi bi-person-circle me-1"></i> {{ article.author.username }} &bull; {{ article.created_at|date:"d M Y" }}
+                        </div>
+                        <p class="card-text text-muted small">{{ article.content|striptags|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-eye"></i> {{ article.views_count }}</small>
+                        <a href="{{ article.get_absolute_url }}" class="btn btn-outline-primary btn-sm rounded-pill">Leer más</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-journal-x display-1 text-muted mb-3"></i>
+                <h4>No se encontraron artículos</h4>
+                <p class="text-muted">Sé el primero en compartir un caso de estudio.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.hobby %}&hobby={{ request.GET.hobby }}{% endif %}">Anterior</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.hobby %}&hobby={{ request.GET.hobby }}{% endif %}">Siguiente</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

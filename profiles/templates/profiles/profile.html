@@ -132,7 +132,7 @@
                     {% if user_profile.bio %}
                         <div class="mb-3">
                             <h6 class="fw-bold small text-uppercase text-dark mb-1">Sobre mí</h6>
-                            <p class="mb-0 small text-dark">{{ user_profile.bio }}</p>
+                            <div class="mb-0 small text-dark">{{ user_profile.bio|safe }}</div>
                         </div>
                     {% endif %}
 
@@ -333,6 +333,34 @@
                         <i class="bi bi-camera text-muted display-4"></i>
                         <p class="text-muted mt-2">Aún no hay publicaciones para mostrar.</p>
                     </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Aqui va la sección de artículos -->
+        <div class="d-flex justify-content-between align-items-center mt-5 mb-4">
+            <h5 class="fw-bold mb-0"><i class="bi bi-book me-2"></i>Artículos y Casos ({{ user_profile.user.articles.count }})</h5>
+            {% if is_own_profile %}
+                <a href="{% url 'library:article_create' %}" class="btn btn-sm btn-outline-primary">Publicar Artículo</a>
+            {% endif %}
+        </div>
+        <div class="row g-3">
+            {% for article in user_profile.user.articles.all|dictsortreversed:"created_at" %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm article-card bg-light-hover transition-all">
+                        <div class="card-body">
+                            <span class="badge bg-primary-subtle text-primary mb-2 position-relative z-1">{{ article.hobby.name }}</span>
+                            <h6 class="card-title fw-bold text-truncate-custom"><a href="{{ article.get_absolute_url }}" class="text-decoration-none text-dark stretched-link">{{ article.title }}</a></h6>
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-calendar me-1"></i> {{ article.created_at|date:"d M Y" }}
+                            </div>
+                            <p class="card-text text-muted small">{{ article.content|striptags|truncatewords:15 }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-4">
+                    <p class="text-muted small mb-0">No hay artículos publicados.</p>
                 </div>
             {% endfor %}
         </div>
