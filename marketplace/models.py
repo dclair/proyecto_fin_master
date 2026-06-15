@@ -2,9 +2,15 @@ from django.db import models
 from django.contrib.auth.models import User
 from profiles.models import Hobby
 from django.utils.text import slugify
+from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from posts.models import validate_image_size
 import os
+
+def validate_video_size(value):
+    filesize = value.size
+    if filesize > 15 * 1024 * 1024:
+        raise ValidationError("El tamaño máximo del video es 15MB")
 
 class Listing(models.Model):
     LISTING_TYPES = [
@@ -45,6 +51,18 @@ class Listing(models.Model):
         help_text='Formatos soportados: JPG, JPEG, PNG. Tamaño máximo: 5MB'
     )
     
+    video = models.FileField(
+        'video',
+        upload_to='marketplace_videos/%Y/%m/%d/',
+        blank=True,
+        null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=['mp4', 'webm', 'mov']),
+            validate_video_size,
+        ],
+        help_text='Opcional. Duración máxima: 1 minuto. Tamaño máximo: 15MB. Formatos: MP4, WebM, MOV.'
+    )
+    
     created_at = models.DateTimeField('fecha de publicación', auto_now_add=True)
     updated_at = models.DateTimeField('última actualización', auto_now=True)
 
@@ -68,6 +86,8 @@ class Listing(models.Model):
     def delete(self, *args, **kwargs):
         if self.image and os.path.isfile(self.image.path):
             os.remove(self.image.path)
+        if self.video and os.path.isfile(self.video.path):
+            os.remove(self.video.path)
         super().delete(*args, **kwargs)
 
     def __str__(self):

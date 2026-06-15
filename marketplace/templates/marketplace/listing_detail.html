@@ -44,6 +44,16 @@
                         {% if listing.price == 0 %}A convenir / Intercambio{% else %}{{ listing.price }} €{% endif %}
                     </h3>
 
+                    {% if listing.video %}
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-video me-2"></i>Video</h5>
+                        <video controls class="w-100 rounded shadow-sm" style="max-height: 400px; background: #000;">
+                            <source src="{{ listing.video.url }}" type="video/mp4">
+                            Tu navegador no soporta la reproducción de videos.
+                        </video>
+                    </div>
+                    {% endif %}
+
                     <h5 class="fw-bold mb-3">Descripción</h5>
                     <div class="text-muted" style="white-space: pre-line;">
                         {{ listing.description }}
