@@ -57,7 +57,7 @@ Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección 
 
    Gestión Autónoma: Cada usuario puede administrar (editar/eliminar) sus propios anuncios y aplicar filtros por terapias o tipos de artículos.
 
-5. Ecosistema de Comunicación & Branding 📧
+6. Ecosistema de Comunicación & Branding 📧
    Emails HTML Corporativos: Notificaciones de sistema con diseño "Visión de Empresa", incluyendo logotipos incrustados (CID) y botones de acción.
 
 Lógica de Notificación Dual: Cada interacción crítica genera un aviso interno (web) y, en casos de eventos o contacto, un correo electrónico profesional.
@@ -66,6 +66,7 @@ Formulario de Contacto Pro: Integración de mensajes de usuario con guardado en 
 
 💻 Stack Tecnológico (Cumplimiento de Requisitos PFM)
 Este proyecto cumple estrictamente con los requisitos universitarios del Proyecto Final de Máster:
+
 - **Backend (30%):** Django 6.0 + Python 3.12. Modelos, vistas, plantillas, autenticación y persistencia de datos.
 - **Frontend (15%):** HTML5, CSS3, Bootstrap 5.3, integrando **React 18** (para la interfaz completa de mensajería en tiempo real que consume los datos del backend vía API REST y WebSockets).
 - **Interactividad y Tiempo Real:** HTMX & JavaScript Vanilla (AJAX) y Channels (ASGI).
@@ -105,16 +106,19 @@ source env/bin/activate
 
 # Activar el entorno (Windows)
 
-env\Scripts\activate 3. Instalar dependencias
-Asegúrate de tener el archivo requirements.txt actualizado:
+env\Scripts\activate
+
+3. Instalar dependencias
+   Asegúrate de tener el archivo requirements.txt actualizado:
 
 Bash
-pip install -r requirements.txt 4. Preparar la Base de Datos
-Realiza las migraciones para crear la estructura de tablas (Eventos, Perfiles, Notificaciones, etc.):
+pip install -r requirements.txt
 
-Bash
-python manage.py makemigrations
-python manage.py migrate
+4. Preparar la Base de Datos
+   Realiza las migraciones para crear la estructura de tablas (Eventos, Perfiles, Notificaciones, etc.):
+   Bash
+   python manage.py makemigrations
+   python manage.py migrate
 
 ### Configuración MySQL/MariaDB
 
