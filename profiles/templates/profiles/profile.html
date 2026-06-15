@@ -155,6 +155,21 @@
                         </div>
                     </div>
 
+                    {# Logros y Medallas #}
+                    {% if user_profile.user.badges.all %}
+                    <div class="mb-3 border-top pt-3">
+                        <h6 class="fw-bold small text-uppercase text-dark mb-2">Logros y Reconocimientos</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for user_badge in user_profile.user.badges.all %}
+                                <span class="badge border border-warning bg-light text-dark p-2 text-wrap" style="max-width: 200px;" title="{{ user_badge.badge.description }}">
+                                    <i class="{{ user_badge.badge.icon }} me-1 fs-6 align-middle"></i> 
+                                    <span class="align-middle">{{ user_badge.badge.name }}</span>
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
                     {# Datos de Ubicación/Web/Contacto #}
                     <div class="row g-2 border-top pt-3">
                         {% if user_profile.location %}
