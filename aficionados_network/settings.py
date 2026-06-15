@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "notifications",  # App para notificaciones
     "chat",  # App para chat en vivo
     "marketplace",  # App de mercadillo
+    "gamification",  # App para logros y medallas
     
     # Nuevas dependencias
     "rest_framework",

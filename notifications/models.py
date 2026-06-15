@@ -11,6 +11,7 @@ class Notification(models.Model):
         ("comment", "Comentario"),
         ("event", "Quedada"),
         ("review", "Valoración"),
+        ("badge", "Logro Obtenido"),
     )
 
     # Añadimos verbose_name a cada campo
@@ -60,6 +61,9 @@ class Notification(models.Model):
     # este campo es para cuando la notificación es de un comentario
     comment = models.ForeignKey(
         "posts.Comment", on_delete=models.CASCADE, null=True, blank=True
+    )
+    message = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name="Mensaje de sistema/logro"
     )
 
     class Meta:
