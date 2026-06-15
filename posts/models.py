@@ -96,8 +96,9 @@ class Posts(models.Model):
         Hobby,
         on_delete=models.SET_NULL,
         null=True,
-        blank=False,  # Obligamos a elegir una para que tenga sentido la red
+        blank=False,
         related_name="posts",
+        verbose_name="Categoría",
     )
 
     class Meta:
@@ -264,7 +265,7 @@ class Event(models.Model):
     stream_url = models.URLField(blank=True, null=True, verbose_name="Enlace de transmisión (YouTube, etc.)")
     event_date = models.DateTimeField(verbose_name="Fecha y hora del evento")
     image = models.ImageField(
-        upload_to="events/", null=True, blank=True, verbose_name="Imagen de la quedada"
+        upload_to="events/", null=True, blank=True, verbose_name="Imagen del evento"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     is_canceled = models.BooleanField(default=False, verbose_name="¿Cancelado?")

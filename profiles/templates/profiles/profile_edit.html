@@ -182,5 +182,38 @@
       </div>
     </div>
   </div>
-  {% endblock %} {% block extra_js %} {% endblock %}
+  {% endblock %} 
+  
+  {% block extra_js %} 
+  <!-- TinyMCE CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+  <script>
+    tinymce.init({
+      selector: '#id_bio',
+      height: 300,
+      menubar: false,
+      plugins: [
+        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+        'insertdatetime', 'media', 'table', 'help', 'wordcount'
+      ],
+      toolbar: 'undo redo | blocks | ' +
+      'bold italic textcolor | alignleft aligncenter ' +
+      'alignright alignjustify | bullist numlist outdent indent | ' +
+      'link image media table | removeformat | help',
+      content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }',
+      paste_data_images: false,
+      image_advtab: false,
+    });
+  
+    const profileForm = document.getElementById('postForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', function() {
+            if (typeof tinymce !== 'undefined') {
+                tinymce.triggerSave();
+            }
+        });
+    }
+  </script>
+  {% endblock %}
 </div>

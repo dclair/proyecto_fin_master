@@ -18,6 +18,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", HomeView.as_view(), name="home"),
     # path("", include("posts.urls")),  # Incluye las URLs de la app posts
+    path('biblioteca/', include('library.urls', namespace='library')),
     path("events/", include("posts.urls")),
     path("profile/", include("profiles.urls")),  # Esto delega las rutas a la app profiles
     path("mercadillo/", include("marketplace.urls", namespace="marketplace")),

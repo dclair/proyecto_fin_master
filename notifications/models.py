@@ -12,6 +12,8 @@ class Notification(models.Model):
         ("event", "Quedada"),
         ("review", "Valoración"),
         ("badge", "Logro Obtenido"),
+        ("article_comment", "Comentario en Artículo"),
+        ("article_rating", "Valoración de Artículo"),
     )
 
     # Añadimos verbose_name a cada campo

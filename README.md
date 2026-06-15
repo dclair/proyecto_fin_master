@@ -57,7 +57,14 @@ Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección 
 
    Gestión Autónoma: Cada usuario puede administrar (editar/eliminar) sus propios anuncios y aplicar filtros por terapias o tipos de artículos.
 
-6. Ecosistema de Comunicación & Branding 📧
+6. Biblioteca de Artículos 📚
+   Directorio de Conocimiento: Espacio dedicado para la publicación de artículos, guías y casos clínicos por parte de los miembros de la comunidad.
+
+   Editor Enriquecido: Integración nativa de TinyMCE para la redacción de contenido enriquecido (negritas, listas, enlaces a imágenes externas) tanto en Artículos como en la creación de Eventos.
+
+   Categorización Inteligente: Organización de artículos por terapias utilizando selectores de búsqueda avanzada (Tom Select).
+
+7. Ecosistema de Comunicación & Branding 📧
    Emails HTML Corporativos: Notificaciones de sistema con diseño "Visión de Empresa", incluyendo logotipos incrustados (CID) y botones de acción.
 
 Lógica de Notificación Dual: Cada interacción crítica genera un aviso interno (web) y, en casos de eventos o contacto, un correo electrónico profesional.
@@ -199,6 +206,8 @@ CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contac
 
 [x] Mercadillo de Profesionales: Implementado (Directorio de anuncios, CRUD completo, sistema de valoraciones).
 
-[x] UI/UX y Accesibilidad: Tema oscuro refinado con utilidades adaptativas, estandarización de spinners de carga en todos los formularios, y navbar totalmente unificado.
+[x] Biblioteca de Artículos: CRUD de artículos de divulgación, integración con TinyMCE y badges de recuento global.
+
+[x] UI/UX y Accesibilidad: Tema oscuro refinado con utilidades adaptativas, selectores inteligentes (Tom Select) en formularios, estandarización de spinners de carga en todos los formularios, y navbar totalmente unificado con badges de notificaciones de contenido (+999).
 
 Hubs&Clicks - "Descubre, Comparte, Disfruta"
