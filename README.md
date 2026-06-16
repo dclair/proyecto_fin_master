@@ -1,5 +1,5 @@
 🚀 Hubs&Clicks - Red social de terapias naturales
-Hubs&Clicks es una plataforma web diseñada para conectar a personas a través de sus terapias, permitiéndoles organizar eventos, unirse a eventos y gestionar su comunidad de forma ágil, moderna y con una identidad visual corporativa única.
+Hubs&Clicks es una plataforma web de caracter privado, diseñada para conectar a personas a través de sus terapias, permitiéndoles organizar eventos, unirse a eventos y gestionar su comunidad de forma ágil, moderna y con una identidad visual corporativa única.
 
 🛠️ Características Principales (Features)
 
@@ -23,7 +23,7 @@ Privacidad de Contacto: Campos sensibles (teléfono, móvil, dirección y email)
 
 Estadísticas en Tiempo Real: Contadores dinámicos de publicaciones, seguidores, siguiendo, eventos y participaciones.
 
-Agenda Personal: Visualización de las próximas citas confirmadas directamente en el perfil.
+Agenda Personal: Mis citas + Mis planes. Visualización de las próximas citas confirmadas directamente en el perfil.
 
 3. Sistema de Interacción y Feedback
    Likes Dinámicos: Sistema de "Me gusta" con actualización asíncrona (AJAX/JS) y persistencia en base de datos.
@@ -71,15 +71,15 @@ Lógica de Notificación Dual: Cada interacción crítica genera un aviso intern
 
 Formulario de Contacto Pro: Integración de mensajes de usuario con guardado en base de datos y aviso automático por email al administrador.
 
-💻 Stack Tecnológico (Cumplimiento de Requisitos PFM)
+💻 Stack Tecnológico.
 Este proyecto cumple estrictamente con los requisitos universitarios del Proyecto Final de Máster:
 
-- **Backend (30%):** Django 6.0 + Python 3.12. Modelos, vistas, plantillas, autenticación y persistencia de datos.
-- **Frontend (15%):** HTML5, CSS3, Bootstrap 5.3, integrando **React 18** (para la interfaz completa de mensajería en tiempo real que consume los datos del backend vía API REST y WebSockets).
+- **Backend:** Django 6.0 + Python 3.12. Modelos, vistas, plantillas, autenticación y persistencia de datos.
+- **Frontend:** HTML5, CSS3, Bootstrap 5.3, integrando **React 18** (para la interfaz completa de mensajería en tiempo real que consume los datos del backend vía API REST y WebSockets).
 - **Interactividad y Tiempo Real:** HTMX & JavaScript Vanilla (AJAX) y Channels (ASGI).
 - **Comunicaciones:** Django Mail (EmailMultiAlternatives).
 - **Base de Datos:** SQLite (Desarrollo) / MySQL (Producción).
-- **Arquitectura y Seguridad (30%):** Protección CSRF, autenticación robusta, validación de formularios y estructura de código mantenible (MVP).
+- **Arquitectura y Seguridad:** Protección CSRF, autenticación robusta mediante **Email**, flujos de registro con aprobación manual del administrador (activación automatizada por Signals), validación avanzada de formularios y secciones privadas blindadas (Biblioteca).
 
 🏗️ Estructura del Proyecto
 Bash
@@ -175,14 +175,18 @@ DB_ENGINE=mysql python manage.py flush --noinput
 DB_ENGINE=mysql python manage.py loaddata db_full_backup.json
 
 La migración ejecutada en este proyecto está registrada en `.sdd/changes/sqlite-to-mysql-migration/`.
-La guía reutilizable para futuros proyectos está en `.sdd/knowledge/django-sqlite-to-mysql-mariadb.md`. 5. Crear superusuario (Admin)
-Para gestionar las terapias y los mensajes de contacto desde el panel:
+La guía reutilizable para futuros proyectos está en `.sdd/knowledge/django-sqlite-to-mysql-mariadb.md`.
+
+5. Crear superusuario (Admin)
+   Para gestionar las terapias y los mensajes de contacto desde el panel:
 
 Bash
-python manage.py createsuperuser 6. Ejecutar el servidor
-Bash
-python manage.py runserver
-La plataforma estará disponible en http://127.0.0.1:8000.
+python manage.py createsuperuser
+
+6. Ejecutar el servidor
+   Bash
+   python manage.py runserver
+   La plataforma estará disponible en http://127.0.0.1:8000.
 
 📧 Configuración de Email (Desarrollo)
 Para probar el sistema de notificaciones por correo sin configurar un servidor SMTP real, el proyecto está configurado para mostrar los emails en la consola.
