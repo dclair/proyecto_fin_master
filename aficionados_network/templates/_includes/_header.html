@@ -36,6 +36,7 @@
                         <i class="bi bi-compass me-1"></i> Directorio
                     </a>
                     <ul class="dropdown-menu shadow-sm border-0 mt-1 rounded-3 min-w-200" aria-labelledby="directorioDropdown">
+                        {% if user.is_authenticated %}
                         <li>
                             <a class="dropdown-item d-flex align-items-center py-2 {% if 'library' in request.resolver_match.app_name %}bg-light text-dark fw-bold{% endif %}" 
                                href="{% url 'library:article_list' %}"
@@ -47,6 +48,7 @@
                                 {% endif %}
                             </a>
                         </li>
+                        {% endif %}
                         <li>
                             <a class="dropdown-item d-flex align-items-center py-2 {% if 'posts' in request.resolver_match.app_name and 'event' in request.resolver_match.url_name %}bg-light text-dark fw-bold{% endif %}" 
                                href="{% url 'posts:event_list' %}"

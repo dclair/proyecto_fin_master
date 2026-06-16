@@ -104,7 +104,7 @@
                     <div class="d-flex mb-4">
                         <img src="{{ comment.author.profile.profile_picture_url|default:'' }}" onerror="this.src='{% static 'img/default-profile.png' %}'" class="rounded-circle me-3 avatar-sm">
                         <div>
-                            <div class="bg-light p-3 rounded">
+                            <div class="bg-light p-3 rounded dark-mode-text-dark">
                                 <strong class="d-block mb-1">{{ comment.author.username }}</strong>
                                 <p class="mb-0">{{ comment.content }}</p>
                             </div>

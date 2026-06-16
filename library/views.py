@@ -12,7 +12,7 @@ from notifications.models import Notification
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
-class ArticleListView(ListView):
+class ArticleListView(LoginRequiredMixin, ListView):
     model = Article
     template_name = 'library/article_list.html'
     context_object_name = 'articles'
@@ -34,7 +34,7 @@ class ArticleListView(ListView):
         context['hobbies'] = Hobby.objects.filter(articles__isnull=False).distinct()
         return context
 
-class ArticleDetailView(DetailView):
+class ArticleDetailView(LoginRequiredMixin, DetailView):
     model = Article
     template_name = 'library/article_detail.html'
     context_object_name = 'article'
