@@ -6,9 +6,40 @@ from .models import ContactMessage
 
 
 class RegisterForm(UserCreationForm):
+    razon_social = forms.CharField(
+        max_length=255,
+        required=True,
+        label="Razón Social",
+        help_text="Nombre de la empresa, autónomo",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre de empresa o autónomo"})
+    )
+    numero_socio = forms.CharField(
+        max_length=50,
+        required=True,
+        label="Número de Socio",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Número de socio"})
+    )
+
     class Meta:
         model = User
-        fields = ["first_name", "username", "email", "password1", "password2"]
+        fields = ["first_name", "username", "email"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['first_name'].required = True
+        self.fields['email'].required = True
+        self.fields['email'].help_text = "Mismo email con el que estás registrado en la Asociación."
+        self.fields['username'].help_text = "Letras, números y caracteres @/./+/-/_ únicamente."
+        
+        # Sobrescribimos el help_text por defecto de password1
+        self.fields['password1'].help_text = (
+            "<ul>"
+            "<li>La contraseña no debe parecer o contener a su nombre, razón social, nombre de usuario o email.</li>"
+            "<li>Debe contener al menos 8 caracteres.</li>"
+            "<li>No puede ser una clave utilizada comúnmente.</li>"
+            "<li>No puede ser completamente numérica.</li>"
+            "</ul>"
+        )
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -19,13 +50,15 @@ class RegisterForm(UserCreationForm):
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "placeholder": "Nombre de usuario"}
+        label="Correo electrónico",
+        widget=forms.EmailInput(
+            attrs={"class": "form-control", "placeholder": "Tu correo electrónico"}
         )
     )
     password = forms.CharField(
+        label="Contraseña",
         widget=forms.PasswordInput(
-            attrs={"class": "form-control", "placeholder": "Contraseña"}
+            attrs={"class": "form-control", "placeholder": "Tu contraseña"}
         )
     )
 

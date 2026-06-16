@@ -70,6 +70,12 @@ class UserProfile(models.Model):
     address = models.CharField(
         "dirección", max_length=255, blank=True, null=True, help_text="Dirección de la consulta"
     )
+    razon_social = models.CharField(
+        "razón social", max_length=255, blank=True, null=True, help_text="Nombre de la empresa o autónomo"
+    )
+    numero_socio = models.CharField(
+        "número de socio", max_length=50, blank=True, null=True, help_text="Número de socio de la asociación"
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="creado el")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="actualizado el")
 

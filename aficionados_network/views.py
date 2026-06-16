@@ -179,40 +179,38 @@ class RegisterView(CreateView):
         user.is_active = False
         user.save()
 
-        # 2. Generamos la lógica del email
-        current_site = get_current_site(self.request)
-        mail_subject = "Activa tu cuenta en Hubs & Clicks"
+        # Actualizamos el UserProfile con los nuevos campos
+        razon_social = form.cleaned_data.get("razon_social")
+        numero_socio = form.cleaned_data.get("numero_socio")
+        
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        profile.razon_social = razon_social
+        profile.numero_socio = numero_socio
+        profile.save()
 
-        context = {
-            "user": user,
-            "domain": current_site.domain,
-            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-            "token": default_token_generator.make_token(user),
-        }
+        # 2. Enviamos el correo a la administración
+        admin_email = "jmdclair@gmail.com"
+        mail_subject = "Nuevo registro pendiente de aprobación"
+        
+        text_content = (
+            f"Se ha registrado un nuevo usuario y requiere aprobación en el panel de administración:\n\n"
+            f"Nombre: {user.first_name}\n"
+            f"Email: {user.email}\n"
+            f"Razón Social: {razon_social}\n"
+            f"Número de Socio: {numero_socio}\n"
+        )
 
-        # CAMBIO: Aquí lo llamamos html_content para que coincida con lo de abajo
-        html_content = render_to_string("registration/acc_active_email.html", context)
-
-        # 3. Enviamos el correo real
-        to_email = form.cleaned_data.get("email")
-
-        # Usamos EmailMultiAlternatives para el logo adjunto
-        email = EmailMultiAlternatives(mail_subject, "", to=[user.email])
-        email.attach_alternative(html_content, "text/html")
-
-        # ADJUNTO: Logo hubs
-        img_path = os.path.join(settings.BASE_DIR, "static", "img", "logo_hubs.png")
-        if os.path.exists(img_path):
-            with open(img_path, "rb") as f:
-                logo = MIMEImage(f.read())
-                logo.add_header("Content-ID", "<logo_id>")
-                email.attach(logo)
-
+        email = EmailMultiAlternatives(
+            mail_subject,
+            text_content,
+            settings.DEFAULT_FROM_EMAIL,
+            [admin_email]
+        )
         email.send()
 
-        # 4. Mostramos la pantalla de "Revisa tu correo"
+        # 4. Mostramos la pantalla indicando que la solicitud está en revisión
         return render(
-            self.request, "registration/confirm_email_sent.html", {"email": to_email}
+            self.request, "registration/registration_pending.html", {"email": user.email}
         )
 
 
