@@ -108,6 +108,7 @@ class ProfileUpdateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Asegurarse de que el formato de fecha sea compatible con el input type="date"
         self.fields["birth_date"].input_formats = ["%Y-%m-%d"]
+        self.fields["profile_picture"].required = False
 
         # Si ya hay una imagen de perfil, mostrarla
         if self.instance and self.instance.profile_picture:
