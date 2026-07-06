@@ -10,8 +10,8 @@ services:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     depends_on:
-      - redis
       - db
+      - redis
 
   db:
     image: mariadb:10.11
@@ -27,7 +27,8 @@ services:
   redis:
     image: redis:7-alpine
     restart: always
-    # No exponemos el puerto hacia el host por seguridad, la red interna de docker lo maneja.
+    ports:
+      - "6379:6379"
 
   nginx:
     image: nginx:1.25-alpine

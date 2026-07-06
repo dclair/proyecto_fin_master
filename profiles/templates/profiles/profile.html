@@ -29,7 +29,7 @@
             <div class="col-md-3 text-center mb-3 mb-md-0">
                 <img src="{{ user_profile.profile_picture_url|default:'' }}" 
                      class="rounded-circle img-thumbnail shadow-sm avatar-xxl" 
-                     onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+                     onerror="this.onerror=null; this.src='{% static 'img/default_profile.png' %}'">
             </div>
             
             {# Datos del Usuario #}
@@ -259,7 +259,7 @@
                                         <div class="d-flex align-items-start">
                                             <img src="{{ review.author.profile.profile_picture_url|default:'' }}" 
                                                  class="rounded-circle me-3 avatar-sm"
-                                                 onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+                                                 onerror="this.onerror=null; this.src='{% static 'img/default_profile.png' %}'">
                                             
                                             <div class="flex-grow-1">
                                                 <div class="d-flex justify-content-between mb-1">
@@ -390,7 +390,7 @@
                     {% for follower in user_profile.followers.all %}
                         <li class="list-group-item d-flex align-items-center px-3 border-0" 
                             data-search="{{ follower.user.username }} {{ follower.user.first_name }} {{ follower.user.last_name }} {{ follower.user.email }}">
-                            <img src="{{ follower.profile_picture_url|default:'' }}" class="rounded-circle me-3 avatar-xs" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+                            <img src="{{ follower.profile_picture_url|default:'' }}" class="rounded-circle me-3 avatar-xs" onerror="this.onerror=null; this.src='{% static 'img/default_profile.png' %}'">
                             <a href="{% url 'profiles:profile' follower.pk %}" class="text-decoration-none text-dark text-dark-mode-white fw-bold small">{{ follower.user.username }}</a>
                         </li>
                     {% endfor %}
@@ -420,7 +420,7 @@
                     {% for followed in user_profile.following.all %}
                         <li class="list-group-item d-flex align-items-center px-3 border-0"
                             data-search="{{ followed.user.username }} {{ followed.user.first_name }} {{ followed.user.last_name }} {{ followed.user.email }}">
-                            <img src="{{ followed.profile_picture_url|default:'' }}" class="rounded-circle me-3 avatar-xs" onerror="this.onerror=null; this.src='{% static 'img/default-profile.png' %}'">
+                            <img src="{{ followed.profile_picture_url|default:'' }}" class="rounded-circle me-3 avatar-xs" onerror="this.onerror=null; this.src='{% static 'img/default_profile.png' %}'">
                             <a href="{% url 'profiles:profile' followed.pk %}" class="text-decoration-none text-dark text-dark-mode-white fw-bold small">{{ followed.user.username }}</a>
                         </li>
                     {% endfor %}

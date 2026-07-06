@@ -1,172 +1,287 @@
-{% extends "general/layout.html" %}
-
-{% block content %}
+{% extends "general/layout.html" %} {% block content %}
+<style>
+  /* Permite que el menú desplegable (tres puntitos) no se corte dentro de la tabla */
+  .table-responsive-visible {
+    overflow: visible !important;
+  }
+  @media (max-width: 767.98px) {
+    .table-responsive-visible {
+      overflow-x: auto !important;
+    }
+    /* En móviles, forzamos que el dropdown use position fixed para que escape de la tabla */
+    .dropdown-menu[data-bs-popper] {
+      position: fixed !important;
+    }
+  }
+</style>
 <div class="container py-5">
-    
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0 text-dark-mode-white"><i class="bi bi-ticket-perforated me-2 text-info"></i>Mis Citas</h2>
-            <p class="text-muted small d-none d-md-block">Gestiona los planes a los que has asistido o asistirás.</p>
-        </div>
-        <a href="{% url 'posts:event_list' %}" class="btn btn-outline-primary btn-sm shadow-sm">
-            <i class="bi bi-search me-1"></i> Explorar más
-        </a>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-0 text-dark-mode-white">
+        <i class="bi bi-ticket-perforated me-2 text-info"></i>Mis Citas
+      </h2>
+      <p class="text-muted small d-none d-md-block">
+        Gestiona los planes a los que has asistido o asistirás.
+      </p>
     </div>
+    <a
+      href="{% url 'posts:event_list' %}"
+      class="btn btn-outline-primary btn-sm shadow-sm"
+    >
+      <i class="bi bi-search me-1"></i> Explorar más
+    </a>
+  </div>
 
-    <div class="card shadow-sm border-0 card-visible">
-        <div class="table-responsive border-0 table-responsive-visible">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-secondary small fw-bold">
-                    <tr>
-                        <th class="ps-4 col-event-width">Evento</th>
-                        <th class="d-none d-sm-table-cell">Organizador</th>
-                        <th class="text-center">Fecha</th>
-                        <th class="text-center">Estado</th>
-                        <th class="text-end pe-4">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for event in participations %}
-                    <tr>
-                        <td class="ps-4">
-                            <div class="fw-bold text-dark text-dark-mode-white text-truncate event-title-truncate">
-                                {{ event.title }}
-                            </div>
-                        </td>
+  <div class="card shadow-sm border-0 card-visible">
+    <div class="table-responsive border-0 table-responsive-visible">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light text-secondary small fw-bold">
+          <tr>
+            <th class="ps-4 col-event-width">Evento</th>
+            <th class="d-none d-sm-table-cell">Organizador</th>
+            <th class="text-center">Fecha</th>
+            <th class="text-center">Estado</th>
+            <th class="text-end pe-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in participations %}
+          <tr>
+            <td class="ps-4">
+              <div
+                class="fw-bold text-dark text-dark-mode-white text-truncate event-title-truncate"
+              >
+                {{ event.title }}
+              </div>
+            </td>
 
-                        <td class="d-none d-sm-table-cell">
-                            <span class="small text-dark text-dark-mode-white">{{ event.organizer.username }}</span>
-                        </td>
+            <td class="d-none d-sm-table-cell">
+              <span class="small text-dark text-dark-mode-white"
+                >{{ event.organizer.username }}</span
+              >
+            </td>
 
-                        <td class="text-center">
-                            {# Lógica para destacar si el evento es HOY #}
-                            {% if event.event_date|date:"Y-m-d" == now|date:"Y-m-d" %}
-                                <span class="badge rounded-pill bg-info-subtle text-info extra-small mb-1 animate__animated animate__pulse animate__infinite" style="font-size: 0.65rem;">¡HOY!</span>
-                                <div class="small fw-bold text-info">{{ event.event_date|date:"d M Y" }}</div>
-                            {% else %}
-                                <div class="small fw-bold text-dark text-dark-mode-white">{{ event.event_date|date:"d M Y" }}</div>
-                            {% endif %}
-                            <div class="extra-small text-muted">{{ event.event_date|date:"H:i" }}h</div>
-                        </td>
+            <td class="text-center">
+              {# Lógica para destacar si el evento es HOY #} {% if
+              event.event_date|date:"Y-m-d" == now|date:"Y-m-d" %}
+              <span
+                class="badge rounded-pill bg-info-subtle text-info extra-small mb-1 animate__animated animate__pulse animate__infinite"
+                style="font-size: 0.65rem"
+                >¡HOY!</span
+              >
+              <div class="small fw-bold text-info">
+                {{ event.event_date|date:"d M Y" }}
+              </div>
+              {% else %}
+              <div class="small fw-bold text-dark text-dark-mode-white">
+                {{ event.event_date|date:"d M Y" }}
+              </div>
+              {% endif %}
+              <div class="extra-small text-muted">
+                {{ event.event_date|date:"H:i" }}h
+              </div>
+            </td>
 
-                        <td class="text-center">
-                            {% if event.is_canceled %}
-                                <span class="badge rounded-pill bg-danger-subtle text-danger">Cancelado</span>
-                            {% elif event.event_date < now %}
-                                <span class="badge rounded-pill bg-secondary-subtle text-secondary">Finalizado</span>
-                            {% else %}
-                                <span class="badge rounded-pill bg-success-subtle text-success">Confirmado</span>
-                            {% endif %}
-                        </td>
+            <td class="text-center">
+              {% if event.is_canceled %}
+              <span class="badge rounded-pill bg-danger-subtle text-danger"
+                >Cancelado</span
+              >
+              {% elif event.event_date < now %}
+              <span
+                class="badge rounded-pill bg-secondary-subtle text-secondary"
+                >Finalizado</span
+              >
+              {% else %}
+              <span class="badge rounded-pill bg-success-subtle text-success"
+                >Confirmado</span
+              >
+              {% endif %}
+            </td>
 
-                        <td class="text-end pe-4">
-                            <div class="dropdown">
-                                <button class="btn btn-light btn-sm border shadow-sm" type="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 dropdown-menu-top">
-                                    <li><a class="dropdown-item py-2" href="{% url 'posts:event_detail' event.pk %}"><i class="bi bi-eye me-2 text-muted"></i> Ver detalle</a></li>
-                                    
-                                    {% if event.event_date < now and not event.is_canceled %}
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            {% if event.has_reviewed %}
-                                                <span class="dropdown-item py-2 text-success small opacity-75">
-                                                    <i class="bi bi-check-circle-fill me-2"></i> Evento valorado
-                                                </span>
-                                            {% else %}
-                                                <button type="button" class="dropdown-item py-2 text-warning fw-bold" 
-                                                        data-bs-toggle="modal" data-bs-target="#reviewModal{{ event.id }}">
-                                                    <i class="bi bi-star-fill me-2"></i> Valorar
-                                                </button>
-                                            {% endif %}
-                                        </li>
-                                    {% endif %}
+            <td class="text-end pe-4">
+              <div class="dropdown">
+                <button
+                  class="btn btn-light btn-sm border shadow-sm"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                >
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul
+                  class="dropdown-menu dropdown-menu-end shadow border-0 dropdown-menu-top"
+                >
+                  <li>
+                    <a
+                      class="dropdown-item py-2"
+                      href="{% url 'posts:event_detail' event.pk %}"
+                      ><i class="bi bi-eye me-2 text-muted"></i> Ver detalle</a
+                    >
+                  </li>
 
-                                    {% if event.event_date > now and not event.is_canceled %}
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <button type="button" class="dropdown-item py-2 text-danger" 
-                                                    data-bs-toggle="modal" data-bs-target="#confirmCancelModal{{ event.id }}">
-                                                <i class="bi bi-box-arrow-right me-2"></i> Desapuntarme
-                                            </button>
-                                        </li>
-                                    {% endif %}
-                                </ul>
-                            </div>
+                  {% if event.event_date < now and not event.is_canceled %}
+                  <li><hr class="dropdown-divider" /></li>
+                  <li>
+                    {% if event.has_reviewed %}
+                    <span
+                      class="dropdown-item py-2 text-success small opacity-75"
+                    >
+                      <i class="bi bi-check-circle-fill me-2"></i> Evento
+                      valorado
+                    </span>
+                    {% else %}
+                    <button
+                      type="button"
+                      class="dropdown-item py-2 text-warning fw-bold"
+                      data-bs-toggle="modal"
+                      data-bs-target="#reviewModal{{ event.id }}"
+                    >
+                      <i class="bi bi-star-fill me-2"></i> Valorar
+                    </button>
+                    {% endif %}
+                  </li>
+                  {% endif %} {% if event.event_date > now and not
+                  event.is_canceled %}
+                  <li><hr class="dropdown-divider" /></li>
+                  <li>
+                    <button
+                      type="button"
+                      class="dropdown-item py-2 text-danger"
+                      data-bs-toggle="modal"
+                      data-bs-target="#confirmCancelModal{{ event.id }}"
+                    >
+                      <i class="bi bi-box-arrow-right me-2"></i> Desapuntarme
+                    </button>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
 
-                            {# Modal de Valoración #}
-                            {% if event.event_date < now and not event.is_canceled and not event.has_reviewed %}
-                            <div class="modal fade" id="reviewModal{{ event.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content modal-content-custom">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title fw-bold">Valorar a {{ event.organizer.username }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <form action="{% url 'profiles:add_review' event.id %}" method="POST">
-                                            {% csrf_token %}
-                                            <div class="modal-body text-start">
-                                                <div class="mb-3">
-                                                    <label class="form-label small fw-bold">Estrellas</label>
-                                                    <select name="rating" class="form-select border-warning">
-                                                        <option value="5">⭐⭐⭐⭐⭐</option>
-                                                        <option value="4">⭐⭐⭐⭐</option>
-                                                        <option value="3" selected>⭐⭐⭐</option>
-                                                        <option value="2">⭐⭐</option>
-                                                        <option value="1">⭐</option>
-                                                    </select>
-                                                </div>
-                                                <div class="mb-0">
-                                                    <label class="form-label small fw-bold">Tu reseña</label>
-                                                    <textarea name="comment" class="form-control" rows="3" placeholder="Opcional..."></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer border-0">
-                                                <button type="submit" class="btn btn-warning btn-sm px-4 fw-bold shadow-sm">Enviar valoración</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %} 
-
-                            {# Modal de Confirmación para Desapuntarse #}
-                            {% if event.event_date > now and not event.is_canceled %}
-                            <div class="modal fade" id="confirmCancelModal{{ event.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-sm">
-                                    <div class="modal-content modal-content-custom">
-                                        <div class="modal-body text-center py-4">
-                                            <div class="modal-confirm-icon">
-                                                <i class="bi bi-info-circle-fill"></i>
-                                            </div>
-                                            <h6 class="fw-bold mb-2">¿Quieres desapuntarte?</h6>
-                                            <p class="text-muted small mb-0">Vas a cancelar tu asistencia a <strong>{{ event.title }}</strong>.</p>
-                                        </div>
-                                        <div class="modal-footer modal-footer-confirm justify-content-center">
-                                            <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">No, volver</button>
-                                            <form action="{% url 'posts:toggle_attendance' event.id %}" method="POST" class="d-inline">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger btn-sm px-3 fw-bold shadow-sm">Sí, desapuntarme</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
-                            <p>No tienes planes registrados.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+              {# Modal de Valoración #} {% if event.event_date < now and not
+              event.is_canceled and not event.has_reviewed %}
+              <div
+                class="modal fade"
+                id="reviewModal{{ event.id }}"
+                tabindex="-1"
+                aria-hidden="true"
+              >
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content modal-content-custom">
+                    <div class="modal-header">
+                      <h5 class="modal-title fw-bold">
+                        Valorar a {{ event.organizer.username }}
+                      </h5>
+                      <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                      ></button>
+                    </div>
+                    <form
+                      action="{% url 'profiles:add_review' event.id %}"
+                      method="POST"
+                    >
+                      {% csrf_token %}
+                      <div class="modal-body text-start">
+                        <div class="mb-3">
+                          <label class="form-label small fw-bold"
+                            >Estrellas</label
+                          >
+                          <select
+                            name="rating"
+                            class="form-select border-warning"
+                          >
+                            <option value="5">⭐⭐⭐⭐⭐</option>
+                            <option value="4">⭐⭐⭐⭐</option>
+                            <option value="3" selected>⭐⭐⭐</option>
+                            <option value="2">⭐⭐</option>
+                            <option value="1">⭐</option>
+                          </select>
+                        </div>
+                        <div class="mb-0">
+                          <label class="form-label small fw-bold"
+                            >Tu reseña</label
+                          >
+                          <textarea
+                            name="comment"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Opcional..."
+                          ></textarea>
+                        </div>
+                      </div>
+                      <div class="modal-footer border-0">
+                        <button
+                          type="submit"
+                          class="btn btn-warning btn-sm px-4 fw-bold shadow-sm"
+                        >
+                          Enviar valoración
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              {% endif %} {# Modal de Confirmación para Desapuntarse #} {% if
+              event.event_date > now and not event.is_canceled %}
+              <div
+                class="modal fade"
+                id="confirmCancelModal{{ event.id }}"
+                tabindex="-1"
+                aria-hidden="true"
+              >
+                <div class="modal-dialog modal-dialog-centered modal-sm">
+                  <div class="modal-content modal-content-custom">
+                    <div class="modal-body text-center py-4">
+                      <div class="modal-confirm-icon">
+                        <i class="bi bi-info-circle-fill"></i>
+                      </div>
+                      <h6 class="fw-bold mb-2">¿Quieres desapuntarte?</h6>
+                      <p class="text-muted small mb-0">
+                        Vas a cancelar tu asistencia a
+                        <strong>{{ event.title }}</strong>.
+                      </p>
+                    </div>
+                    <div
+                      class="modal-footer modal-footer-confirm justify-content-center"
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-light btn-sm px-3"
+                        data-bs-dismiss="modal"
+                      >
+                        No, volver
+                      </button>
+                      <form
+                        action="{% url 'posts:toggle_attendance' event.id %}"
+                        method="POST"
+                        class="d-inline"
+                      >
+                        {% csrf_token %}
+                        <button
+                          type="submit"
+                          class="btn btn-danger btn-sm px-3 fw-bold shadow-sm"
+                        >
+                          Sí, desapuntarme
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-5 text-muted">
+              <p>No tienes planes registrados.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 {% endblock %}

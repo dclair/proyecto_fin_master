@@ -17,7 +17,7 @@
             <h1 class="fw-bold mb-3 text-dark-mode-white">{{ article.title }}</h1>
             
             <div class="d-flex align-items-center mb-4 text-muted flex-wrap">
-                <img src="{{ article.author.profile.profile_picture_url|default:'' }}" class="rounded-circle me-2 avatar-sm" onerror="this.src='{% static 'img/default-profile.png' %}'">
+                <img src="{{ article.author.profile.profile_picture_url|default:'' }}" class="rounded-circle me-2 avatar-sm" onerror="this.src='{% static 'img/default_profile.png' %}'">
                 <span>Por <a href="{% url 'profiles:profile' article.author.profile.pk %}" class="fw-bold text-decoration-none text-dark">{{ article.author.username }}</a></span>
                 <span class="mx-2">&bull;</span>
                 <span>{{ article.created_at|date:"d M Y" }}</span>
@@ -102,7 +102,7 @@
             <div class="comments-list">
                 {% for comment in article.comments.all %}
                     <div class="d-flex mb-4">
-                        <img src="{{ comment.author.profile.profile_picture_url|default:'' }}" onerror="this.src='{% static 'img/default-profile.png' %}'" class="rounded-circle me-3 avatar-sm">
+                        <img src="{{ comment.author.profile.profile_picture_url|default:'' }}" onerror="this.src='{% static 'img/default_profile.png' %}'" class="rounded-circle me-3 avatar-sm">
                         <div>
                             <div class="bg-light p-3 rounded dark-mode-text-dark">
                                 <strong class="d-block mb-1">{{ comment.author.username }}</strong>
