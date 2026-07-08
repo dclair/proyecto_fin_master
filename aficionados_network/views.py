@@ -189,7 +189,7 @@ class RegisterView(CreateView):
         profile.save()
 
         # 2. Enviamos el correo a la administración
-        admin_email = "jmdclair@gmail.com"
+        admin_email = getattr(settings, "CONTACT_EMAIL", "jmdclair@gmail.com")
         mail_subject = "Nuevo registro pendiente de aprobación"
         
         text_content = (
