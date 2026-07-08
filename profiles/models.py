@@ -49,8 +49,8 @@ class UserProfile(models.Model):
         "biografía",
         blank=True,
         null=True,
-        max_length=500,
-        help_text="Cuéntanos sobre ti (máx. 500 caracteres)",
+        max_length=1500,
+        help_text="Cuéntanos sobre ti (máx. 1500 caracteres)",
     )
     birth_date = models.DateField(
         "fecha de nacimiento", blank=True, null=True, validators=[validate_birth_date]

@@ -5,9 +5,11 @@ from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Exists, OuterRef, Avg
 from django.contrib import messages
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.views import View
 from django.utils import timezone
+from django.core.files.storage import default_storage
+import os
 
 # Importaciones de tu proyecto
 from aficionados_network.forms import UserUpdateForm, ProfileUpdateForm, AddHobbyForm
@@ -304,3 +306,20 @@ def read_and_redirect(request, notification_id):
 
     # Si no sabemos a dónde ir, al historial general
     return redirect("notifications:list")
+
+
+@login_required
+def upload_image_tinymce(request):
+    if request.method == "POST" and request.FILES.get("file"):
+        file = request.FILES["file"]
+        
+        # Validar extensión (opcional pero recomendado)
+        ext = os.path.splitext(file.name)[1].lower()
+        if ext not in [".jpg", ".jpeg", ".png", ".gif", ".webp"]:
+            return JsonResponse({"error": "Formato no válido"}, status=400)
+            
+        file_path = default_storage.save(f"tinymce/{file.name}", file)
+        file_url = default_storage.url(file_path)
+        
+        return JsonResponse({"location": file_url})
+    return JsonResponse({"error": "Invalid request"}, status=400)
