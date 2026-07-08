@@ -569,15 +569,6 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
       {/* Preview Area */}
       {selectedFile && (
         <div className="p-2 border-top bg-light position-relative" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button 
-            className="btn btn-sm btn-light rounded-circle p-1 position-absolute top-0 start-100 translate-middle" 
-            onClick={cancelAttachment}
-            style={{ zIndex: 10, border: '1px solid #ccc' }}
-            title="Cancelar adjunto"
-          >
-            <X size={14} className="text-danger" />
-          </button>
-          
           {previewUrl && previewUrl !== 'video' && previewUrl !== 'document' && previewUrl !== 'audio' ? (
             <img src={previewUrl} alt="Preview" style={{ height: '60px', borderRadius: '4px', objectFit: 'cover' }} />
           ) : previewUrl === 'video' ? (
@@ -597,6 +588,14 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
             <div className="fw-bold">{selectedFile.name}</div>
             <div className="text-muted">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
           </div>
+          <button 
+            className="btn btn-sm btn-light rounded-circle p-1" 
+            onClick={cancelAttachment}
+            style={{ border: '1px solid #ccc', flexShrink: 0 }}
+            title="Cancelar adjunto"
+          >
+            <X size={14} className="text-danger" />
+          </button>
         </div>
       )}
 

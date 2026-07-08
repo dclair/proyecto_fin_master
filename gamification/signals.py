@@ -13,11 +13,15 @@ def check_likes_badges(sender, instance, action, **kwargs):
 @receiver(post_save, sender=EventAttendance)
 @receiver(post_delete, sender=EventAttendance)
 def check_event_badges(sender, instance, **kwargs):
+    if kwargs.get('raw', False):
+        return
     # instance es el EventAttendance
     # Validamos al organizador del evento
     check_badges(instance.event.organizer)
 
 @receiver(post_save, sender='profiles.Review')
 def check_review_badges(sender, instance, **kwargs):
+    if kwargs.get('raw', False):
+        return
     # Evaluamos al organizador que recibe la valoración
     check_badges(instance.recipient)

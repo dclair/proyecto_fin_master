@@ -33,6 +33,10 @@
   </div>
 
   <div class="card shadow-sm border-0 card-visible">
+    <!-- Indicador de scroll horizontal para móviles -->
+    <div class="d-block d-md-none bg-light text-secondary text-center py-1 small fw-bold border-bottom" style="font-size: 0.75rem;">
+      <i class="bi bi-arrow-left-right me-1"></i> Desliza la tabla para ver más detalles
+    </div>
     <div class="table-responsive border-0 table-responsive-visible">
       <table class="table table-hover align-middle mb-0">
         <thead class="bg-light text-secondary small fw-bold">
@@ -62,8 +66,8 @@
             </td>
 
             <td class="text-center">
-              {# Lógica para destacar si el evento es HOY #} {% if
-              event.event_date|date:"Y-m-d" == now|date:"Y-m-d" %}
+              {# Lógica para destacar si el evento es HOY #} 
+              {% if event.event_date|date:"Y-m-d" == now|date:"Y-m-d" %}
               <span
                 class="badge rounded-pill bg-info-subtle text-info extra-small mb-1 animate__animated animate__pulse animate__infinite"
                 style="font-size: 0.65rem"
@@ -140,8 +144,8 @@
                     </button>
                     {% endif %}
                   </li>
-                  {% endif %} {% if event.event_date > now and not
-                  event.is_canceled %}
+                  {% endif %} 
+                  {% if event.event_date > now and not event.is_canceled %}
                   <li><hr class="dropdown-divider" /></li>
                   <li>
                     <button
@@ -157,8 +161,8 @@
                 </ul>
               </div>
 
-              {# Modal de Valoración #} {% if event.event_date < now and not
-              event.is_canceled and not event.has_reviewed %}
+              {# Modal de Valoración #} 
+              {% if event.event_date < now and not event.is_canceled and not event.has_reviewed %}
               <div
                 class="modal fade"
                 id="reviewModal{{ event.id }}"
@@ -222,8 +226,8 @@
                   </div>
                 </div>
               </div>
-              {% endif %} {# Modal de Confirmación para Desapuntarse #} {% if
-              event.event_date > now and not event.is_canceled %}
+              {% endif %} {# Modal de Confirmación para Desapuntarse #} 
+              {% if event.event_date > now and not event.is_canceled %}
               <div
                 class="modal fade"
                 id="confirmCancelModal{{ event.id }}"
