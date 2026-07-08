@@ -1118,27 +1118,29 @@ footer a:active {
 .text-primary-hover:hover { color: #0d6efd; text-decoration: underline; }
 
 /* ============================================================
-   EFECTO HOVER LÍNEA NAVBAR
+   EFECTO HOVER LÍNEA NAVBAR (Solo Desktop)
    ============================================================ */
-.navbar-nav .nav-link:not(.rounded-pill):not(.btn) {
-    position: relative;
-}
+@media (min-width: 992px) {
+    .navbar-nav .nav-link:not(.rounded-pill):not(.btn) {
+        position: relative;
+    }
 
-.navbar-nav .nav-link:not(.rounded-pill):not(.btn)::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 3px;
-    bottom: 0px;
-    left: 50%;
-    background-color: var(--hubs-primary);
-    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    transform: translateX(-50%);
-    border-radius: 3px 3px 0 0;
-}
+    .navbar-nav .nav-link:not(.rounded-pill):not(.btn)::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 3px;
+        bottom: 0px;
+        left: 50%;
+        background-color: var(--hubs-primary);
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        transform: translateX(-50%);
+        border-radius: 3px 3px 0 0;
+    }
 
-.navbar-nav .nav-link:not(.rounded-pill):not(.btn):hover::after {
-    width: 70%;
+    .navbar-nav .nav-link:not(.rounded-pill):not(.btn):hover::after {
+        width: 70%;
+    }
 }
 
 /* ============================================================

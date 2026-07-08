@@ -142,7 +142,7 @@ class LoginView(FormView):
 
         if user is not None:
             login(self.request, user)
-            messages.success(self.request, f"¡Bienvenido/a {username}!")
+            messages.success(self.request, f"¡Bienvenido/a {user.username}!")
             return super().form_valid(form)
         else:
             messages.error(self.request, "Usuario o contraseña incorrectos")
@@ -319,9 +319,20 @@ class ContactFormView(FormView):
             email.attach(attachment.name, attachment.read(), attachment.content_type)
 
         # 5. Enviar
-        email.send(fail_silently=False)
-
-        messages.success(
-            self.request, "Gracias por tu mensaje. Nos pondremos en contacto pronto."
-        )
+        import smtplib
+        try:
+            email.send(fail_silently=False)
+            messages.success(
+                self.request, "Gracias por tu mensaje. Nos pondremos en contacto pronto."
+            )
+        except smtplib.SMTPException as e:
+            messages.error(
+                self.request, "Hubo un error al enviar el mensaje. Verifica las credenciales de correo electrónico del servidor."
+            )
+            # Retornar form_invalid para que no se pierdan los datos o redirigir
+            return super().form_valid(form)
+        except Exception as e:
+            messages.error(
+                self.request, "Ocurrió un error inesperado al procesar el mensaje."
+            )
         return super().form_valid(form)
