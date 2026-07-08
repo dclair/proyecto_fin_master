@@ -1,161 +1,293 @@
-{% extends "general/layout.html" %}
-{% load static %}
-{% block head_title %}{{ article.title }} | Aficionados{% endblock %}
-
-{% block content %}
+{% extends "general/layout.html" %} {% load static %} {% block head_title %}{{
+article.title }} | Aficionados{% endblock %} {% block content %}
 <div class="container py-5">
-    <div class="row">
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'library:article_list' %}">Biblioteca</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ article.title|truncatechars:30 }}</li>
-                </ol>
-            </nav>
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'library:article_list' %}">Biblioteca</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            {{ article.title|truncatechars:30 }}
+          </li>
+        </ol>
+      </nav>
 
-            <h1 class="fw-bold mb-3 text-dark-mode-white">{{ article.title }}</h1>
-            
-            <div class="d-flex align-items-center mb-4 text-muted flex-wrap">
-                <img src="{{ article.author.profile.profile_picture_url|default:'' }}" class="rounded-circle me-2 avatar-sm" onerror="this.src='{% static 'img/default_profile.png' %}'">
-                <span>Por <a href="{% url 'profiles:profile' article.author.profile.pk %}" class="fw-bold text-decoration-none text-dark">{{ article.author.username }}</a></span>
-                <span class="mx-2">&bull;</span>
-                <span>{{ article.created_at|date:"d M Y" }}</span>
-                <span class="mx-2">&bull;</span>
-                <span class="badge bg-primary-subtle text-primary">{{ article.hobby.name }}</span>
-            </div>
+      <h1 class="fw-bold mb-3 text-dark-mode-white">{{ article.title }}</h1>
 
-            {% if article.cover_image %}
-                <img src="{{ article.cover_image.url }}" class="img-fluid rounded mb-4 shadow-sm w-100 object-fit-cover" style="max-height: 400px;" alt="{{ article.title }}">
-            {% endif %}
-
-            <div class="article-content fs-5 mb-5" style="line-height: 1.8;">
-                {{ article.content|safe }}
-            </div>
-
-            <!-- Media Attachments -->
-            {% if article.attached_video or article.external_video_url or article.attached_document or article.external_document_url %}
-            <div class="card border-0 shadow-sm mb-5 bg-light">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-paperclip me-2"></i>Recursos Adjuntos</h5>
-                    <div class="row g-3">
-                        {% if article.attached_video %}
-                        <div class="col-12">
-                            <h6>Video Adjunto</h6>
-                            <video controls class="w-100 rounded shadow-sm">
-                                <source src="{{ article.attached_video.url }}" type="video/mp4">
-                                Tu navegador no soporta el formato de video.
-                            </video>
-                        </div>
-                        {% endif %}
-                        
-                        {% if article.external_video_url %}
-                        <div class="col-12">
-                            <a href="{{ article.external_video_url }}" target="_blank" class="btn btn-outline-danger"><i class="bi bi-youtube me-2"></i>Ver Video Externo</a>
-                        </div>
-                        {% endif %}
-
-                        {% if article.attached_document %}
-                        <div class="col-md-6">
-                            <a href="{{ article.attached_document.url }}" target="_blank" class="btn btn-primary w-100" download><i class="bi bi-file-earmark-arrow-down me-2"></i>Descargar Documento</a>
-                        </div>
-                        {% endif %}
-                        
-                        {% if article.external_document_url %}
-                        <div class="col-md-6">
-                            <a href="{{ article.external_document_url }}" target="_blank" class="btn btn-outline-primary w-100"><i class="bi bi-link-45deg me-2"></i>Documento Externo</a>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Actions -->
-            <div class="d-flex justify-content-between align-items-center py-3 border-top border-bottom mb-5">
-                <div>
-                    <button onclick="window.dispatchEvent(new CustomEvent('openChatWith', { detail: { userId: {{ article.author.id }} } }))" class="btn btn-outline-secondary">
-                        <i class="bi bi-chat-dots me-2"></i> Consultar al Autor
-                    </button>
-                </div>
-                {% if request.user == article.author or request.user.is_superuser %}
-                <div>
-                    <a href="{% url 'library:article_update' article.slug %}" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
-                    <a href="{% url 'library:article_delete' article.slug %}" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
-                </div>
+      <div class="d-flex align-items-center mb-4 text-muted flex-wrap">
+        <img
+          src="{{ article.author.profile.profile_picture_url|default:'' }}"
+          class="rounded-circle me-2 avatar-sm"
+          onerror="this.src='{% static 'img/default_profile.png' %}'"
+        />
+        <span>Por 
+                {% if article.author.profile %}
+                    <a href="{% url 'profiles:profile' article.author.profile.pk %}" class="fw-bold text-decoration-none text-dark">{{ article.author.username }}</a>
+                {% else %}
+                    <span class="fw-bold text-dark">{{ article.author.username }}</span>
                 {% endif %}
-            </div>
+                </span>
+        <span class="mx-2">&bull;</span>
+        <span>{{ article.created_at|date:"d M Y" }}</span>
+        <span class="mx-2">&bull;</span>
+        <span class="badge bg-primary-subtle text-primary"
+          >{{ article.hobby.name }}</span
+        >
+      </div>
 
-            <!-- Comments Section -->
-            <h4 class="fw-bold mb-4"><i class="bi bi-chat-left-text me-2"></i>Comentarios ({{ article.comments.count }})</h4>
-            
-            {% if user.is_authenticated %}
-                <form action="{% url 'library:add_comment' article.slug %}" method="POST" class="mb-5">
-                    {% csrf_token %}
-                    {{ comment_form.content }}
-                    <button type="submit" class="btn btn-primary mt-2">Comentar</button>
-                </form>
-            {% else %}
-                <div class="alert alert-info">Debes <a href="{% url 'login' %}">iniciar sesión</a> para comentar.</div>
+      {% if article.cover_image %}
+      <img
+        src="{{ article.cover_image.url }}"
+        class="img-fluid rounded mb-4 shadow-sm w-100 object-fit-cover"
+        style="max-height: 400px"
+        alt="{{ article.title }}"
+      />
+      {% endif %}
+
+      <div class="article-content fs-5 mb-5" style="line-height: 1.8">
+        {{ article.content|safe }}
+      </div>
+
+      <!-- Media Attachments -->
+      {% if article.attached_video or article.external_video_url or
+      article.attached_document or article.external_document_url %}
+      <div class="card border-0 shadow-sm mb-5 bg-light">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">
+            <i class="bi bi-paperclip me-2"></i>Recursos Adjuntos
+          </h5>
+          <div class="row g-3">
+            {% if article.attached_video %}
+            <div class="col-12">
+              <h6>Video Adjunto</h6>
+              <video controls class="w-100 rounded shadow-sm">
+                <source
+                  src="{{ article.attached_video.url }}"
+                  type="video/mp4"
+                />
+                Tu navegador no soporta el formato de video.
+              </video>
+            </div>
+            {% endif %} {% if article.external_video_url %}
+            <div class="col-12">
+              <a
+                href="{{ article.external_video_url }}"
+                target="_blank"
+                class="btn btn-outline-danger"
+                ><i class="bi bi-youtube me-2"></i>Ver Video Externo</a
+              >
+            </div>
+            {% endif %} {% if article.attached_document %}
+            <div class="col-md-6">
+              <a
+                href="{{ article.attached_document.url }}"
+                target="_blank"
+                class="btn btn-primary w-100"
+                download
+                ><i class="bi bi-file-earmark-arrow-down me-2"></i>Descargar
+                Documento</a
+              >
+            </div>
+            {% endif %} {% if article.external_document_url %}
+            <div class="col-md-6">
+              <a
+                href="{{ article.external_document_url }}"
+                target="_blank"
+                class="btn btn-outline-primary w-100"
+                ><i class="bi bi-link-45deg me-2"></i>Documento Externo</a
+              >
+            </div>
             {% endif %}
-
-            <div class="comments-list">
-                {% for comment in article.comments.all %}
-                    <div class="d-flex mb-4">
-                        <img src="{{ comment.author.profile.profile_picture_url|default:'' }}" onerror="this.src='{% static 'img/default_profile.png' %}'" class="rounded-circle me-3 avatar-sm">
-                        <div>
-                            <div class="bg-light p-3 rounded dark-mode-text-dark">
-                                <strong class="d-block mb-1">{{ comment.author.username }}</strong>
-                                <p class="mb-0">{{ comment.content }}</p>
-                            </div>
-                            <small class="text-muted ms-2">{{ comment.created_at|date:"d M Y, H:i" }}</small>
-                        </div>
-                    </div>
-                {% empty %}
-                    <p class="text-muted">Aún no hay comentarios.</p>
-                {% endfor %}
-            </div>
+          </div>
         </div>
+      </div>
+      {% endif %}
 
-        <!-- Sidebar / Ratings -->
-        <div class="col-lg-4 mt-5 mt-lg-0">
-            <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
-                <div class="card-body text-center">
-                    <h5 class="fw-bold mb-3">Valoración de la Comunidad</h5>
-                    <div class="display-4 fw-bold text-warning mb-2">
-                        {{ average_rating|default:"0.0"|stringformat:".1f" }} <i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="text-muted small">{{ total_ratings }} valoraciones</p>
-                    
-                    <hr>
-                    
-                    {% if user.is_authenticated %}
-                        {% if user != article.author %}
-                            <h6 class="fw-bold">Tu valoración:</h6>
-                            <form action="{% url 'library:rate_article' article.slug %}" method="POST">
-                                {% csrf_token %}
-                                <div class="rating-stars mb-3 fs-3">
-                                    <select name="rating" class="form-select mb-2">
-                                        <option value="5" {% if user_rating and user_rating.rating == 5 %}selected{% endif %}>5 - Excelente</option>
-                                        <option value="4" {% if user_rating and user_rating.rating == 4 %}selected{% endif %}>4 - Muy Bueno</option>
-                                        <option value="3" {% if user_rating and user_rating.rating == 3 %}selected{% endif %}>3 - Bueno</option>
-                                        <option value="2" {% if user_rating and user_rating.rating == 2 %}selected{% endif %}>2 - Regular</option>
-                                        <option value="1" {% if user_rating and user_rating.rating == 1 %}selected{% endif %}>1 - Pobre</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-outline-warning w-100">
-                                    {% if user_rating %}Actualizar Valoración{% else %}Valorar Artículo{% endif %}
-                                </button>
-                            </form>
-                        {% else %}
-                            <p class="text-muted small">No puedes valorar tu propio artículo.</p>
-                        {% endif %}
-                    {% else %}
-                        <p class="text-muted small">Inicia sesión para valorar.</p>
-                    {% endif %}
-                </div>
-            </div>
+      <!-- Actions -->
+      <div
+        class="d-flex justify-content-between align-items-center py-3 border-top border-bottom mb-5"
+      >
+        <div>
+          <button
+            onclick="window.dispatchEvent(new CustomEvent('openChatWith', { detail: { userId: {{ article.author.id }} } }))"
+            class="btn btn-outline-secondary"
+          >
+            <i class="bi bi-chat-dots me-2"></i> Consultar al Autor
+          </button>
         </div>
+        {% if request.user == article.author or request.user.is_superuser %}
+        <div>
+          <a
+            href="{% url 'library:article_update' article.slug %}"
+            class="btn btn-warning btn-sm"
+            ><i class="bi bi-pencil"></i
+          ></a>
+          <a
+            href="{% url 'library:article_delete' article.slug %}"
+            class="btn btn-danger btn-sm"
+            ><i class="bi bi-trash"></i
+          ></a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Comments Section -->
+      <h4 class="fw-bold mb-4">
+        <i class="bi bi-chat-left-text me-2"></i>Comentarios ({{
+        article.comments.count }})
+      </h4>
+
+      {% if user.is_authenticated %}
+      <form
+        action="{% url 'library:add_comment' article.slug %}"
+        method="POST"
+        class="mb-5"
+      >
+        {% csrf_token %} {{ comment_form.content }}
+        <button type="submit" class="btn btn-primary mt-2">Comentar</button>
+      </form>
+      {% else %}
+      <div class="alert alert-info">
+        Debes <a href="{% url 'login' %}">iniciar sesión</a> para comentar.
+      </div>
+      {% endif %}
+
+      <div class="comments-list">
+        {% for comment in article.comments.all %}
+        <div class="d-flex mb-4">
+          <img
+            src="{{ comment.author.profile.profile_picture_url|default:'' }}"
+            onerror="this.src='{% static 'img/default_profile.png' %}'"
+            class="rounded-circle me-3 avatar-sm"
+          />
+          <div>
+            <div class="bg-light p-3 rounded dark-mode-text-dark">
+              <strong class="d-block mb-1"
+                >{{ comment.author.username }}</strong
+              >
+              <p class="mb-0">{{ comment.content }}</p>
+            </div>
+            <small class="text-muted ms-2"
+              >{{ comment.created_at|date:"d M Y, H:i" }}</small
+            >
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">Aún no hay comentarios.</p>
+        {% endfor %}
+      </div>
     </div>
+
+    <!-- Sidebar / Ratings -->
+    <div class="col-lg-4 mt-5 mt-lg-0">
+      <div class="card border-0 shadow-sm sticky-top" style="top: 100px">
+        <div class="card-body text-center">
+          <h5 class="fw-bold mb-3">Valoración de la Comunidad</h5>
+          <div class="display-4 fw-bold text-warning mb-2">
+            {{ average_rating|default:"0.0"|stringformat:".1f" }}
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <p class="text-muted small">{{ total_ratings }} valoraciones</p>
+
+          <hr />
+
+          {% if user.is_authenticated %} {% if user != article.author %}
+          <h6 class="fw-bold">Tu valoración:</h6>
+          <form
+            action="{% url 'library:rate_article' article.slug %}"
+            method="POST"
+          >
+            {% csrf_token %}
+            <div class="rating-stars mb-3 fs-3">
+              <select name="rating" class="form-select mb-2">
+                <option
+                  value="5"
+                  {%
+                  if
+                  user_rating
+                  and
+                  user_rating.rating=""
+                  ="5"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  5 - Excelente
+                </option>
+                <option
+                  value="4"
+                  {%
+                  if
+                  user_rating
+                  and
+                  user_rating.rating=""
+                  ="4"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  4 - Muy Bueno
+                </option>
+                <option
+                  value="3"
+                  {%
+                  if
+                  user_rating
+                  and
+                  user_rating.rating=""
+                  ="3"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  3 - Bueno
+                </option>
+                <option
+                  value="2"
+                  {%
+                  if
+                  user_rating
+                  and
+                  user_rating.rating=""
+                  ="2"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  2 - Regular
+                </option>
+                <option
+                  value="1"
+                  {%
+                  if
+                  user_rating
+                  and
+                  user_rating.rating=""
+                  ="1"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  1 - Pobre
+                </option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-outline-warning w-100">
+              {% if user_rating %}Actualizar Valoración{% else %}Valorar
+              Artículo{% endif %}
+            </button>
+          </form>
+          {% else %}
+          <p class="text-muted small">No puedes valorar tu propio artículo.</p>
+          {% endif %} {% else %}
+          <p class="text-muted small">Inicia sesión para valorar.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
