@@ -5,6 +5,28 @@
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
 
+## 2026-07-08: Security Audit, UI Fixes, and TinyMCE Local Image Upload
+
+**Type:** feature / bug fix / security
+**Status:** done
+
+What changed:
+- Removed `.env.prod` from Git tracking and added to `.gitignore` to prevent secret leakage.
+- Added a `try/except` block in `ContactView` to handle `SMTPException` (e.g. 500 error from Gmail auth failures) gracefully.
+- Fixed a bug where the login success message showed the email instead of the username.
+- Fixed layout issues in `my_events.html` (mobile horizontal scroll and table headers).
+- Increased the `UserProfile.bio` character limit from 500 to 1500.
+- Implemented local image upload functionality for TinyMCE in the profile edit view, saving images to `media/tinymce/`.
+
+Why:
+- To secure production credentials and prevent them from being exposed in public repositories.
+- To prevent the application from crashing on the contact page if SMTP credentials fail.
+- To provide a more personalized login experience.
+- To allow therapists more space to explain their services and integrate local images natively without relying on external URLs.
+
+Impact:
+- Enhanced security, stability, and a significantly improved user experience for profile editing.
+
 ## 2026-06-11: UI Refinements, "Quedada" to "Evento" Migration & Select2 Integration
 
 **Type:** feature / UI
