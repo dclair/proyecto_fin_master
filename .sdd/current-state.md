@@ -30,6 +30,7 @@ Current user-facing capabilities:
 - Chat in real-time (1-on-1 and Groups) with multimedia support (images, videos, documents).
 - Full control over messages ("Delete for everyone" and "Delete for me").
 - Filter events easily matching the user's registered therapies ("Mis Terapias" filter).
+- Upload local images directly into the biography editor via TinyMCE integration.
 
 ## Runtime
 
