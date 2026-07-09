@@ -123,6 +123,9 @@ class EventForm(forms.ModelForm):
         help_texts = {
             "level": "Explica la dificultad: Principiante (sin experiencia), Intermedio (conoces las bases),Avanzado (nivel técnico/competitivo), Experto (nivel profesional o muy experimentado).",
         }
+        labels = {
+            "hobby": "Terapia",
+        }
         widgets = {
             "title": forms.TextInput(
                 attrs={
