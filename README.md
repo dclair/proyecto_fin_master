@@ -217,4 +217,6 @@ CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contac
 
 [x] Seguridad y Perfil: `.env.prod` fuera del control de versiones, manejo de excepciones de SMTP, límite de biografía expandido (1500 caracteres) y subida de imágenes locales mediante TinyMCE al servidor.
 
+[x] Backups Automatizados: Configuración de script de volcado de base de datos (MariaDB) y compresión de archivos multimedia con retención rotativa (7 días) mediante cron.
+
 Hubs&Clicks - "Descubre, Comparte, Disfruta"
