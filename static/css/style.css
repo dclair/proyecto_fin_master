@@ -1157,3 +1157,45 @@ footer a:active {
 .navbar-nav button.nav-link[type="submit"]:hover {
     transform: translateY(2px) scale(0.98);
 }
+
+/* ============================================================
+   FIX: FORMULARIOS EN MODO OSCURO
+   ============================================================ */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] textarea.form-control,
+[data-bs-theme="dark"] input.form-control {
+    color: #ffffff !important;
+    background-color: var(--bs-dark) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus,
+[data-bs-theme="dark"] textarea.form-control:focus,
+[data-bs-theme="dark"] input.form-control:focus {
+    color: #ffffff !important;
+    background-color: #2b3035 !important;
+    border-color: var(--hubs-primary) !important;
+}
+
+[data-bs-theme="dark"] .form-label,
+[data-bs-theme="dark"] label,
+[data-bs-theme="dark"] .col-form-label,
+[data-bs-theme="dark"] .form-text,
+[data-bs-theme="dark"] .text-muted.help-text,
+[data-bs-theme="dark"] span.helptext,
+[data-bs-theme="dark"] .help-block {
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .form-control::placeholder,
+[data-bs-theme="dark"] textarea.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+[data-bs-theme="dark"] .input-group-text {
+    color: #ffffff !important;
+    background-color: #343a40 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
