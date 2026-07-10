@@ -10,7 +10,7 @@
 set -e
 
 # Configuración de rutas (Ajustar según necesidad en producción)
-PROJECT_DIR="/home/ubuntu/PROYECTO_FIN_MASTER_V2"
+PROJECT_DIR="/home/ubuntu/proyecto_fin_master"
 BACKUP_DIR="/home/ubuntu/backups/aficionados_network"
 ENV_FILE="$PROJECT_DIR/.env.prod"
 DATE=$(date +"%Y%m%d_%H%M%S")
