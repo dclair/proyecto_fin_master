@@ -38,7 +38,12 @@ document.addEventListener("DOMContentLoaded", function() {
         resetBtn.addEventListener('click', function(e) {
             e.preventDefault(); // Evita que la página salte
             localStorage.removeItem('hubs-cookies-accepted'); // Borramos la decisión
-            location.reload(); // Recargamos para que el banner vuelva a saltar
+            
+            // Mostrar el banner dinámicamente en lugar de recargar la página
+            if (banner) {
+                banner.style.display = 'block'; // O el valor original (el div es block por defecto)
+                banner.classList.remove('hidden'); // Removemos la clase que lo oculta si fue animado
+            }
         });
     }
 
