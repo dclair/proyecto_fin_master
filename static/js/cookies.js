@@ -54,9 +54,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // 2. COMPROBACIÓN INICIAL Y BOTONES DEL BANNER
     // ============================================================
     
-    // Si ya existe una decisión previa, ocultamos el banner de inmediato
-    if (localStorage.getItem('hubs-cookies-accepted')) {
-        banner.style.display = 'none'; 
+    // Mostramos el banner solo si NO hay una decisión tomada
+    if (!localStorage.getItem('hubs-cookies-accepted')) {
+        banner.style.display = 'block'; 
     }
 
     // Botón: Aceptar todas
