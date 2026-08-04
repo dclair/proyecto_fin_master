@@ -27,6 +27,8 @@ class RegisterForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['first_name'].required = True
+        self.fields['first_name'].label = "Nombre Completo"
+        self.fields['first_name'].help_text = "Nombre y apellidos completos. La persona que está registrada en la asociación"
         self.fields['email'].required = True
         self.fields['email'].help_text = "Mismo email con el que estás registrado en la Asociación."
         self.fields['username'].help_text = "Letras, números y caracteres @/./+/-/_ únicamente."
