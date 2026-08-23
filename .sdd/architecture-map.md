@@ -25,13 +25,13 @@ The application uses server-rendered pages as the primary experience. JavaScript
 Two roles:
 
 - Django project package: settings, root URLs, ASGI/WSGI.
-- General app: home, auth, registration activation, contact messages.
+- General app: home, auth, registration pending, contact messages.
 
 Key files:
 
 - `settings.py`: env loading, apps, middleware, DB selection, static/media/email/security.
 - `urls.py`: top-level routing.
-- `views.py`: home, login/logout/register/activate/contact, plus legacy profile views.
+- `views.py`: home, login/logout/register/contact, plus legacy profile views.
 - `models.py`: `ContactMessage`.
 - `forms.py`: register/login/user/profile/contact/add-hobby forms.
 - `templates/`: main global template tree.
@@ -165,7 +165,7 @@ Root routes in `aficionados_network/urls.py`:
 - `/profile/`: includes `profiles.urls`.
 - `/profile/list/`: profile list shortcut.
 - `/profile/<pk>/`: profile detail shortcut.
-- `/login/`, `/logout/`, `/register/`, `/activate/...`: auth/registration.
+- `/login/`, `/logout/`, `/register/`: auth/registration.
 - `/password-reset/...`: password reset.
 - `/contact/`: contact form.
 - `/legal/`, `/privacidad/`, `/politica-cookies/`, `/cookies/`: legal/static pages.
@@ -238,7 +238,7 @@ Media:
 
 ### Registration
 
-`RegisterView` creates inactive user -> sends activation email -> `activate()` validates token -> enables user -> sends welcome email.
+`RegisterView` creates inactive user -> user sees 72h pending screen -> Admin manually marks `is_active=True` in Django Admin -> Signal sends welcome email.
 
 ### Home Personalization
 
@@ -265,3 +265,4 @@ Important interactions use branded HTML email templates and CID logos. Tests use
 - Upload cleanup and media paths.
 - Email template paths.
 - MySQL vs SQLite behavior.
+- **Soft Delete Pattern**: Core models (`Posts`, `Event`, `Hobby`) inherit from `SoftDeleteModel`. Deletions flag `is_active=False` rather than DB removal. Use `all_objects` manager to bypass active-only filtering if necessary. Foreign keys use `PROTECT` instead of `CASCADE` to preserve history.

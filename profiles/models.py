@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import date
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from aficionados_network.models import SoftDeleteModel
 
 def validate_birth_date(value):
     if value > date.today():
@@ -18,7 +18,7 @@ def validate_birth_date(value):
 
 
 # esta clase la usaremos para crear las terapias
-class Hobby(models.Model):
+class Hobby(SoftDeleteModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     slug = models.SlugField(unique=True, null=True, blank=True)

@@ -32,6 +32,11 @@ Este documento sirve como anclaje de conocimiento para cualquier agente que anal
    - Notificaciones in-app y por Email corporativo.
    - **NUEVO:** Sistema de gestión de notificaciones asíncrono. Borrado individual y masivo sin recarga de página, integrado tanto en el dropdown de navegación como en la vista de historial (`HTMX` + `HX-Trigger`). Completamente respaldado por pruebas unitarias.
 
+6. **Gestión de Integridad de Datos e Históricos (NUEVO):**
+   - Implementación de un patrón de arquitectura **Soft Delete** (mediante `SoftDeleteModel` y `SoftDeleteManager`).
+   - Los modelos críticos (`Event`, `Posts`, `Hobby`) ya no se eliminan físicamente de la base de datos (se usa `is_active=False` y `deleted_at`). 
+   - Las relaciones foráneas se cambiaron de `CASCADE` a `PROTECT` para asegurar que el contenido generado por los terapeutas se preserve a lo largo del tiempo.
+
 ## Detalles de Arquitectura y Despliegue
 - El proyecto corre sobre Python 3.12 y Django 6.0.
 - El chat está compilado con Vite. Los assets se generan en `static/chat/`.

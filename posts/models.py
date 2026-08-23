@@ -9,7 +9,7 @@ from django.utils.text import slugify
 from PIL import Image
 import os
 from django.urls import reverse
-
+from aficionados_network.models import SoftDeleteModel
 
 def validate_image_size(image):
     """Valida que la imagen no sea mayor a 5MB"""
@@ -24,7 +24,7 @@ def validate_video_size(video):
         raise ValidationError("El vídeo no puede pesar más de 20MB")
 
 
-class Posts(models.Model):
+class Posts(SoftDeleteModel):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="posts", verbose_name="usuario"
     )
@@ -142,13 +142,7 @@ class Posts(models.Model):
                 print(f"Error al procesar la imagen: {e}")
 
     def delete(self, *args, **kwargs):
-        """Eliminar la imagen y el vídeo del sistema de archivos al eliminar el post"""
-        if self.image:
-            if os.path.isfile(self.image.path):
-                os.remove(self.image.path)
-        if self.video:
-            if os.path.isfile(self.video.path):
-                os.remove(self.video.path)
+        """Soft delete the post without destroying the files"""
         super().delete(*args, **kwargs)
 
     @property
@@ -250,7 +244,7 @@ class EventAttendance(models.Model):
         return f"{self.user.username} asiste a {self.event.title} ({self.get_attendance_type_display()})"
 
 
-class Event(models.Model):
+class Event(SoftDeleteModel):
     LEVEL_CHOICES = [
         ("all", " Para todos"),
         ("beginner", "Principiante"),
@@ -277,7 +271,7 @@ class Event(models.Model):
     )
 
     # A qué terapia pertenece (Fotografía, Ciclismo, etc.)
-    hobby = models.ForeignKey(Hobby, on_delete=models.CASCADE, related_name="events")
+    hobby = models.ForeignKey(Hobby, on_delete=models.PROTECT, related_name="events")
 
     # Lista de usuarios que se apuntan (Muchos a Muchos con modelo intermedio)
     participants = models.ManyToManyField(

@@ -11,7 +11,6 @@ from .views import (
     RegisterView,
     LogoutView,
     ContactFormView,
-    activate,
 )
 
 urlpatterns = [
@@ -59,8 +58,6 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     path("register/", RegisterView.as_view(), name="register"),
-    # Esta es la URL que el usuario pincha en su correo:
-    path("activate/<uidb64>/<token>/", activate, name="activate"),
     path("contact/", ContactFormView.as_view(), name="contact"),
     path(
         "legal/",

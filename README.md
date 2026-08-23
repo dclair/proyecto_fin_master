@@ -77,7 +77,7 @@ Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección 
 - **Interactividad y Tiempo Real:** HTMX & JavaScript Vanilla (AJAX) y Channels (ASGI).
 - **Comunicaciones:** Django Mail (EmailMultiAlternatives).
 - **Base de Datos:** SQLite (Desarrollo) / MySQL (Producción).
-- **Arquitectura y Seguridad:** Protección CSRF, autenticación robusta mediante **Email**, flujos de registro con aprobación manual del administrador (activación automatizada por Signals), validación avanzada de formularios y secciones privadas blindadas (Biblioteca).
+- **Arquitectura y Seguridad:** Protección CSRF, autenticación robusta mediante **Email**, flujos de registro con aprobación 100% manual del administrador (sin enlaces de auto-activación), validación avanzada de formularios, secciones privadas blindadas y retención histórica de datos mediante **Soft Delete** en entidades core.
 
 🏗️ ESTRUCTURA DEL PROYECTO:
 
