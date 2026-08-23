@@ -16,6 +16,9 @@
                     <p class="small text-muted">
                         Un administrador revisará tu cuenta. Te avisaremos a tu correo electrónico cuando haya sido activada para que puedas acceder a la plataforma.
                     </p>
+                    <p class="small text-muted mt-2">
+                        Si pasadas 72 horas no has recibido el email de activación, por favor <a href="{% url 'contact' %}?subject=ACTIVACION%20DE%20LA%20CUENTA%20NO%20REALIZADA%20DESPUES%20DE%2072%20HORAS" class="text-info text-decoration-none fw-bold">haz click aquí</a> para contactarnos.
+                    </p>
                     <a href="{% url 'home' %}" class="btn btn-outline-secondary mt-3">
                         <i class="bi bi-house-door me-1"></i> Volver al inicio
                     </a>

@@ -11,7 +11,7 @@ El proyecto requiere que el registro de nuevos usuarios no sea automático (no s
    user.is_active = False
    user.save()
    ```
-3. **Notificación al Admin**: Al guardarse la instancia, se envía un correo a la cuenta administrativa configurada con los datos ingresados para que el administrador los valide.
+3. **Notificación al Admin y Feedback al Usuario**: Al guardarse la instancia, se envía un correo a la cuenta administrativa configurada. El usuario es redirigido a una vista de espera (`registration_pending.html`) donde se le indica que si en 72 horas no es activado, puede usar el enlace de contacto con un asunto predefinido para agilizar el reclamo.
 4. **Validación**: El administrador utiliza el entorno nativo de Django (`/admin`) para revisar el perfil. Al marcar `is_active=True`, se dispara un signal.
 5. **Signals (`profiles/signals.py`)**:
    - `pre_save`: Atrapa el estado anterior de `is_active`.

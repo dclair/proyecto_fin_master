@@ -214,55 +214,6 @@ class RegisterView(CreateView):
         )
 
 
-# --- La función de activación ---
-def activate(request, uidb64, token):
-    try:
-        # Decodificamos el ID del usuario de la URL
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    # Verificamos si el token es válido
-    if user is not None and default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-
-        # --- CONFIGURACIÓN DEL EMAIL DE BIENVENIDA ---
-        current_site = get_current_site(request)
-        mail_subject = "¡Bienvenido a Hubs & Clicks!"
-
-        # Renderizamos el HTML del correo
-        html_content = render_to_string(
-            "registration/welcome_email.html",
-            {
-                "user": user,
-                "domain": current_site.domain,
-            },
-        )
-
-        # Creamos el correo (EmailMultiAlternatives es necesario para adjuntos CID)
-        email = EmailMultiAlternatives(mail_subject, "", to=[user.email])
-        email.attach_alternative(html_content, "text/html")
-
-        # Adjuntamos el logo como recurso relacionado (CID)
-        img_path = os.path.join(settings.BASE_DIR, "static", "img", "logo_hubs.png")
-
-        if os.path.exists(img_path):
-            with open(img_path, "rb") as f:
-                logo = MIMEImage(f.read())
-                # El ID <logo_id> debe coincidir con el src="cid:logo_id" del HTML
-                logo.add_header("Content-ID", "<logo_id>")
-                email.attach(logo)
-
-        email.send()
-        # -------------------------------------
-
-        return render(request, "registration/activation_success.html")
-    else:
-        return render(request, "registration/activation_invalid.html")
-
-
 
 class ContactFormView(FormView):
     template_name = "general/contact.html"

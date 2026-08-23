@@ -18,3 +18,24 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.subject}"
+
+from django.utils import timezone
+
+class SoftDeleteManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
+class SoftDeleteModel(models.Model):
+    is_active = models.BooleanField("Activo", default=True)
+    deleted_at = models.DateTimeField("Fecha de eliminación", null=True, blank=True)
+
+    objects = SoftDeleteManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        abstract = True
+
+    def delete(self, using=None, keep_parents=False):
+        self.is_active = False
+        self.deleted_at = timezone.now()
+        self.save(using=using)
