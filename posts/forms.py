@@ -1,9 +1,6 @@
 from django import forms
+from django.utils import timezone
 from .models import Posts, Comment, Event, EventComment
-
-
-from django import forms
-from .models import Posts
 
 
 class PostCreateForm(forms.ModelForm):
@@ -174,6 +171,10 @@ class EventForm(forms.ModelForm):
         if is_online and not stream_url and not location:
             raise forms.ValidationError("Debes proveer al menos el enlace de transmisión o un lugar físico.")
             
+        event_date = cleaned_data.get("event_date")
+        if event_date and event_date < timezone.now():
+            raise forms.ValidationError({"event_date": "La fecha del evento no puede estar en el pasado."})
+
         return cleaned_data
 
 
