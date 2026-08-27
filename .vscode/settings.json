@@ -1,3 +1,4 @@
 {
-    "lmstudioCode.permissionMode": "strict"
+    "lmstudioCode.permissionMode": "strict",
+    "djlint.showInstallError": false
 }
