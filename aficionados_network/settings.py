@@ -10,6 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+#servir sus archivos estáticos (CSS, JavaScript, imágenes, fuentes) de forma directa
 HAS_WHITENOISE = find_spec("whitenoise") is not None
 
 if find_spec("MySQLdb") is None and find_spec("pymysql") is not None:
