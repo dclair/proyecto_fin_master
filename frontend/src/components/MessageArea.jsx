@@ -548,7 +548,8 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
                 const query = userSearchQuery.toLowerCase();
                 const fullName = `${u.first_name || ''} ${u.last_name || ''}`.toLowerCase();
                 const username = (u.username || '').toLowerCase();
-                return fullName.includes(query) || username.includes(query);
+                const email = (u.email || '').toLowerCase();
+                return fullName.includes(query) || username.includes(query) || email.includes(query);
               }).map(u => {
                 const isSelected = selectedUsersToAdd.includes(u.id);
                 return (
@@ -558,8 +559,11 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
                     className={`list-group-item list-group-item-action py-1 px-2 d-flex align-items-center border-0 ${isSelected ? 'bg-light' : ''}`} 
                     onClick={() => setSelectedUsersToAdd(prev => prev.includes(u.id) ? prev.filter(id => id !== u.id) : [...prev, u.id])}
                   >
-                    <img src={u.profile_picture_url} alt="" className="rounded-circle me-2" style={{width: '20px', height: '20px', objectFit: 'cover'}} />
-                    <span className="text-truncate text-dark" style={{fontSize: '0.8rem', flex: 1}}>{u.first_name || u.username}</span>
+                    <img src={u.profile_picture_url} alt="" className="rounded-circle me-2" style={{width: '28px', height: '28px', objectFit: 'cover'}} />
+                    <div className="text-truncate text-dark" style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+                      <span style={{fontSize: '0.8rem'}}>{u.first_name || u.username}</span>
+                      <span className="text-muted" style={{fontSize: '0.65rem'}}>{u.email}</span>
+                    </div>
                     {isSelected && <Check size={14} className="text-primary" />}
                   </button>
                 );
