@@ -16,13 +16,16 @@ from aficionados_network.models import ContactMessage
     DEFAULT_FROM_EMAIL="noreply@example.com",
     CONTACT_EMAIL="admin@example.com",
 )
+# esta clase testea las vistas y los emails del core
 class CoreViewAndEmailTests(TestCase):
+    # testea la vista home para usuario anonimo
     def test_home_view_renders_for_anonymous_user(self):
         response = self.client.get(reverse("home"))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "general/home.html")
 
+    # testea el flujo de login y logout
     def test_login_and_logout_flow(self):
         User.objects.create_user(username="ana", password="testpass123")
 
@@ -39,6 +42,7 @@ class CoreViewAndEmailTests(TestCase):
         self.assertRedirects(logout_response, reverse("home"))
         self.assertNotIn("_auth_user_id", self.client.session)
 
+    # testea el registro de un usuario y el envio de email de activacion
     def test_register_creates_inactive_user_and_activation_email(self):
         response = self.client.post(
             reverse("register"),
@@ -57,6 +61,7 @@ class CoreViewAndEmailTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Activa tu cuenta", mail.outbox[0].subject)
 
+    # testea la activacion del usuario y el envio de email de bienvenida
     def test_activation_enables_user_and_sends_welcome_email(self):
         user = User.objects.create_user(
             username="ana",
@@ -78,6 +83,7 @@ class CoreViewAndEmailTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Bienvenido", mail.outbox[0].subject)
 
+    # testea el formulario de contacto y el envio de email de confirmacion
     def test_contact_form_persists_message_and_sends_email(self):
         response = self.client.post(
             reverse("contact"),

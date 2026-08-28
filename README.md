@@ -14,6 +14,8 @@ Hubs&Clicks es una plataforma web de caracter privado, diseñada para conectar a
 
    Protocolo de Cancelación: Sistema seguro de cancelación que bloquea interacciones y notifica automáticamente a todos los asistentes.
 
+   Sincronización Automática con Chat (Eventos Online): Los eventos configurados como "Online" generan automáticamente un Grupo de Chat privado. Los participantes que se unen de forma online son agregados e integrados al grupo en tiempo real (vía Django Signals) para conversar antes, durante y después del evento.
+
 2. Dashboard y Comunidad de Terapeutas
    Directorio de Profesionales: Exploración fluida mediante scroll infinito (HTMX) para navegar por la comunidad de terapeutas.
 
@@ -97,7 +99,19 @@ Sigue estos pasos para desplegar Hubs&Clicks en tu entorno local:
    Bash
    git clone https://github.com/tu-usuario/aficionados_network.git
    cd aficionados_network
-2. Configurar el entorno virtual
+
+2. Entorno de Desarrollo Simplificado (Tmux + Vite + Redis)
+   El proyecto cuenta con el script automatizado `start_dev.sh` que levanta todo el entorno simultáneamente usando Tmux:
+   - Panel 1: Servidor Django (`manage.py runserver`)
+   - Panel 2: Servidor de Vite para React (`npm run dev`)
+   - Panel 3: Servidor Redis para WebSockets (`redis-server`)
+   - Ventana adicional para ejecutar comandos de consola.
+   
+   Simplemente ejecuta:
+   Bash
+   ./start_dev.sh
+
+3. Configurar el entorno virtual
    Se recomienda el uso de Python 3.12 para garantizar la compatibilidad con Django 6.0:
 
    Bash

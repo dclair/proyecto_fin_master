@@ -41,8 +41,17 @@ Este documento registra el diseño, componentes y reglas de negocio del sistema 
   - Muestra un panel de solicitudes pendientes (icono de campana/usuario rojo).
   - Muestra un panel para añadir usuarios (buscador en vivo contra `/api/chat/users/`).
   - Muestra el botón de Papelera (`Trash2`) para eliminar el grupo.
+- **UI Compartida en Grupos (`MessageArea.jsx`)**:
+  - Muestra un panel (Dropdown) con la lista completa de Participantes y su rol (Admin/User), incluyendo un buscador dinámico en tiempo real para filtrar usuarios de forma ágil por nombre o username.
 
-## 4. Tecnologías y Tráfico
+## 4. Integración Automática con Quedadas/Eventos (Django Signals)
+- **Automatización de Grupos (`posts/signals.py`)**: 
+  - Al crear un Evento marcado como `is_online=True`, se crea automáticamente una `Conversation` de tipo `is_group=True` (Nombre: "Título del Evento - Creador").
+  - El campo `chat_group` en el modelo `Event` (Relación OneToOneField) guarda el enlace a esta conversación.
+  - Al apuntarse a un evento mediante la acción de asistencia (y especificando modalidad `online`), el usuario es añadido automáticamente al grupo del chat correspondiente.
+  - Al desapuntarse del evento online, la señal `post_delete` elimina automáticamente al usuario del grupo (el admin está protegido contra auto-expulsiones accidentales).
+
+## 5. Tecnologías y Tráfico
 - **REST API**: Django REST Framework. Protegido por autenticación basada en sesiones de Django (CSRF Token presente en cookies).
 - **Tiempo Real**: Django Channels (WebSockets) implementado en el hook `useWebSocket.js`.
   - El formato de envío soporta tanto acciones estándar de mensajes (`action: 'chat_message'`) transmitiendo el objeto completo (`full_message`) para inyectar archivos adjuntos directamente sin recargar.
