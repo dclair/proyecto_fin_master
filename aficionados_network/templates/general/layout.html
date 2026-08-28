@@ -1,5 +1,6 @@
 {% load static %}
 {% load django_vite %}
+{% load sidebar_tags %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -54,65 +55,7 @@
         <div class="row">
             
             {% if request.user.is_authenticated %}
-                <div class="col-12 d-lg-none mb-4">
-                    <h6 class="sidebar-label px-1">MIS TERAPIAS</h6>
-                    <div class="mobile-hobby-wrapper position-relative">
-                        <div class="mobile-hobby-scroll d-flex pb-2 pt-2">
-
-                            {% for hobby in my_hobbies %}
-                                <a href="{% url 'posts:hobby_hub' hobby.slug %}" class="mobile-hobby-pill position-relative text-decoration-none {% if current_hub == hobby %}active{% endif %}" title="{{ hobby.name }}">
-                                    <div class="hobby-dot-sm bg-hubs flex-shrink-0">
-                                        {{ hobby.name|slice:":1"|upper }}
-                                    </div>
-                                    <span class="text-truncate d-inline-block" style="max-width: 130px;">{{ hobby.name }}</span>
-                                    
-                                    {% if hobby.match_count > 0 %}
-                                        <span class="badge rounded-pill bg-info text-dark mobile-hobby-badge">
-                                            {{ hobby.match_count }}
-                                        </span>
-                                    {% endif %}
-                                </a>
-                            {% empty %}
-                                <small class="text-muted">Sin terapias</small>
-                            {% endfor %}
-                        </div>
-
-                        <!-- Flechas indicadoras (solo si hay varios elementos) -->
-                        {% if my_hobbies|length >= 2 %}
-                        <div class="scroll-arrow-left scroll-arrow-hidden">
-                            <i class="bi bi-chevron-left"></i>
-                        </div>
-                        <div class="scroll-arrow-right">
-                            <i class="bi bi-chevron-right"></i>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <aside class="col-md-2 d-none d-md-block">
-                    <div class="sticky-sidebar">
-                        <h6 class="sidebar-label">MIS GRUPOS</h6>
-                        <div class="list-group sidebar-group shadow-sm">
-                            {% for hobby in my_hobbies %}
-                                <a href="{% url 'posts:hobby_hub' hobby.slug %}" 
-                                   class="list-group-item list-group-item-action sidebar-item d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center" style="min-width: 0;">
-                                        <div class="hobby-dot bg-hubs flex-shrink-0">
-                                            {{ hobby.name|slice:":1"|upper }}
-                                        </div>
-                                        <span class="hobby-name" title="{{ hobby.name }}">{{ hobby.name }}</span>
-                                    </div>
-                                    
-                                    {% if hobby.match_count > 0 %}
-                                        <span class="badge rounded-pill bg-info text-dark match-pulse sidebar-badge">
-                                            {{ hobby.match_count }}
-                                        </span>
-                                    {% endif %}
-                                </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </aside>
+                {% render_terapias_sidebar %}
             {% endif %}
 
             <div class="col-12 {% if request.user.is_authenticated %}col-md-10{% endif %}">

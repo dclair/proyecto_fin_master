@@ -261,6 +261,14 @@ class Event(SoftDeleteModel):
     image = models.ImageField(
         upload_to="events/", null=True, blank=True, verbose_name="Imagen del evento"
     )
+    chat_group = models.OneToOneField(
+        'chat.Conversation', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='event_linked',
+        verbose_name="Grupo de Chat"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     is_canceled = models.BooleanField(default=False, verbose_name="¿Cancelado?")
 

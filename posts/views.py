@@ -14,7 +14,7 @@ from django.views import View
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from .models import Posts, Event, Hobby
+from .models import Posts, Event, Hobby, EventAttendance
 from .forms import PostCreateForm, CommentForm, EventForm, EventCommentForm
 from notifications.models import Notification
 from django.db.models import Q  # Importante para el buscador
@@ -361,7 +361,10 @@ def toggle_attendance(request, event_id):
     )
 
     if request.user in event.participants.all():
-        event.participants.remove(request.user)
+        # Usar .delete() explícito en la instancia para disparar post_delete
+        attendance = EventAttendance.objects.filter(event=event, user=request.user).first()
+        if attendance:
+            attendance.delete()
         messages.info(request, "Ya no estás apuntado.")
         # USAMOS LA FUNCIÓN MAESTRA
         send_hubs_email(
@@ -376,7 +379,12 @@ def toggle_attendance(request, event_id):
         if attendance_type == 'physical' and physical_count >= event.max_participants:
             messages.error(request, "El aforo presencial para este evento está lleno.")
         else:
-            event.participants.add(request.user, through_defaults={'attendance_type': attendance_type})
+            # Usar .create() explícito para disparar post_save y enganchar la señal del chat
+            EventAttendance.objects.create(
+                event=event, 
+                user=request.user, 
+                attendance_type=attendance_type
+            )
             tipo_msg = "presencial" if attendance_type == 'physical' else "online"
             messages.success(request, f"¡Te has apuntado de forma {tipo_msg}!")
             # USAMOS LA FUNCIÓN MAESTRA

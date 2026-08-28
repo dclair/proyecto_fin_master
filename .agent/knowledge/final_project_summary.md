@@ -10,6 +10,8 @@ Este documento sirve como anclaje de conocimiento para cualquier agente que anal
    - Envío de adjuntos multimedia (subida vía REST API y notificación por WebSocket).
    - Eliminación de mensajes: "Para todos" (física/cascade) y "Para mí" (lógica por `hidden_by`).
    - Integración nativa en `ChatApp.jsx` embebida en las templates de Django.
+   - **NUEVO**: Panel dinámico de Participantes con buscador en tiempo real dentro de los chats grupales.
+   - **NUEVO**: Integración Automática con Quedadas (Events). Al crear un evento online, se genera un Grupo de Chat. Al unirse al evento, los usuarios son sincronizados automáticamente como participantes del grupo mediante Django Signals (`post_save`, `post_delete`).
 
 2. **Autenticación e Identidad:**
    - Custom User Model (donde el Email es único y utilizado para buscar usuarios).
@@ -39,7 +41,7 @@ Este documento sirve como anclaje de conocimiento para cualquier agente que anal
 
 ## Detalles de Arquitectura y Despliegue
 - El proyecto corre sobre Python 3.12 y Django 6.0.
-- El chat está compilado con Vite. Los assets se generan en `static/chat/`.
+- El chat está compilado con Vite. Los assets se generan en `static/chat/`. Para el entorno de desarrollo se configuró el script `start_dev.sh` que levanta simultáneamente Django, Vite y Redis usando Tmux.
 - La Base de Datos principal en producción es MySQL/MariaDB (`DB_ENGINE=mysql`).
 - Las dependencias asíncronas para el chat están limitadas en versiones (`redis<5.0.0`) para evitar bugs documentados.
 - **Modo Oscuro:** Gestionado de forma global en Django vía `[data-bs-theme="dark"]` en `style.css`. La aplicación de Chat en React está explícitamente aislada en modo claro (`data-bs-theme="light"`) para evitar colisiones de diseño con sus componentes hardcodeados.

@@ -26,27 +26,28 @@ if [ $? != 0 ]; then
   # Crear nueva sesión en background (desatachada) con la primera ventana llamada "Servicios"
   tmux new-session -d -s $SESSION_NAME -n "Servicios" -c "$PROJECT_DIR"
   
-  # --- PANEL IZQUIERDO: Servidor Django ---
-  tmux send-keys -t $SESSION_NAME:0 "cd '$PROJECT_DIR' && source env/bin/activate" C-m
-  tmux send-keys -t $SESSION_NAME:0 "python manage.py runserver" C-m
+  # --- PANEL 0: Servidor Django ---
+  tmux send-keys -t $SESSION_NAME:0.0 "cd '$PROJECT_DIR' && source env/bin/activate" C-m
+  tmux send-keys -t $SESSION_NAME:0.0 "python manage.py runserver" C-m
   
-  # Dividir la ventana horizontalmente (50/50)
-  tmux split-window -h -t $SESSION_NAME:0 -c "$PROJECT_DIR"
+  # --- PANEL 1: Vite (React Frontend) ---
+  # Dividimos horizontalmente. Queda a la derecha.
+  tmux split-window -h -t $SESSION_NAME:0.0 -c "$PROJECT_DIR/frontend"
+  tmux send-keys -t $SESSION_NAME:0.1 "npm run dev" C-m
   
-  # --- PANEL DERECHO (Arriba): Consola libre para git, tests o comandos ---
-  tmux send-keys -t $SESSION_NAME:0.1 "cd '$PROJECT_DIR' && source env/bin/activate" C-m
-  tmux send-keys -t $SESSION_NAME:0.1 "clear" C-m
-  tmux send-keys -t $SESSION_NAME:0.1 "echo '⚡ Terminal libre con entorno virtual activado. ¡A codear!'" C-m
+  # --- PANEL 2: Redis ---
+  # Dividimos verticalmente el panel izquierdo. Queda abajo a la izquierda.
+  tmux split-window -v -t $SESSION_NAME:0.0 -c "$PROJECT_DIR"
+  tmux send-keys -t $SESSION_NAME:0.1 "redis-server" C-m
   
-  # Dividir el panel derecho verticalmente (si tenés Redis, Celery, o querés ver logs de BD, lo hacés acá)
-  tmux split-window -v -t $SESSION_NAME:0.1 -c "$PROJECT_DIR"
+  # --- VENTANA 2 (Consola libre) ---
+  tmux new-window -t $SESSION_NAME:1 -n "Terminal" -c "$PROJECT_DIR"
+  tmux send-keys -t $SESSION_NAME:1.0 "cd '$PROJECT_DIR' && source env/bin/activate" C-m
+  tmux send-keys -t $SESSION_NAME:1.0 "clear" C-m
+  tmux send-keys -t $SESSION_NAME:1.0 "echo '⚡ Terminal libre lista para usar. Vite, Redis y Django están en la ventana 0 (Ctrl+b, 0)'" C-m
   
-  # --- PANEL DERECHO (Abajo): Log de base de datos o consola extra ---
-  tmux send-keys -t $SESSION_NAME:0.2 "cd '$PROJECT_DIR'" C-m
-  tmux send-keys -t $SESSION_NAME:0.2 "clear" C-m
-  tmux send-keys -t $SESSION_NAME:0.2 "echo '⚡ Acá podés levantar Redis, Celery, o usarlo para ver logs de base de datos.'" C-m
-  
-  # Seleccionar el panel izquierdo (Django) como el principal activo
+  # Seleccionar el panel izquierdo (Django) en la primera ventana
+  tmux select-window -t $SESSION_NAME:0
   tmux select-pane -t $SESSION_NAME:0.0
 fi
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Send, ArrowLeft, Smile, UserPlus, Check, UserCheck, Trash2, Paperclip, X, FileText, Image as ImageIcon, Video, Mic, Trash } from 'lucide-react';
+import { Send, ArrowLeft, Smile, UserPlus, Check, UserCheck, Trash2, Paperclip, X, FileText, Image as ImageIcon, Video, Mic, Trash, Users } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 
 const renderMessageWithLinks = (text) => {
@@ -51,10 +51,15 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
   const [pendingRequests, setPendingRequests] = useState([]);
   const [showPending, setShowPending] = useState(false);
 
+  // States for participants
+  const [showParticipants, setShowParticipants] = useState(false);
+  const [participantSearchQuery, setParticipantSearchQuery] = useState('');
+
   const messagesEndRef = useRef(null);
   const emojiPickerRef = useRef(null);
   const addMemberRef = useRef(null);
   const pendingRef = useRef(null);
+  const participantsRef = useRef(null);
 
   const me = activeConversation?.participants?.find(p => p.username === currentUsername);
   const isAdmin = isGroup && me && activeConversation.admin === me.id;
@@ -122,6 +127,20 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
     }
     return () => document.removeEventListener('mousedown', handleClickOutsidePending);
   }, [showPending]);
+
+  // Cerrar panel de participantes al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutsideParticipants = (event) => {
+      if (participantsRef.current && !participantsRef.current.contains(event.target)) {
+        setShowParticipants(false);
+        setParticipantSearchQuery('');
+      }
+    };
+    if (showParticipants) {
+      document.addEventListener('mousedown', handleClickOutsideParticipants);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutsideParticipants);
+  }, [showParticipants]);
 
   const handleAddUsers = () => {
     if (selectedUsersToAdd.length === 0) return;
@@ -410,6 +429,18 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
         </div>
         
         <div className="d-flex ms-auto gap-2">
+          {isGroup && (
+            <button 
+              className="btn btn-sm btn-link text-primary p-0 d-flex align-items-center"
+              onClick={() => setShowParticipants(!showParticipants)}
+              title="Ver participantes"
+              style={{ textDecoration: 'none' }}
+            >
+              <Users size={18} />
+              <span className="ms-1" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>{activeConversation?.participants?.length || 0}</span>
+            </button>
+          )}
+
           {(!isGroup || isAdmin) && (
             <button 
               className="btn btn-sm btn-link text-danger p-0"
@@ -461,6 +492,43 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {showParticipants && isGroup && (
+          <div ref={participantsRef} className="position-absolute shadow rounded p-2" style={{ top: '100%', right: '10px', width: '250px', zIndex: 1000, border: '1px solid #ccc', backgroundColor: 'white' }}>
+            <div className="text-dark fw-bold mb-2" style={{fontSize: '0.85rem'}}>Participantes ({activeConversation?.participants?.length || 0})</div>
+            <input 
+              type="text" 
+              className="form-control form-control-sm mb-2" 
+              placeholder="Buscar participante..." 
+              value={participantSearchQuery}
+              onChange={(e) => setParticipantSearchQuery(e.target.value)}
+            />
+            <div className="list-group list-group-flush mb-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
+              {activeConversation?.participants?.filter(p => {
+                const query = participantSearchQuery.toLowerCase();
+                const fullName = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase();
+                const username = (p.username || '').toLowerCase();
+                return fullName.includes(query) || username.includes(query);
+              }).map(p => (
+                <div key={p.id} className="list-group-item py-1 px-2 d-flex align-items-center border-0">
+                  <img src={p.profile_picture_url} alt="" className="rounded-circle me-2" style={{width: '24px', height: '24px', objectFit: 'cover'}} />
+                  <span className="text-truncate text-dark flex-grow-1" style={{fontSize: '0.8rem'}}>
+                    {p.first_name || p.username}
+                    {activeConversation.admin === p.id && <span className="ms-1 badge bg-primary" style={{fontSize: '0.6rem'}}>Admin</span>}
+                  </span>
+                </div>
+              ))}
+              {activeConversation?.participants?.filter(p => {
+                const query = participantSearchQuery.toLowerCase();
+                const fullName = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase();
+                const username = (p.username || '').toLowerCase();
+                return fullName.includes(query) || username.includes(query);
+              }).length === 0 && (
+                <div className="text-muted" style={{fontSize: '0.8rem'}}>No se encontraron participantes.</div>
+              )}
             </div>
           </div>
         )}

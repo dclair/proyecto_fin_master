@@ -89,26 +89,7 @@ class HomeView(TemplateView):
         upcoming_events = Event.objects.none()
 
         if user.is_authenticated and hasattr(user, "profile"):
-            my_hobbies = user.profile.hobbies.all()  # Tus terapias para la sidebar
-
-            # --- LÓGICA DE NIVELES PARA LA SIDEBAR (NUEVO) ---
-            user_levels = UserHobby.objects.filter(profile=user.profile).values(
-                "hobby_id", "level"
-            )
-            levels_map = {item["hobby_id"]: item["level"] for item in user_levels}
-
-            for hobby in my_hobbies:
-                u_level = levels_map.get(hobby.id)
-                hobby.match_count = (
-                    Event.objects.filter(
-                        hobby=hobby, **{"event_date__gte": now, "is_canceled": False}
-                    )
-                    .filter(
-                        Q(level="all") | Q(level=u_level) if u_level else Q(level="all")
-                    )
-                    .count()
-                )
-            context["my_hobbies"] = my_hobbies  # Esta es la variable que usa tu sidebar
+            my_hobbies = user.profile.hobbies.all()
 
             if my_hobbies.exists():
                 personal_filter = Q(hobby__in=my_hobbies) | Q(organizer=user)
@@ -124,8 +105,6 @@ class HomeView(TemplateView):
                     "event_date"
                 )[:5]
                 context["filtered_by_hobbies"] = False
-
-            context["user_levels_map"] = levels_map
         context["upcoming_events"] = upcoming_events
         return context
 
