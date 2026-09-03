@@ -180,7 +180,7 @@ class ProfileUpdateView(LoginRequiredMixin, View):
         profile_form = ProfileUpdateForm(instance=profile)
 
         current_hobbies = UserHobby.objects.filter(profile=profile)
-        all_hobbies = Hobby.objects.all()
+        all_hobbies = Hobby.objects.exclude(slug="agora")
 
         return render(
             request,
@@ -224,6 +224,10 @@ def add_hobby(request):
         if form.is_valid():
             user_hobby = form.save(commit=False)
             user_hobby.profile = request.user.profile
+            if user_hobby.hobby.slug == "agora":
+                messages.info(request, "La terapia Ágora ya forma parte oficial de tu perfil.")
+                return redirect("profiles:profile_edit")
+
             if not UserHobby.objects.filter(
                 profile=user_hobby.profile, hobby=user_hobby.hobby
             ).exists():
@@ -238,6 +242,12 @@ def add_hobby(request):
 @login_required
 def delete_hobby(request, hobby_id):
     user_hobby = get_object_or_404(UserHobby, id=hobby_id, profile=request.user.profile)
+    if user_hobby.hobby.slug == "agora":
+        messages.warning(
+            request,
+            "La terapia Ágora es el canal oficial de la asociación y no puede ser eliminada.",
+        )
+        return redirect("profiles:profile_edit")
     user_hobby.delete()
     messages.success(request, "Terapia eliminada.")
     return redirect("profiles:profile_edit")

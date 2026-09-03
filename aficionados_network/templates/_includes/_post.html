@@ -1,7 +1,7 @@
 <div class="container-fluid px-0">
     <div class="row g-4">
         {% for post in last_posts %}
-        <div class="col-12 col-md-6 col-lg-3">
+        <div class="{{ card_col_class|default:'col-12 col-md-6 col-lg-3' }}">
             <div class="card h-100 shadow-sm border-0 card-hubs rounded-4 overflow-hidden">
 
                 <div class="card-header bg-white py-2 border-bottom-0">
@@ -31,10 +31,17 @@
                         {% endif %}
 
                         {% if post.category %}
-                            <span class="badge-hobby-post ms-1">
-                                <i class="bi bi-tag-fill text-hubs"></i>
-                                <strong class="text-hubs">{{ post.category.name|upper }}</strong>
-                            </span>
+                            {% if post.category.slug == 'agora' %}
+                                <span class="badge-agora ms-1">
+                                    <i class="bi bi-shield-fill-check"></i>
+                                    <strong>{{ post.category.name|upper }}</strong>
+                                </span>
+                            {% else %}
+                                <span class="badge-hobby-post ms-1">
+                                    <i class="bi bi-tag-fill text-hubs"></i>
+                                    <strong class="text-hubs">{{ post.category.name|upper }}</strong>
+                                </span>
+                            {% endif %}
                         {% endif %}
 
                         <div class="ms-auto d-flex align-items-center gap-2">
@@ -66,7 +73,17 @@
                     </div>
                 </div>
 
-                {% if post.video %}
+                {% if post.image %}
+                <div class="ratio ratio-4x3"> 
+                    <a href="{% url 'posts:post_detail' post.pk %}">
+                        <img src="{{ post.image.url }}" 
+                             class="card-img-top"
+                             loading="lazy"
+                             style="object-fit: cover;"
+                             alt="{{ post.title|default:'Publicación' }}">
+                    </a>
+                </div>
+                {% elif post.video %}
                 <div class="ratio ratio-4x3 bg-dark position-relative">
                     {% if user.is_authenticated %}
                         <video src="{{ post.video.url }}" controls class="w-100 h-100" style="object-fit: cover;"></video>
@@ -79,28 +96,20 @@
                         </a>
                     {% endif %}
                 </div>
-                {% elif post.video_url %}
+                {% elif post.document %}
                 <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center border-bottom position-relative">
-                    {% if user.is_authenticated %}
-                        <a href="{{ post.video_url }}" target="_blank" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
-                            <i class="bi bi-play-circle-fill text-danger mb-2" style="font-size: 3rem;"></i>
-                            <span class="fw-bold text-dark">Ver vídeo externo</span>
-                        </a>
-                    {% else %}
-                        <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
-                            <i class="bi bi-play-circle-fill text-danger mb-2" style="font-size: 3rem;"></i>
-                            <span class="fw-bold text-dark">Ver vídeo externo</span>
-                        </a>
-                    {% endif %}
+                    <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
+                        <i class="bi bi-file-earmark-pdf-fill text-danger mb-2" style="font-size: 3rem;"></i>
+                        <span class="fw-bold text-dark small">Documento PDF</span>
+                        <span class="badge bg-danger-subtle text-danger extra-small mt-1">Artículo Extenso</span>
+                    </a>
                 </div>
-                {% elif post.image %}
-                <div class="ratio ratio-4x3"> 
-                    <a href="{% url 'posts:post_detail' post.pk %}">
-                        <img src="{{ post.image.url }}" 
-                             class="card-img-top"
-                             loading="lazy"
-                             style="object-fit: cover;"
-                             alt="{{ post.title }}">
+                {% elif post.external_url %}
+                <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center border-bottom position-relative">
+                    <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
+                        <i class="bi bi-link-45deg text-primary mb-2" style="font-size: 3rem;"></i>
+                        <span class="fw-bold text-dark small">Enlace Externo</span>
+                        <span class="badge bg-primary-subtle text-primary extra-small mt-1">Recurso de interés</span>
                     </a>
                 </div>
                 {% endif %}
@@ -108,8 +117,26 @@
                 <div class="card-body p-3 d-flex flex-column">
                     <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-dark">
                         <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">{{ post.title|default:"" }}</h6>
-                        <p class="small text-muted mb-3">{{ post.caption|truncatechars:60 }}</p>
+                        <p class="small text-muted mb-2">{{ post.plain_text_caption|truncatechars:60 }}</p>
                     </a>
+
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        {% if post.document %}
+                            <span class="badge bg-danger-subtle text-danger extra-small" title="Documento PDF adjunto">
+                                <i class="bi bi-file-earmark-pdf-fill me-1"></i>PDF
+                            </span>
+                        {% endif %}
+                        {% if post.external_url %}
+                            <span class="badge bg-primary-subtle text-primary extra-small" title="Enlace externo">
+                                <i class="bi bi-link-45deg me-1"></i>Enlace
+                            </span>
+                        {% endif %}
+                        {% if post.video and post.image %}
+                            <span class="badge bg-dark-subtle text-dark extra-small" title="Vídeo incluido">
+                                <i class="bi bi-camera-video me-1"></i>Vídeo
+                            </span>
+                        {% endif %}
+                    </div>
                     
                     <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
                         <div class="d-flex gap-3">

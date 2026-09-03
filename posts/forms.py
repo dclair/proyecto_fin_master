@@ -20,8 +20,17 @@ class PostCreateForm(forms.ModelForm):
 
     class Meta:
         model = Posts
-        # Añadimos 'location' y organizamos el orden de aparición
-        fields = ["title", "category", "location", "caption", "image", "video", "video_url"]
+        # Añadimos 'location', 'external_url' y 'document'
+        fields = [
+            "title",
+            "category",
+            "location",
+            "caption",
+            "image",
+            "video",
+            "external_url",
+            "document",
+        ]
 
         widgets = {
             "title": forms.TextInput(
@@ -48,11 +57,18 @@ class PostCreateForm(forms.ModelForm):
                     "id": "id_video",
                 }
             ),
-            "video_url": forms.URLInput(
+            "external_url": forms.URLInput(
                 attrs={
-                    "class": "form-control validate-media",
-                    "placeholder": "https://www.youtube.com/watch?v=...",
-                    "id": "id_video_url",
+                    "class": "form-control",
+                    "placeholder": "https://ejemplo.com, enlace a web, vídeo o artículo...",
+                    "id": "id_external_url",
+                }
+            ),
+            "document": forms.FileInput(
+                attrs={
+                    "class": "form-control d-none",
+                    "accept": ".pdf,application/pdf",
+                    "id": "id_document",
                 }
             ),
         }
@@ -63,15 +79,35 @@ class PostCreateForm(forms.ModelForm):
             },
         }
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        qs = self.fields["category"].queryset.order_by("name")
+        if not (self.user and (self.user.is_staff or self.user.is_superuser)):
+            qs = qs.exclude(slug="agora")
+        self.fields["category"].queryset = qs
+        self.fields["category"].empty_label = "Selecciona o busca una terapia..."
+
+    def clean_category(self):
+        category = self.cleaned_data.get("category")
+        if category and category.slug == "agora":
+            if not (self.user and (self.user.is_staff or self.user.is_superuser)):
+                raise forms.ValidationError(
+                    "Solo el personal de dirección o administración (staff) puede publicar bajo la categoría Ágora."
+                )
+        return category
+
     def clean(self):
         cleaned_data = super().clean()
+        caption = cleaned_data.get("caption")
         image = cleaned_data.get("image")
         video = cleaned_data.get("video")
-        video_url = cleaned_data.get("video_url")
+        external_url = cleaned_data.get("external_url")
+        document = cleaned_data.get("document")
 
-        if not image and not video and not video_url:
+        if not image and not video and not external_url and not document:
             raise forms.ValidationError(
-                "Debes subir una foto, un vídeo o proporcionar un enlace de vídeo para publicar."
+                "Debes subir una foto, un vídeo, un enlace o un documento PDF para publicar."
             )
         return cleaned_data
 
@@ -158,6 +194,24 @@ class EventForm(forms.ModelForm):
             ),
             "level": forms.Select(attrs={"class": "form-select"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        qs = self.fields["hobby"].queryset.order_by("name")
+        if not (self.user and (self.user.is_staff or self.user.is_superuser)):
+            qs = qs.exclude(slug="agora")
+        self.fields["hobby"].queryset = qs
+        self.fields["hobby"].empty_label = "Selecciona o busca una terapia..."
+
+    def clean_hobby(self):
+        hobby = self.cleaned_data.get("hobby")
+        if hobby and hobby.slug == "agora":
+            if not (self.user and (self.user.is_staff or self.user.is_superuser)):
+                raise forms.ValidationError(
+                    "Solo el personal de dirección o administración (staff) puede crear eventos bajo la categoría Ágora."
+                )
+        return hobby
 
     def clean(self):
         cleaned_data = super().clean()

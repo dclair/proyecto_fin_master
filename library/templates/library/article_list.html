@@ -46,12 +46,18 @@
                         </div>
                     {% endif %}
                     <div class="card-body">
-                        <span class="badge bg-primary-subtle text-primary mb-2">{{ article.hobby.name }}</span>
+                        {% if article.hobby.slug == 'agora' %}
+                            <span class="badge-agora mb-2">
+                                <i class="bi bi-shield-fill-check"></i> {{ article.hobby.name }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-primary-subtle text-primary mb-2">{{ article.hobby.name }}</span>
+                        {% endif %}
                         <h5 class="card-title fw-bold text-truncate-custom"><a href="{{ article.get_absolute_url }}" class="text-decoration-none text-dark">{{ article.title }}</a></h5>
                         <div class="small text-muted mb-3 d-flex align-items-center">
                             <i class="bi bi-person-circle me-1"></i> {{ article.author.username }} &bull; {{ article.created_at|date:"d M Y" }}
                         </div>
-                        <p class="card-text text-muted small">{{ article.content|striptags|truncatewords:20 }}</p>
+                        <p class="card-text text-muted small">{{ article.plain_text_summary|truncatewords:20 }}</p>
                     </div>
                     <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
                         <small class="text-muted"><i class="bi bi-eye"></i> {{ article.views_count }}</small>

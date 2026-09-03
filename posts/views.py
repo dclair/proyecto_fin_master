@@ -17,7 +17,7 @@ from django.utils import timezone
 from .models import Posts, Event, Hobby, EventAttendance
 from .forms import PostCreateForm, CommentForm, EventForm, EventCommentForm
 from notifications.models import Notification
-from django.db.models import Q  # Importante para el buscador
+from django.db.models import Q, Case, When, Value, IntegerField
 from django.db.models import Exists, OuterRef
 from itertools import chain
 from operator import attrgetter
@@ -92,6 +92,11 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("home")
     login_url = "login"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -127,6 +132,50 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
+
+
+# --- VISTA PARA EXPLORAR TODAS LAS PUBLICACIONES ---
+class PostListView(LoginRequiredMixin, ListView):
+    model = Posts
+    template_name = "posts/post_list.html"
+    context_object_name = "posts"
+    login_url = "login"
+    paginate_by = 12
+
+    def get_queryset(self):
+        is_agora = Case(
+            When(category__slug="agora", then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField(),
+        )
+        queryset = (
+            Posts.objects.select_related("user", "user__profile", "category")
+            .prefetch_related("likes", "comments")
+            .annotate(is_agora=is_agora)
+            .order_by("-is_agora", "-created_at")
+        )
+        search_query = self.request.GET.get("q")
+        hobby_id = self.request.GET.get("hobby")
+
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query)
+                | Q(caption__icontains=search_query)
+                | Q(user__username__icontains=search_query)
+                | Q(location__icontains=search_query)
+            )
+        if hobby_id and hobby_id != "all":
+            queryset = queryset.filter(category_id=hobby_id)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["hobbies"] = Hobby.objects.all().order_by("name")
+        context["current_q"] = self.request.GET.get("q", "")
+        context["current_hobby"] = self.request.GET.get("hobby", "")
+        return context
+
 
 
 # --- VISTA DE DETALLE DEL POST ---
@@ -285,6 +334,11 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = PostCreateForm
     template_name = "posts/post_update.html"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def test_func(self):
         # Solo el autor puede editar
         post = self.get_object()
@@ -321,6 +375,11 @@ class EventCreateView(LoginRequiredMixin, CreateView):
     template_name = "posts/event_form.html"
     success_url = reverse_lazy("posts:event_list")
     login_url = "login"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
         # 1. Asignamos al usuario como organizador
@@ -522,6 +581,11 @@ class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Event
     form_class = EventForm  # Usamos el formulario con el que creamos el evento
     template_name = "posts/event_form.html"  # Reutilizamos el mismo de crear
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def test_func(self):
         # Solo el organizador puede editar
@@ -794,7 +858,7 @@ def clicks_gallery(request):
         Posts.objects.filter(
             Q(image__isnull=False) & ~Q(image="") |
             Q(video__isnull=False) & ~Q(video="") |
-            Q(video_url__isnull=False) & ~Q(video_url="")
+            Q(external_url__isnull=False) & ~Q(external_url="")
         ).select_related("user")
     )
 

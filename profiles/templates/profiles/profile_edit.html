@@ -126,17 +126,27 @@
             >
               <div>
                 <span class="fw-bold text-dark">{{ uh.hobby.name }}</span>
-                <small class="badge bg-primary ms-2"
-                  >{{ uh.get_level_display }}</small
-                >
+                {% if uh.hobby.slug == 'agora' %}
+                  <small class="badge bg-danger-subtle text-danger border border-danger-subtle ms-2">
+                    <i class="bi bi-shield-check me-1"></i>Canal Oficial
+                  </small>
+                {% else %}
+                  <small class="badge bg-primary ms-2">{{ uh.get_level_display }}</small>
+                {% endif %}
               </div>
-              <a
-                href="{% url 'profiles:delete_hobby' uh.id %}"
-                class="text-danger"
-                title="Eliminar terapia"
-              >
-                <i class="bi bi-trash3-fill"></i>
-              </a>
+              {% if uh.hobby.slug == 'agora' %}
+                <span class="text-muted extra-small" title="Canal oficial de la asociación. No puede ser eliminado.">
+                  <i class="bi bi-lock-fill text-muted"></i>
+                </span>
+              {% else %}
+                <a
+                  href="{% url 'profiles:delete_hobby' uh.id %}"
+                  class="text-danger"
+                  title="Eliminar terapia"
+                >
+                  <i class="bi bi-trash3-fill"></i>
+                </a>
+              {% endif %}
             </div>
             {% empty %}
             <p class="text-muted small text-center my-3">

@@ -23,14 +23,27 @@ class ArticleForm(forms.ModelForm):
         }
         
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         self.fields['hobby'].required = False
+        if not (self.user and (self.user.is_staff or self.user.is_superuser)):
+            self.fields['hobby'].queryset = self.fields['hobby'].queryset.exclude(slug="agora")
         
     def clean(self):
         cleaned_data = super().clean()
         hobby = cleaned_data.get('hobby')
         custom_hobby = cleaned_data.get('custom_hobby')
         
+        if not (self.user and (self.user.is_staff or self.user.is_superuser)):
+            if hobby and hobby.slug == "agora":
+                raise forms.ValidationError(
+                    "Solo la dirección y administración (staff) pueden publicar bajo la categoría Ágora."
+                )
+            if custom_hobby and slugify(custom_hobby) == "agora":
+                raise forms.ValidationError(
+                    "Solo la dirección y administración (staff) pueden crear publicaciones bajo el nombre Ágora."
+                )
+
         if not hobby and not custom_hobby:
             raise forms.ValidationError("Debes seleccionar una terapia existente o escribir una nueva.")
             

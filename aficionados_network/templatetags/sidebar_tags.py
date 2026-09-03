@@ -41,6 +41,16 @@ def render_terapias_sidebar(context):
             .annotate(count=Count("id"))
         )
         counts_map = {item["hobby_id"]: item["count"] for item in match_counts}
+
+        # Resiliencia / Desarrollo: si no hay eventos futuros activos, contar eventos activos no cancelados que hagan match
+        if not any(counts_map.values()):
+            fallback_counts = (
+                Event.objects.filter(is_canceled=False)
+                .filter(event_q)
+                .values("hobby_id")
+                .annotate(count=Count("id"))
+            )
+            counts_map = {item["hobby_id"]: item["count"] for item in fallback_counts}
     else:
         counts_map = {}
 

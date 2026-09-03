@@ -26,8 +26,7 @@ from django.db import transaction
 from django.conf import settings
 from django.core.mail import send_mail
 from django.views.decorators.http import require_http_methods
-from django.utils.decorators import method_decorator
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, IntegerField
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -52,7 +51,8 @@ from profiles.models import (
     Follow,
     UserHobby,
     Hobby,
-)  # Asegura estos imports
+)
+from library.models import Article
 
 
 class HomeView(TemplateView):
@@ -63,29 +63,54 @@ class HomeView(TemplateView):
         user = self.request.user
         now = timezone.now()
 
-        # --- TU LÓGICA DE POSTS ORIGINAL ---
+        # 1. --- ÚLTIMAS 10 PUBLICACIONES (Priorizando Ágora y luego por fecha) ---
+        post_is_agora = Case(
+            When(category__slug="agora", then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField(),
+        )
+        posts_base_qs = (
+            Posts.objects.select_related("user", "user__profile", "category")
+            .prefetch_related("likes", "comments")
+            .annotate(is_agora=post_is_agora)
+        )
+
         last_posts = Posts.objects.none()
         if user.is_authenticated:
             has_profile = hasattr(user, "profile")
             context["has_profile"] = has_profile
             if not has_profile:
-                last_posts = Posts.objects.all().order_by("-created_at")[:20]
+                last_posts = posts_base_qs.order_by("-is_agora", "-created_at")[:10]
             else:
                 profile = user.profile
                 seguidos = Follow.objects.filter(follower=profile).values_list(
                     "following__user", flat=True
                 )
-                last_posts = Posts.objects.filter(user__in=seguidos).order_by(
-                    "-created_at"
-                )[:20]
+                my_hobbies = profile.hobbies.all()
+                feed_filter = (
+                    Q(category__in=my_hobbies)
+                    | Q(user__in=seguidos)
+                    | Q(user=user)
+                    | Q(category__slug="agora")
+                )
+                last_posts = (
+                    posts_base_qs.filter(feed_filter)
+                    .distinct()
+                    .order_by("-is_agora", "-created_at")[:10]
+                )
                 if not last_posts.exists():
-                    last_posts = Posts.objects.all().order_by("-created_at")[:20]
+                    last_posts = posts_base_qs.order_by("-is_agora", "-created_at")[:10]
         else:
-            last_posts = Posts.objects.all().order_by("-created_at")[:20]
+            last_posts = posts_base_qs.order_by("-is_agora", "-created_at")[:10]
         context["last_posts"] = last_posts
 
-        # --- TU LÓGICA DE EVENTOS ORIGINAL ---
-        base_filter = Q(event_date__gte=now, is_canceled=False)
+        # 2. --- EVENTOS RECOMENDADOS / DESTACADOS (Sidebar horizontal - Priorizando Ágora) ---
+        event_is_agora = Case(
+            When(hobby__slug="agora", then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField(),
+        )
+        base_event_filter = Q(event_date__gte=now, is_canceled=False)
         upcoming_events = Event.objects.none()
 
         if user.is_authenticated and hasattr(user, "profile"):
@@ -94,18 +119,83 @@ class HomeView(TemplateView):
             if my_hobbies.exists():
                 personal_filter = Q(hobby__in=my_hobbies) | Q(organizer=user)
                 upcoming_events = (
-                    Event.objects.filter(base_filter & personal_filter)
-                    .select_related("hobby")
+                    Event.objects.filter(base_event_filter & personal_filter)
+                    .select_related("hobby", "organizer")
+                    .prefetch_related("participants")
                     .distinct()
-                    .order_by("event_date")[:5]
+                    .annotate(is_agora=event_is_agora)
+                    .order_by("-is_agora", "event_date")[:4]
                 )
                 context["filtered_by_hobbies"] = True
-            else:
-                upcoming_events = Event.objects.filter(base_filter).order_by(
-                    "event_date"
-                )[:5]
+
+            if not upcoming_events.exists():
+                upcoming_events = (
+                    Event.objects.filter(base_event_filter)
+                    .select_related("hobby", "organizer")
+                    .prefetch_related("participants")
+                    .annotate(is_agora=event_is_agora)
+                    .order_by("-is_agora", "event_date")[:4]
+                )
                 context["filtered_by_hobbies"] = False
+
+        # Si no hay eventos futuros activos (o usuario anónimo), mostramos los eventos activos más recientes
+        if not upcoming_events.exists():
+            fallback_qs = (
+                Event.objects.filter(is_canceled=False)
+                .select_related("hobby", "organizer")
+                .prefetch_related("participants")
+                .annotate(is_agora=event_is_agora)
+            )
+            if user.is_authenticated and hasattr(user, "profile") and user.profile.hobbies.exists():
+                h_events = fallback_qs.filter(hobby__in=user.profile.hobbies.all()).order_by("-is_agora", "-event_date")[:4]
+                upcoming_events = h_events if h_events.exists() else fallback_qs.order_by("-is_agora", "-event_date")[:4]
+            else:
+                upcoming_events = fallback_qs.order_by("-is_agora", "-event_date")[:4]
+
         context["upcoming_events"] = upcoming_events
+
+        # 3. --- LOS 10 EVENTOS (Pestaña General de Eventos - Priorizando Ágora) ---
+        last_events = (
+            Event.objects.filter(base_event_filter)
+            .select_related("hobby", "organizer")
+            .prefetch_related("participants")
+            .annotate(is_agora=event_is_agora)
+            .order_by("-is_agora", "event_date")[:10]
+        )
+        if not last_events.exists():
+            last_events = (
+                Event.objects.filter(is_canceled=False)
+                .select_related("hobby", "organizer")
+                .prefetch_related("participants")
+                .annotate(is_agora=event_is_agora)
+                .order_by("-is_agora", "-event_date")[:10]
+            )
+        context["last_events"] = last_events
+
+        # 4. --- LAS 10 ÚLTIMAS PUBLICACIONES DE BIBLIOTECA (Pestaña Biblioteca - Priorizando Ágora) ---
+        article_is_agora = Case(
+            When(hobby__slug="agora", then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField(),
+        )
+        last_articles = (
+            Article.objects.select_related("author", "hobby")
+            .annotate(is_agora=article_is_agora)
+            .order_by("-is_agora", "-created_at")[:10]
+        )
+        context["last_articles"] = last_articles
+
+        # 5. --- MAPA DE NIVELES DEL USUARIO (Para badges de match de nivel) ---
+        if user.is_authenticated and hasattr(user, "profile"):
+            user_levels_qs = UserHobby.objects.filter(profile=user.profile).values(
+                "hobby_id", "level"
+            )
+            context["user_levels_map"] = {
+                item["hobby_id"]: item["level"] for item in user_levels_qs
+            }
+        else:
+            context["user_levels_map"] = {}
+
         return context
 
 

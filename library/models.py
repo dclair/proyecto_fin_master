@@ -96,6 +96,22 @@ class Article(models.Model):
         from django.urls import reverse
         return reverse('library:article_detail', kwargs={'slug': self.slug})
 
+    @property
+    def plain_text_summary(self):
+        import html
+        import re
+        if not self.content:
+            return ""
+        # Reemplazar tags de bloque o saltos (<br>, </p>, </h1>...) por espacio
+        text = re.sub(r'<(br|/p|/div|/h[1-6]|/li)[^>]*>', ' ', self.content, flags=re.IGNORECASE)
+        # Quitar todos los tags HTML restantes
+        text = re.sub(r'<[^>]+>', '', text)
+        # Decodificar entidades HTML (&eacute; -> é, &nbsp; -> espacio, etc.)
+        text = html.unescape(text)
+        # Normalizar espacios múltiples
+        return re.sub(r'\s+', ' ', text).strip()
+
+
 class ArticleComment(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments', verbose_name='artículo')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='article_comments', verbose_name='autor')

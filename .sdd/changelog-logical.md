@@ -1,11 +1,43 @@
 # Logical Changelog
 
-**Last reviewed:** 2026-06-01  
+**Last reviewed:** 2026-09-03  
 **Purpose:** semantic change history of the system, independent from Git commits.
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
 
-## 2026-07-08: Security Audit, UI Fixes, and TinyMCE Local Image Upload
+## 2026-09-03: Ágora Channel, Multimedia Posts, Text Sanitization, Post Explorer & Dark Mode Harmonization
+
+**Type:** feature / architecture / UI / security
+**Status:** done
+
+What changed:
+- **Canal Oficial Ágora**:
+  - Auto-asignación automática en registro (`profiles/signals.py`) y migración histórica universal (`0010_assign_agora_to_all_profiles`).
+  - Restricción estricta de selección y publicación para usuarios `is_staff=True` en `PostCreateForm` y `EventForm`.
+  - Badges destacados `.badge-agora` y `.badge-agora-solid` en naranja fuerte (`#ea580c`) con icono de escudo oficial (`bi-shield-fill-check`).
+  - Priorización fija al inicio (índice 0) en Home feeds y explorador mediante anotación `Case/When` (`is_agora`) en el ORM de Django.
+- **Publicaciones Multimedia No Excluyentes y PDF**:
+  - Habilitada la combinación simultánea de imagen, video corto, enlace genérico y documento PDF adjunto con descarga directa y badge representativo.
+- **Exploración de Publicaciones (`/events/posts/`)**:
+  - Creada CBV `PostListView` con búsqueda multi-campo, filtro por terapia y paginación en bloques de 12 elementos.
+  - Añadido botón píldora simétrico *"Ver todas las publicaciones"* en la Home.
+- **Selectores de Terapias con TomSelect**:
+  - Orden alfabético forzado (`Hobby.Meta.ordering = ["name"]`) con buscador predictivo y carga asíncrona resiliente a la hidratación de Vite.
+- **Motor de Sanitización de Texto Plano**:
+  - Propiedades `@property plain_text_summary` (`Article`), `@property plain_text_caption` (`Posts`) y `@property plain_text_description` (`Event`) que decodifican entidades HTML (`&eacute;`, `&nbsp;`), evitan palabras aglutinadas y limpian el texto para tarjetas resumen.
+- **Armonización de Modo Oscuro (Dark Theme)**:
+  - Eliminado `bg-light` en `.recommended-events-box` y `.nav-pills-hubs`.
+  - Aplicados fondos nativos oscuros (`var(--bs-body-bg)`), bordes verde turquesa corporativo (`1.5px solid var(--hubs-primary)`, `#2ba1ab`), textos inactivos en blanco puro (`#ffffff`) y badges con contadores numéricos en color.
+  - Versión de assets CSS incrementada a `?v=2.0`.
+
+Why:
+- Dotar a la asociación de un canal institucional indiscutible con visibilidad 100% garantizada.
+- Evitar fallos de renderizado y entidades HTML crudas generadas por TinyMCE.
+- Ofrecer máxima simetría y coherencia estética en modo oscuro.
+
+Impact:
+- Experiencia de usuario y rendimiento óptimos con suite de tests ampliada (32 tests unitarios pasando en verde).
+
 
 **Type:** feature / bug fix / security
 **Status:** done

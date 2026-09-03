@@ -349,12 +349,16 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm article-card bg-light-hover transition-all">
                         <div class="card-body">
-                            <span class="badge bg-primary-subtle text-primary mb-2 position-relative z-1">{{ article.hobby.name }}</span>
+                            {% if article.hobby.slug == 'agora' %}
+                                <span class="badge-agora mb-2 position-relative z-1"><i class="bi bi-shield-fill-check"></i> {{ article.hobby.name }}</span>
+                            {% else %}
+                                <span class="badge bg-primary-subtle text-primary mb-2 position-relative z-1">{{ article.hobby.name }}</span>
+                            {% endif %}
                             <h6 class="card-title fw-bold text-truncate-custom"><a href="{{ article.get_absolute_url }}" class="text-decoration-none text-dark stretched-link">{{ article.title }}</a></h6>
                             <div class="small text-muted mb-2">
                                 <i class="bi bi-calendar me-1"></i> {{ article.created_at|date:"d M Y" }}
                             </div>
-                            <p class="card-text text-muted small">{{ article.content|striptags|truncatewords:15 }}</p>
+                            <p class="card-text text-muted small">{{ article.plain_text_summary|truncatewords:15 }}</p>
                         </div>
                     </div>
                 </div>

@@ -11,7 +11,7 @@ const CommunityHub = {
 
         if (container && input) {
             container.addEventListener('click', (e) => {
-                if (e.target !== input) input.click();
+                if (e.target !== input && !e.target.closest('#btnRemoveImage')) input.click();
             });
             
             input.addEventListener('change', function() {
@@ -31,11 +31,29 @@ const CommunityHub = {
                         placeholder.classList.add('d-none');
                         preview.innerHTML = `
                             <img id="image-preview" src="${e.target.result}" class="img-fluid rounded shadow-sm mb-2" style="max-height: 250px; width: 100%; object-fit: cover;">
-                            <p class="small text-danger mb-0" style="cursor:pointer;"><i class="bi bi-arrow-repeat me-1"></i>Cambiar foto</p>
+                            <div class="d-flex justify-content-center gap-3 mt-1">
+                                <span class="extra-small text-hubs fw-bold" style="cursor:pointer;"><i class="bi bi-arrow-repeat me-1"></i>Cambiar</span>
+                                <span class="extra-small text-danger fw-bold" id="btnRemoveImage" style="cursor:pointer;"><i class="bi bi-trash3 me-1"></i>Quitar</span>
+                            </div>
                         `;
                         preview.classList.remove('d-none');
+                        const badge = document.getElementById('badgePhoto');
+                        if (badge) badge.classList.remove('d-none');
                     };
                     reader.readAsDataURL(file);
+                }
+            });
+
+            // Delegar evento de quitar imagen
+            preview.addEventListener('click', (e) => {
+                if (e.target.closest('#btnRemoveImage')) {
+                    e.stopPropagation();
+                    input.value = "";
+                    placeholder.classList.remove('d-none');
+                    preview.classList.add('d-none');
+                    preview.innerHTML = "";
+                    const badge = document.getElementById('badgePhoto');
+                    if (badge) badge.classList.add('d-none');
                 }
             });
         }
@@ -53,7 +71,7 @@ const CommunityHub = {
 
         if (container && input) {
             container.addEventListener('click', (e) => {
-                if (e.target !== input) input.click();
+                if (e.target !== input && !e.target.closest('#btnRemoveVideo')) input.click();
             });
             
             input.addEventListener('change', function() {
@@ -77,10 +95,86 @@ const CommunityHub = {
                             videoTag.src = e.target.result;
                         }
                         preview.classList.remove('d-none');
+                        const badge = document.getElementById('badgeVideo');
+                        if (badge) badge.classList.remove('d-none');
                     };
                     reader.readAsDataURL(file);
                 }
             });
+
+            // Delegar evento de quitar vídeo
+            preview.addEventListener('click', (e) => {
+                if (e.target.closest('#btnRemoveVideo')) {
+                    e.stopPropagation();
+                    input.value = "";
+                    placeholder.classList.remove('d-none');
+                    preview.classList.add('d-none');
+                    const videoTag = preview.querySelector('video');
+                    if (videoTag) videoTag.src = "";
+                    const badge = document.getElementById('badgeVideo');
+                    if (badge) badge.classList.add('d-none');
+                }
+            });
+        }
+    },
+
+    // 1.8. Previsualización y validación de PDF
+    initDocumentPreview: function() {
+        const input = document.getElementById('id_document');
+        const container = document.getElementById('documentUploadContainer');
+        const preview = document.getElementById('documentPreview');
+        const placeholder = document.getElementById('documentUploadPlaceholder');
+        const nameEl = document.getElementById('documentFileName');
+        const sizeEl = document.getElementById('documentFileSize');
+        
+        const MAX_SIZE_MB = 10;
+        const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
+        if (container && input) {
+            container.addEventListener('click', (e) => {
+                if (e.target !== input && !e.target.closest('#btnRemoveDocument')) {
+                    input.click();
+                }
+            });
+
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+                        alert('¡Formato no válido! Solo se permiten documentos en formato PDF.');
+                        this.value = "";
+                        if (placeholder) placeholder.classList.remove('d-none');
+                        if (preview) preview.classList.add('d-none');
+                        return;
+                    }
+                    if (file.size > MAX_SIZE_BYTES) {
+                        alert(`¡Documento demasiado pesado! El límite es de ${MAX_SIZE_MB}MB.`);
+                        this.value = "";
+                        if (placeholder) placeholder.classList.remove('d-none');
+                        if (preview) preview.classList.add('d-none');
+                        return;
+                    }
+                    if (nameEl) nameEl.textContent = file.name;
+                    if (sizeEl) sizeEl.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                    if (placeholder) placeholder.classList.add('d-none');
+                    if (preview) preview.classList.remove('d-none');
+                    
+                    const badge = document.getElementById('badgeDoc');
+                    if (badge) badge.classList.remove('d-none');
+                }
+            });
+
+            const removeBtn = document.getElementById('btnRemoveDocument');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    input.value = "";
+                    if (placeholder) placeholder.classList.remove('d-none');
+                    if (preview) preview.classList.add('d-none');
+                    const badge = document.getElementById('badgeDoc');
+                    if (badge) badge.classList.add('d-none');
+                });
+            }
         }
     },
 
@@ -152,6 +246,7 @@ const CommunityHub = {
 document.addEventListener('DOMContentLoaded', () => {
     CommunityHub.initImagePreview();
     CommunityHub.initVideoPreview();
+    CommunityHub.initDocumentPreview();
     CommunityHub.initCharCounter();
     CommunityHub.initSmartScroll();
     CommunityHub.initLoadingState();
