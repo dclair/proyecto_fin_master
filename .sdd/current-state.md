@@ -1,13 +1,13 @@
 # Current State
 
-**Last reviewed:** 2026-06-01  
+**Last reviewed:** 2026-09-03  
 **Role:** single operational truth for the project today.
 
 This document is the first place to check before modifying Hubs&Clicks. It summarizes what is currently true, what is verified, what is risky, and where deeper details live.
 
 ## Product
 
-Hubs&Clicks is a Django social network for connecting people through hobbies.
+Hubs&Clicks is a Django social network for connecting people through hobbies and natural therapies.
 
 Current user-facing capabilities:
 
@@ -15,9 +15,10 @@ Current user-facing capabilities:
 - Edit profile data: avatar, bio, birth date, location, website, identity fields.
 - Add hobbies to profile with experience levels.
 - Follow and unfollow other profiles.
-- Create image-based posts called Clicks.
+- Create multi-content posts (Clicks): combines non-exclusive photo, video, generic external link, and attached PDF document (up to 10MB).
+- Explore all community posts (`/events/posts/`) with keyword search, therapy filter, clean server-side pagination (12 per page), and symmetric Home button.
 - Like and comment on posts.
-- Create hobby-based events.
+- Create hobby-based events with TinyMCE rich descriptions and TomSelect searchable category dropdowns sorted alphabetically.
 - Join or leave events when allowed.
 - Cancel, reactivate, duplicate, edit, and list owned events.
 - View personal event participations.
@@ -31,6 +32,17 @@ Current user-facing capabilities:
 - Full control over messages ("Delete for everyone" and "Delete for me").
 - Filter events easily matching the user's registered therapies ("Mis Terapias" filter).
 - Upload local images directly into the biography editor via TinyMCE integration.
+- Official Institutional Channel "Ágora" (`slug="agora"`):
+  - Automatically assigned to all new users upon registration as their default primary therapy.
+  - Existing users retroactively assigned via migration `0010_assign_agora_to_all_profiles`.
+  - Publishing strictly restricted to `is_staff` users (superusers, admins, board members).
+  - High-visibility orange badge (`.badge-agora` / `.badge-agora-solid`, `#ea580c`) with official shield icon.
+  - Priority pinned to first position (index 0) in Home feeds (Posts, Events, Library) via ORM `Case/When` annotation (`is_agora`).
+- Universal Plain-Text Extraction & HTML Entity Sanitization:
+  - Properties `Article.plain_text_summary`, `Posts.plain_text_caption`, and `Event.plain_text_description` decode HTML entities (`&eacute;` -> `é`, `&nbsp;` -> ` `) and separate block tags with clean spacing.
+- Harmonized Dark Mode (Theme):
+  - Recommended Events container (`.recommended-events-box`) and Home Tabs navigation (`.nav-pills-hubs`) feature dark body background, brand teal/green border (`1.5px solid var(--hubs-primary)`, `#2ba1ab`), white text on inactive items, and white counter badges with colored numbers.
+
 
 ## Runtime
 

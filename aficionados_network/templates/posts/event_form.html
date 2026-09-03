@@ -1,6 +1,49 @@
 {% extends "general/layout.html" %}
 {% load static %}
 
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+  .ts-wrapper.form-select {
+      padding: 0 !important;
+      border: none !important;
+  }
+  .ts-control {
+      border-radius: 0.5rem !important;
+      padding: 0.475rem 0.75rem !important;
+      border: 1px solid #dee2e6 !important;
+      font-size: 0.9rem !important;
+      background-color: #fff !important;
+      box-shadow: none !important;
+      min-height: calc(1.5em + 0.95rem + 2px) !important;
+      display: flex !important;
+      align-items: center !important;
+  }
+  .ts-control input {
+      font-size: 0.9rem !important;
+  }
+  .ts-dropdown {
+      border-radius: 0.5rem !important;
+      border: 1px solid #dee2e6 !important;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12) !important;
+      font-size: 0.9rem !important;
+      z-index: 1060 !important;
+      margin-top: 4px !important;
+  }
+  .ts-dropdown .active {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      font-weight: 600 !important;
+  }
+  .ts-dropdown .option {
+      padding: 0.5rem 0.85rem !important;
+  }
+  .ts-dropdown .option:hover {
+      background-color: #f8fafc !important;
+  }
+</style>
+{% endblock %}
+
 {% block page_title %} 
 <div class="container-fluid px-4 mt-2 text-center">
     <h1 class="fw-bold h3 text-hubs">
@@ -118,24 +161,38 @@
 {% endblock %}
 
 {% block extra_js %}
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
 <script src="{% static 'js/event-form.js' %}?v=1.0"></script>
 <!-- TinyMCE CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-  // Inicializar Tom Select para buscar terapias
-  document.addEventListener("DOMContentLoaded", function() {
-      new TomSelect("#id_hobby", {
-          create: false,
-          sortField: {
-              field: "text",
-              direction: "asc"
-          },
-          placeholder: "Busca una terapia..."
-      });
-  });
+  function initHobbyTomSelect() {
+      const selectEl = document.getElementById("id_hobby");
+      if (selectEl && window.TomSelect && !selectEl.tomselect) {
+          new TomSelect(selectEl, {
+              create: false,
+              plugins: ['clear_button'],
+              sortField: {
+                  field: "text",
+                  direction: "asc"
+              },
+              placeholder: "Escribe para buscar o seleccionar terapia...",
+              maxOptions: 100,
+              render: {
+                  no_results: function(data, escape) {
+                      return '<div class="no-results p-2 text-muted small">No se encontró ninguna terapia con ese nombre.</div>';
+                  }
+              }
+          });
+      }
+  }
+
+  if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initHobbyTomSelect);
+  } else {
+      initHobbyTomSelect();
+  }
 
   tinymce.init({
     selector: '#id_description',

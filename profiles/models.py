@@ -33,6 +33,7 @@ class Hobby(SoftDeleteModel):
 
     class Meta:
         verbose_name_plural = "Hobbies"
+        ordering = ["name"]
 
 
 class UserProfile(models.Model):

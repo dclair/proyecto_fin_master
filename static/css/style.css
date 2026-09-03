@@ -1199,3 +1199,140 @@ footer a:active {
     background-color: #343a40 !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
 }
+
+/* ============================================================
+   BADGES INSTITUCIONALES PARA ÁGORA (NARANJA FUERTE DESTACADO)
+   ============================================================ */
+.badge-agora {
+    background-color: #fff7ed !important;
+    color: #ea580c !important;
+    border: 1.5px solid #fdba74 !important;
+    font-weight: 700 !important;
+    border-radius: 50rem !important;
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.72rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.3rem !important;
+    box-shadow: 0 1px 4px rgba(234, 88, 12, 0.15) !important;
+}
+
+.badge-agora i {
+    color: #ea580c !important;
+}
+
+.badge-agora-solid {
+    background-color: #ea580c !important;
+    color: #ffffff !important;
+    border: 1.5px solid #c2410c !important;
+    font-weight: 700 !important;
+    border-radius: 50rem !important;
+    padding: 0.3rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.3rem !important;
+    box-shadow: 0 3px 8px rgba(234, 88, 12, 0.35) !important;
+}
+
+.badge-agora-solid i {
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .badge-agora {
+    background-color: rgba(234, 88, 12, 0.22) !important;
+    color: #fb923c !important;
+    border-color: rgba(251, 146, 60, 0.55) !important;
+}
+
+[data-bs-theme="dark"] .badge-agora i {
+    color: #fb923c !important;
+}
+
+/* ============================================================
+   SECCIÓN DE EVENTOS RECOMENDADOS (HOME - MODO CLARO Y OSCURO)
+   ============================================================ */
+.recommended-events-box {
+    background-color: var(--hubs-light) !important;
+    border: 1px solid var(--hubs-border) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.badge-recommended-icon {
+    background-color: #ffffff !important;
+    color: var(--hubs-primary) !important;
+}
+
+[data-bs-theme="dark"] .recommended-events-box {
+    background-color: var(--bs-body-bg) !important; /* Fondo negro como el resto */
+    border: 1.5px solid var(--hubs-primary) !important; /* Borde verde claro distintivo */
+    box-shadow: 0 4px 20px rgba(43, 161, 171, 0.12) !important;
+}
+
+[data-bs-theme="dark"] .recommended-events-box .recommended-events-subtitle {
+    color: #ffffff !important; /* Texto en blanco como pidió el usuario */
+}
+
+[data-bs-theme="dark"] .badge-recommended-icon {
+    background-color: rgba(43, 161, 171, 0.15) !important;
+    border: 1px solid rgba(43, 161, 171, 0.35) !important;
+}
+
+[data-bs-theme="dark"] .badge-recommended-icon i {
+    color: var(--hubs-primary) !important;
+}
+
+/* ============================================================
+   BARRA DE PESTAÑAS (HOME TABS - MODO CLARO Y OSCURO)
+   ============================================================ */
+.nav-pills-hubs {
+    background-color: var(--hubs-light) !important;
+    border: 1px solid var(--hubs-border) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.tab-counter-badge {
+    background-color: rgba(11, 89, 97, 0.12) !important;
+    color: var(--hubs-primary) !important;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.nav-pills-hubs .nav-link.active .tab-counter-badge {
+    background-color: rgba(255, 255, 255, 0.35) !important;
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .nav-pills-hubs {
+    background-color: var(--bs-body-bg) !important;
+    border: 1.5px solid var(--hubs-primary) !important;
+    box-shadow: 0 4px 20px rgba(43, 161, 171, 0.12) !important;
+}
+
+[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) {
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) i {
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active):hover {
+    background-color: rgba(43, 161, 171, 0.15) !important;
+    color: var(--hubs-primary) !important;
+}
+
+[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active):hover i {
+    color: var(--hubs-primary) !important;
+}
+
+/* Badge no seleccionado en modo oscuro: fondo blanco y número con color corporativo */
+[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) .tab-counter-badge {
+    background-color: #ffffff !important;
+    color: var(--hubs-primary) !important;
+    font-weight: 800 !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35) !important;
+}
+
+
+

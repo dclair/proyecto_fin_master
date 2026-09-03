@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from email.mime.image import MIMEImage
 import os
-from .models import UserProfile
+from .models import UserProfile, Hobby, UserHobby
 import logging
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,32 @@ def create_user_profile(sender, instance, created, **kwargs):
         except Exception as e:
             logger.error(
                 f"Error creating profile for user {instance.username}: {str(e)}"
+            )
+
+
+@receiver(post_save, sender=UserProfile)
+def assign_default_agora_hobby(sender, instance, created, **kwargs):
+    """
+    Signal to ensure every UserProfile is automatically subscribed to
+    the official association channel ('Ágora').
+    """
+    if created:
+        try:
+            agora, _ = Hobby.objects.get_or_create(
+                slug="agora",
+                defaults={
+                    "name": "Ágora",
+                    "description": "Canal oficial y publicaciones de la dirección y administración de la asociación.",
+                },
+            )
+            UserHobby.objects.get_or_create(
+                profile=instance,
+                hobby=agora,
+                defaults={"level": "beginner"},
+            )
+        except Exception as e:
+            logger.error(
+                f"Error assigning default Agora hobby to profile {instance.id}: {str(e)}"
             )
 
 

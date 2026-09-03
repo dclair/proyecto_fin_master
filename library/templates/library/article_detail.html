@@ -28,7 +28,13 @@
                 <span class="mx-2">&bull;</span>
                 <span>{{ article.created_at|date:"d M Y" }}</span>
                 <span class="mx-2">&bull;</span>
-                <span class="badge bg-primary-subtle text-primary">{{ article.hobby.name }}</span>
+                {% if article.hobby.slug == 'agora' %}
+                    <span class="badge-agora">
+                        <i class="bi bi-shield-fill-check"></i> {{ article.hobby.name }}
+                    </span>
+                {% else %}
+                    <span class="badge bg-primary-subtle text-primary">{{ article.hobby.name }}</span>
+                {% endif %}
             </div>
 
             {% if article.cover_image %}

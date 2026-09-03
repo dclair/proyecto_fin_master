@@ -5,6 +5,7 @@ app_name = "posts"
 
 urlpatterns = [
     # rutas para los posts
+    path("posts/", views.PostListView.as_view(), name="post_list"),
     path("create/", views.PostCreateView.as_view(), name="post_create"),
     path("post/<int:pk>/", views.PostDetailView.as_view(), name="post_detail"),
     path("like/<int:post_id>/", views.toggle_like, name="toggle_like"),

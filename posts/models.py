@@ -23,6 +23,12 @@ def validate_video_size(video):
     if video.size > max_size:
         raise ValidationError("El vídeo no puede pesar más de 20MB")
 
+def validate_document_size(doc):
+    """Valida que el documento PDF no sea mayor a 10MB"""
+    max_size = 10 * 1024 * 1024  # 10MB
+    if doc.size > max_size:
+        raise ValidationError("El documento PDF no puede pesar más de 10MB")
+
 
 class Posts(SoftDeleteModel):
     user = models.ForeignKey(
@@ -57,13 +63,33 @@ class Posts(SoftDeleteModel):
         ],
         help_text="Formatos soportados: MP4, MOV, AVI, WEBM. Tamaño máximo: 20MB",
     )
-    video_url = models.URLField(
+    external_url = models.URLField(
         max_length=500,
         blank=True,
         null=True,
-        verbose_name="enlace de vídeo",
-        help_text="Enlace a YouTube, Vimeo, etc.",
+        db_column="video_url",
+        verbose_name="enlace de interés",
+        help_text="Enlace a una web, vídeo (YouTube, Vimeo), artículo externo o recurso",
     )
+    document = models.FileField(
+        upload_to="posts_documents/%Y/%m/%d/",
+        blank=True,
+        null=True,
+        verbose_name="documento adjunto (PDF)",
+        validators=[
+            FileExtensionValidator(allowed_extensions=["pdf"]),
+            validate_document_size,
+        ],
+        help_text="Formato soportado: PDF. Tamaño máximo: 10MB",
+    )
+
+    @property
+    def video_url(self):
+        return self.external_url
+
+    @video_url.setter
+    def video_url(self, value):
+        self.external_url = value
     caption = models.TextField(
         "descripción",
         max_length=2000,
@@ -162,6 +188,18 @@ class Posts(SoftDeleteModel):
     def get_absolute_url(self):
         # Asegúrate de que 'post_detail' es el nombre que usas en posts/urls.py
         return reverse("posts:post_detail", kwargs={"pk": self.pk})
+
+    @property
+    def plain_text_caption(self):
+        import html
+        import re
+        if not self.caption:
+            return ""
+        text = re.sub(r"<(br|/p|/div|/h[1-6]|/li)[^>]*>", " ", self.caption, flags=re.IGNORECASE)
+        text = re.sub(r"<[^>]+>", "", text)
+        text = html.unescape(text)
+        return re.sub(r"\s+", " ", text).strip()
+
 
 
 class Comment(models.Model):
@@ -316,6 +354,18 @@ class Event(SoftDeleteModel):
     def get_absolute_url(self):
         # Esto le dice a Django que la página "maestra" de un evento es su detalle
         return reverse("posts:event_detail", kwargs={"pk": self.pk})
+
+    @property
+    def plain_text_description(self):
+        import html
+        import re
+        if not self.description:
+            return ""
+        text = re.sub(r"<(br|/p|/div|/h[1-6]|/li)[^>]*>", " ", self.description, flags=re.IGNORECASE)
+        text = re.sub(r"<[^>]+>", "", text)
+        text = html.unescape(text)
+        return re.sub(r"\s+", " ", text).strip()
+
 
     class Meta:
         ordering = ["event_date"]  # Los más próximos primero

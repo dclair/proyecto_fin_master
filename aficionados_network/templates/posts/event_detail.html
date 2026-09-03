@@ -139,7 +139,13 @@
         </div>
         <div class="col-lg-4 bg-white border-start d-flex align-items-center">
             <div class="p-4 w-100">
-                <span class="badge badge-hubs mb-2">{{ event.hobby.name }}</span>
+                {% if event.hobby.slug == 'agora' %}
+                    <span class="badge-agora-solid mb-2">
+                        <i class="bi bi-shield-fill-check"></i> {{ event.hobby.name }}
+                    </span>
+                {% else %}
+                    <span class="badge badge-hubs mb-2">{{ event.hobby.name }}</span>
+                {% endif %}
                 <h2 class="fw-bold text-hubs mb-3 {% if event.is_canceled %}text-decoration-line-through text-muted{% endif %}">
                     {{ event.title }}
                 </h2>

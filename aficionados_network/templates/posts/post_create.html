@@ -4,6 +4,49 @@
 
 {% block head_title %}Comunidad - Hubs&Clicks{% endblock %}
 
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+  .ts-wrapper.form-select {
+      padding: 0 !important;
+      border: none !important;
+  }
+  .ts-control {
+      border-radius: 0.5rem !important;
+      padding: 0.475rem 0.75rem !important;
+      border: 1px solid #dee2e6 !important;
+      font-size: 0.9rem !important;
+      background-color: #fff !important;
+      box-shadow: none !important;
+      min-height: calc(1.5em + 0.95rem + 2px) !important;
+      display: flex !important;
+      align-items: center !important;
+  }
+  .ts-control input {
+      font-size: 0.9rem !important;
+  }
+  .ts-dropdown {
+      border-radius: 0.5rem !important;
+      border: 1px solid #dee2e6 !important;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12) !important;
+      font-size: 0.9rem !important;
+      z-index: 1060 !important;
+      margin-top: 4px !important;
+  }
+  .ts-dropdown .active {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      font-weight: 600 !important;
+  }
+  .ts-dropdown .option {
+      padding: 0.5rem 0.85rem !important;
+  }
+  .ts-dropdown .option:hover {
+      background-color: #f8fafc !important;
+  }
+</style>
+{% endblock %}
+
 {% block page_title %}
     <i class="bi bi-people-fill me-2 text-hubs"></i> El Hub de la Comunidad
 {% endblock %}
@@ -80,70 +123,128 @@
                                 </div>
                             </div>
                             
-                            <label class="form-label small fw-bold text-muted">Contenido Multimedia (Elige uno)</label>
-                            
-                            <ul class="nav nav-tabs mb-3" id="mediaTabs" role="tablist">
-                              <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="image-tab" data-bs-toggle="tab" data-bs-target="#image-pane" type="button" role="tab" aria-controls="image-pane" aria-selected="true"><i class="bi bi-camera"></i> Foto</button>
-                              </li>
-                              <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-pane" type="button" role="tab" aria-controls="video-pane" aria-selected="false"><i class="bi bi-camera-video"></i> Vídeo</button>
-                              </li>
-                              <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="link-tab" data-bs-toggle="tab" data-bs-target="#link-pane" type="button" role="tab" aria-controls="link-pane" aria-selected="false"><i class="bi bi-link-45deg"></i> Enlace</button>
-                              </li>
-                            </ul>
+                            <div class="mb-4">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <label class="form-label small fw-bold text-muted mb-0">
+                                        <i class="bi bi-paperclip text-hubs me-1"></i> Recursos Multimedia y Adjuntos
+                                    </label>
+                                    <span class="badge bg-light text-muted border extra-small">No excluyentes</span>
+                                </div>
+                                <p class="text-muted extra-small mb-3">
+                                    Puedes añadir una foto, vídeo, enlace de interés o documento PDF para complementar tu publicación.
+                                </p>
 
-                            <div class="tab-content mb-3" id="mediaTabsContent">
-                              <!-- Image Tab -->
-                              <div class="tab-pane fade show active" id="image-pane" role="tabpanel" aria-labelledby="image-tab">
-                                  <div class="image-upload-container rounded-3 p-3 text-center upload-container-hubs" 
-                                      id="imageUploadContainer">
-                                      
-                                      <div id="uploadPlaceholder">
-                                          <i class="bi bi-camera fs-2 text-muted"></i>
-                                          <p class="small text-muted mb-0 d-block">Haz clic para añadir foto</p>
-                                      </div>
+                                <ul class="nav nav-pills nav-fill gap-2 p-1 bg-light rounded-4 mb-3" id="mediaPills" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active rounded-pill py-2 small fw-semibold" id="pill-photo-tab" data-bs-toggle="tab" data-bs-target="#pane-photo" type="button" role="tab">
+                                            <i class="bi bi-camera me-1"></i> Foto <span class="badge bg-success ms-1 d-none" id="badgePhoto">✓</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link rounded-pill py-2 small fw-semibold" id="pill-video-tab" data-bs-toggle="tab" data-bs-target="#pane-video" type="button" role="tab">
+                                            <i class="bi bi-camera-video me-1"></i> Vídeo <span class="badge bg-success ms-1 d-none" id="badgeVideo">✓</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link rounded-pill py-2 small fw-semibold" id="pill-link-tab" data-bs-toggle="tab" data-bs-target="#pane-link" type="button" role="tab">
+                                            <i class="bi bi-link-45deg me-1"></i> Enlace <span class="badge bg-success ms-1 d-none" id="badgeLink">✓</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link rounded-pill py-2 small fw-semibold" id="pill-doc-tab" data-bs-toggle="tab" data-bs-target="#pane-doc" type="button" role="tab">
+                                            <i class="bi bi-file-earmark-pdf me-1"></i> PDF <span class="badge bg-success ms-1 d-none" id="badgeDoc">✓</span>
+                                        </button>
+                                    </li>
+                                </ul>
 
-                                      <div id="imagePreview" class="d-none">
-                                          <img id="image-preview" src="#" alt="Previsualización" 
-                                              class="img-fluid rounded-3 shadow-sm mx-auto media-max-250">
-                                          <p class="extra-small text-hubs mt-2 mb-0 fw-bold">Click para cambiar imagen</p>
-                                      </div>
+                                <div class="tab-content border rounded-4 p-3 bg-light-subtle shadow-sm" id="mediaPillsContent">
+                                    <!-- 1. Foto -->
+                                    <div class="tab-pane fade show active" id="pane-photo" role="tabpanel">
+                                        <label for="id_image" class="image-upload-container rounded-3 p-3 text-center upload-container-hubs bg-white border d-block w-100 mb-0" id="imageUploadContainer" style="cursor: pointer;">
+                                            <div id="uploadPlaceholder">
+                                                <i class="bi bi-camera fs-2 text-muted"></i>
+                                                <p class="small text-muted mb-0 d-block">Haz clic para añadir una foto de portada</p>
+                                                <span class="badge bg-light text-muted border extra-small mt-1">JPG, PNG (máx. 5MB)</span>
+                                            </div>
+                                            <div id="imagePreview" class="d-none">
+                                                <img id="image-preview" src="#" alt="Previsualización" class="img-fluid rounded-3 shadow-sm mx-auto media-max-250">
+                                                <div class="d-flex justify-content-center gap-3 mt-2">
+                                                    <span class="extra-small text-hubs fw-bold"><i class="bi bi-arrow-repeat me-1"></i>Cambiar</span>
+                                                    <span class="extra-small text-danger fw-bold" id="btnRemoveImage" onclick="event.preventDefault(); event.stopPropagation();"><i class="bi bi-trash3 me-1"></i>Quitar foto</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-none">{{ form.image }}</div>
+                                        </label>
+                                    </div>
 
-                                      <div class="d-none">
-                                          {{ form.image }}
-                                      </div>
-                                  </div>
-                              </div>
+                                    <!-- 2. Vídeo -->
+                                    <div class="tab-pane fade" id="pane-video" role="tabpanel">
+                                        <label for="id_video" class="image-upload-container rounded-3 p-3 text-center upload-container-hubs bg-white border d-block w-100 mb-0" id="videoUploadContainer" style="cursor: pointer;">
+                                            <div id="videoUploadPlaceholder">
+                                                <i class="bi bi-camera-video fs-2 text-muted"></i>
+                                                <p class="small text-muted mb-0 d-block">Haz clic para subir un vídeo corto</p>
+                                                <span class="badge bg-light text-muted border extra-small mt-1">MP4, MOV, WEBM (máx. 20MB)</span>
+                                            </div>
+                                            <div id="videoPreview" class="d-none">
+                                                <video id="video-preview" controls class="img-fluid rounded-3 shadow-sm mx-auto media-max-250"></video>
+                                                <div class="d-flex justify-content-center gap-3 mt-2">
+                                                    <span class="extra-small text-hubs fw-bold"><i class="bi bi-arrow-repeat me-1"></i>Cambiar</span>
+                                                    <span class="extra-small text-danger fw-bold" id="btnRemoveVideo" onclick="event.preventDefault(); event.stopPropagation();"><i class="bi bi-trash3 me-1"></i>Quitar vídeo</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-none">{{ form.video }}</div>
+                                        </label>
+                                    </div>
 
-                              <!-- Video Tab -->
-                              <div class="tab-pane fade" id="video-pane" role="tabpanel" aria-labelledby="video-tab">
-                                  <div class="image-upload-container rounded-3 p-3 text-center upload-container-hubs" 
-                                      id="videoUploadContainer">
-                                      
-                                      <div id="videoUploadPlaceholder">
-                                          <i class="bi bi-camera-video fs-2 text-muted"></i>
-                                          <p class="small text-muted mb-0 d-block">Haz clic para subir un vídeo (Max 20MB)</p>
-                                      </div>
+                                    <!-- 3. Enlace Genérico -->
+                                    <div class="tab-pane fade" id="pane-link" role="tabpanel">
+                                        <div class="bg-white border rounded-3 p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bi bi-link-45deg fs-4 text-hubs me-2"></i>
+                                                <div>
+                                                    <h6 class="fw-bold mb-0 small text-dark">Enlace de interés o recurso externo</h6>
+                                                    <small class="text-muted extra-small">Web, artículo, vídeo externo o fuente de información</small>
+                                                </div>
+                                            </div>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light"><i class="bi bi-globe"></i></span>
+                                                {{ form.external_url }}
+                                            </div>
+                                            <small class="text-muted d-block mt-2 extra-small">
+                                                Pega un enlace web válido comenzando con <code>https://</code>.
+                                            </small>
+                                        </div>
+                                    </div>
 
-                                      <div id="videoPreview" class="d-none">
-                                          <video id="video-preview" controls class="img-fluid rounded-3 shadow-sm mx-auto media-max-250"></video>
-                                          <p class="extra-small text-hubs mt-2 mb-0 fw-bold">Click para cambiar vídeo</p>
-                                      </div>
-
-                                      <div class="d-none">
-                                          {{ form.video }}
-                                      </div>
-                                  </div>
-                              </div>
-
-                              <!-- Link Tab -->
-                              <div class="tab-pane fade" id="link-pane" role="tabpanel" aria-labelledby="link-tab">
-                                  <div class="form-group mb-0">
-                                      {{ form.video_url }}
-                                  </div>
-                              </div>
+                                    <!-- 4. Documento PDF -->
+                                    <div class="tab-pane fade" id="pane-doc" role="tabpanel">
+                                        <label for="id_document" class="image-upload-container rounded-3 p-3 text-center upload-container-hubs bg-white border d-block w-100 mb-0" id="documentUploadContainer" style="cursor: pointer;">
+                                            <div id="documentUploadPlaceholder">
+                                                <i class="bi bi-file-earmark-pdf fs-2 text-danger"></i>
+                                                <p class="small text-muted mb-0 d-block">Haz clic para adjuntar documento PDF</p>
+                                                <span class="badge bg-light text-muted border extra-small mt-1">PDF para artículos extensos (máx. 10MB)</span>
+                                            </div>
+                                            <div id="documentPreview" class="d-none">
+                                                <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 text-start">
+                                                    <div class="d-flex align-items-center gap-3 text-truncate">
+                                                        <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
+                                                        <div class="text-truncate">
+                                                            <span class="fw-bold d-block text-truncate small" id="documentFileName">documento.pdf</span>
+                                                            <small class="text-muted extra-small" id="documentFileSize">0 MB</small>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" id="btnRemoveDocument" onclick="event.preventDefault(); event.stopPropagation();">
+                                                        <i class="bi bi-trash3 me-1"></i>Quitar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="d-none">{{ form.document }}</div>
+                                        </label>
+                                        <small class="text-muted d-block mt-2 extra-small text-center">
+                                            ¿Tu contenido supera los 2000 caracteres? Adjunta aquí el PDF completo para la comunidad.
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
 
                             <button type="submit" class="btn btn-hubs w-100 fw-bold py-2 shadow-sm" id="submitBtn">
@@ -190,7 +291,7 @@
                 <h3 class="fw-bold h5 mb-0"><i class="bi bi-globe2 me-2 text-hubs"></i>Descubre la Comunidad</h3>
                 <span class="badge bg-light text-muted dark-mode-text-dark border">Últimos Clicks</span>
             </div>
-            {% include '_includes/_post.html' with last_posts=global_posts %}
+            {% include '_includes/_post.html' with last_posts=global_posts card_col_class='col-12 col-sm-6 col-lg-4' %}
         </div>
 
     </div>
@@ -198,19 +299,102 @@
 {% endblock %}
 
 {% block extra_js %}
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
 <script>
+  function initCategoryTomSelect() {
+      const selectEl = document.getElementById("id_category");
+      if (selectEl && window.TomSelect && !selectEl.tomselect) {
+          new TomSelect(selectEl, {
+              create: false,
+              plugins: ['clear_button'],
+              sortField: {
+                  field: "text",
+                  direction: "asc"
+              },
+              placeholder: "Escribe para buscar o seleccionar terapia...",
+              maxOptions: 100,
+              render: {
+                  no_results: function(data, escape) {
+                      return '<div class="no-results p-2 text-muted small">No se encontró ninguna terapia con ese nombre.</div>';
+                  }
+              }
+          });
+      }
+  }
+
+  // Inicialización resiliente
+  if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initCategoryTomSelect);
+  } else {
+      initCategoryTomSelect();
+  }
+
   document.addEventListener("DOMContentLoaded", function() {
-      new TomSelect("#id_category", {
-          create: false,
-          sortField: {
-              field: "text",
-              direction: "asc"
-          },
-          placeholder: "Busca una categoría..."
-      });
+
+      // Indicador visual para enlace externo
+      const extUrl = document.getElementById('id_external_url');
+      const badgeLink = document.getElementById('badgeLink');
+      if (extUrl && badgeLink) {
+          const checkUrl = () => {
+              if (extUrl.value.trim().length > 0) {
+                  badgeLink.classList.remove('d-none');
+              } else {
+                  badgeLink.classList.add('d-none');
+              }
+          };
+          extUrl.addEventListener('input', checkUrl);
+          checkUrl();
+      }
+
+      // Manejo de documento PDF
+      const docInput = document.getElementById('id_document');
+      const docPlaceholder = document.getElementById('documentUploadPlaceholder');
+      const docPreview = document.getElementById('documentPreview');
+      const docName = document.getElementById('documentFileName');
+      const docSize = document.getElementById('documentFileSize');
+      const badgeDoc = document.getElementById('badgeDoc');
+      const btnRemoveDoc = document.getElementById('btnRemoveDocument');
+
+      if (docInput) {
+          docInput.addEventListener('change', function() {
+              const file = this.files && this.files[0];
+              if (file) {
+                  if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+                      alert('¡Formato no válido! Solo se permiten documentos en formato PDF.');
+                      this.value = '';
+                      if (docPlaceholder) docPlaceholder.classList.remove('d-none');
+                      if (docPreview) docPreview.classList.add('d-none');
+                      if (badgeDoc) badgeDoc.classList.add('d-none');
+                      return;
+                  }
+                  if (file.size > 10 * 1024 * 1024) {
+                      alert('¡Documento demasiado pesado! El límite es de 10MB.');
+                      this.value = '';
+                      if (docPlaceholder) docPlaceholder.classList.remove('d-none');
+                      if (docPreview) docPreview.classList.add('d-none');
+                      if (badgeDoc) badgeDoc.classList.add('d-none');
+                      return;
+                  }
+                  if (docName) docName.textContent = file.name;
+                  if (docSize) docSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                  if (docPlaceholder) docPlaceholder.classList.add('d-none');
+                  if (docPreview) docPreview.classList.remove('d-none');
+                  if (badgeDoc) badgeDoc.classList.remove('d-none');
+              }
+          });
+
+          if (btnRemoveDoc) {
+              btnRemoveDoc.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  docInput.value = '';
+                  if (docPlaceholder) docPlaceholder.classList.remove('d-none');
+                  if (docPreview) docPreview.classList.add('d-none');
+                  if (badgeDoc) badgeDoc.classList.add('d-none');
+              });
+          }
+      }
   });
 </script>
 {% endblock %}

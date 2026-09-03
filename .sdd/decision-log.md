@@ -172,3 +172,65 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 
 - Contact emails now use the same existing branded notification template path as the rest of the app.
 - If email templates are reorganized, update tests and this decision.
+
+## D-011: Canal Oficial Institucional Ágora y Asignación Forzada en Registro
+
+**Date:** 2026-09-03  
+**Decision:** `Ágora` (`slug="agora"`) se define como el canal institucional exclusivo de la dirección/junta. Se asigna automáticamente a todo nuevo usuario en `profiles/signals.py` como su primera terapia y se aplicó una migración de datos histórica (`0010_assign_agora_to_all_profiles`) a todas las cuentas preexistentes.
+
+**Why:**
+- Evita que los comunicados oficiales queden invisibles si un usuario olvida o no sabe que debe suscribirse manualmente a Ágora.
+- Garantiza difusión 100% universal para convocatorias, normativas y avisos institucionales.
+
+**Implications:**
+- Todo nuevo usuario registrado tendrá garantizado el canal en `user.profile.hobbies`.
+- Los tests de usuario deben contemplar que `profile.hobbies.filter(slug='agora').exists()` es `True` por defecto.
+
+## D-012: Restricción de Publicación en Ágora a Usuarios Staff (`is_staff`)
+
+**Date:** 2026-09-03  
+**Decision:** La selección de `Ágora` en formularios de publicación (`PostCreateForm`, `EventForm`, etc.) está filtrada en backend. Si el usuario autenticado no tiene `is_staff=True`, la categoría Ágora es excluida de los querysets del campo del formulario y rechazada en validación.
+
+**Why:**
+- Solo administradores y miembros de la junta directiva deben tener autoridad para emitir mensajes oficiales con la identidad institucional.
+
+**Implications:**
+- Los usuarios regulares nunca verán Ágora como opción seleccionable para sus publicaciones individuales.
+- El backend rechaza cualquier manipulación maliciosa de `category_id`.
+
+## D-013: Priorización de Contenidos Institucionales mediante `Case/When` en el ORM
+
+**Date:** 2026-09-03  
+**Decision:** En lugar de realizar consultas separadas y concatenar listas en Python (lo que destruiría la paginación del ORM y la eficiencia de memoria), las publicaciones, eventos y artículos se ordenan anotando condicionalmente `is_agora = Case(When(category__slug="agora", then=Value(1)), default=Value(0), output_field=IntegerField())` y ordenando por `("-is_agora", "-created_at")`.
+
+**Why:**
+- Permite que los comunicados oficiales aparezcan **fijados al inicio (índice 0)** de las secciones de la Home y Exploración de Publicaciones, sin perder la evaluación perezosa (*lazy evaluation*), `select_related`, `prefetch_related` ni `LIMIT/OFFSET`.
+
+**Implications:**
+- Las consultas permanecen en una sola instrucción SQL optimizada.
+- Los tests verifican que objetos con `slug="agora"` preceden a objetos más recientes de otras categorías.
+
+## D-014: Propiedades de Extracción y Sanitización de Texto Plano en Modelos
+
+**Date:** 2026-09-03  
+**Decision:** Implementar `@property plain_text_summary` (`Article`), `@property plain_text_caption` (`Posts`) y `@property plain_text_description` (`Event`) a nivel de modelo para el renderizado en tarjetas resumen, en lugar de confiar en el filtro de plantilla `striptags`.
+
+**Why:**
+- Los editores enriquecidos (TinyMCE) producen entidades HTML (`&eacute;`, `&nbsp;`, `&oacute;`). El filtro `striptags` no decodifica entidades y elimina `<br>` sin agregar espacios, pegando palabras adyacentes (`primaveralLa`).
+- Las propiedades en el modelo centralizan la sustitución de bloques con espacios, eliminación de HTML, decodificación vía `html.unescape()` y normalización de espacios, asegurando texto 100% natural.
+
+**Implications:**
+- Las tarjetas resumen de toda la plataforma usan estas propiedades antes del filtro `truncatewords`/`truncatechars`.
+
+## D-015: Arquitectura de Alto Contraste en Modo Oscuro para Bloques y Navegación
+
+**Date:** 2026-09-03  
+**Decision:** Eliminar la clase utilitaria `bg-light` de contenedores de nivel superior (`.recommended-events-box` y `.nav-pills-hubs`). En modo oscuro, estos contenedores adoptan `var(--bs-body-bg)`, borde `1.5px solid var(--hubs-primary)` (`#2ba1ab`), textos en `#ffffff` y contadores de insignias con fondo blanco y tipografía en color corporativo.
+
+**Why:**
+- Bootstrap 5 asigna a `.bg-light` un valor con `!important` que genera recuadros descoloridos en modo oscuro, rompiendo la inmersión visual.
+
+**Implications:**
+- Se mantiene perfecta armonía visual entre bloques contiguos en la Home.
+- Las insignias y textos inactivos conservan máxima legibilidad (accesibilidad WCAG AA).
+

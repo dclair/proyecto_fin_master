@@ -58,19 +58,45 @@ Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección 
 
    Gestión Autónoma: Cada usuario puede administrar (editar/eliminar) sus propios anuncios y aplicar filtros por terapias o tipos de artículos.
 
-6. Biblioteca de Artículos 📚
+6. Biblioteca de Artículos y Casos Clínicos 📚
    Directorio de Conocimiento: Espacio dedicado para la publicación de artículos, guías y casos clínicos por parte de los miembros de la comunidad.
 
    Editor Enriquecido: Integración nativa de TinyMCE para la redacción de contenido enriquecido (negritas, listas, enlaces a imágenes externas) tanto en Artículos como en la creación de Eventos.
 
    Categorización Inteligente: Organización de artículos por terapias utilizando selectores de búsqueda avanzada (Tom Select).
 
-7. Ecosistema de Comunicación & Branding 📧
+7. Canal Oficial Institucional "Ágora" 🏛️
+   Canal de Dirección y Administración: Categoría institucional exclusiva destinada a los comunicados oficiales, artículos corporativos y eventos impulsados por la dirección y junta de la asociación.
+
+   Asignación Automática Universal: Cada nuevo usuario que se registra en la plataforma recibe la suscripción a "Ágora" automáticamente como su primera terapia (vía Django Signals), garantizando que las comunicaciones institucionales lleguen a todos los miembros sin requerir acción manual.
+
+   Restricción de Publicación por Rol (`is_staff`): La selección de la categoría Ágora en formularios de creación o edición de publicaciones, eventos o artículos está restringida exclusivamente a usuarios con perfil de administración o staff (`user.is_staff=True`).
+
+   Identidad Visual de Alto Impacto: Insignia visual destacada (`.badge-agora` y `.badge-agora-solid`) en naranja fuerte vibrante (`#ea580c`) con icono de escudo oficial (`<i class="bi bi-shield-fill-check"></i>`), adaptada con alto contraste para modo oscuro.
+
+   Priorización Fija en la Home: Mediante anotaciones condicionales `Case/When` en el ORM de Django, los contenidos de Ágora aparecen siempre fijados en la primera posición (índice 0) de las secciones de Últimas Publicaciones, Próximos Eventos y Biblioteca.
+
+8. Publicaciones Multimedia y Explorador Global 📰
+   Publicaciones Enriquecidas No Excluyentes: Los posts permiten combinar libremente imagen de portada, video corto adjunto, enlace externo genérico (a cualquier web, video o recurso) y documento PDF adjunto descargable (hasta 10MB) con previsualización de insignias.
+
+   Buscador Predictivo de Terapias (TomSelect): Integración de selectores ordenados estrictamente por orden alfabético con filtrado predictivo asíncrono en tiempo real mientras el usuario escribe en los formularios de creación de publicaciones y eventos.
+
+   Explorador de Publicaciones (`/events/posts/`): Nueva vista dedicada con búsqueda multi-campo (título, descripción, autor, ubicación), filtrado dinámico por terapia y paginación modular de 12 elementos por página.
+
+   Simetría de Acciones en la Home: Botón de acceso directo *"Ver todas las publicaciones"* integrado con forma de píldora redondeada en el encabezado de Últimas Publicaciones, equiparándose a los exploradores de Eventos y Biblioteca.
+
+9. Motor de Extracción y Sanitización de Texto Plano 🛡️
+   Decodificación Universal de Entidades: Implementación de propiedades en modelos (`Article.plain_text_summary`, `Posts.plain_text_caption` y `Event.plain_text_description`) que eliminan etiquetas residuales, decodifican entidades HTML generadas por TinyMCE (`&eacute;` -> `é`, `&nbsp;` -> espacio) y reemplazan saltos `<br>` y `</p>` por espacios reales para evitar que las palabras se aglutinen.
+
+10. Ecosistema de Comunicación & Branding 📧
    Emails HTML Corporativos: Notificaciones de sistema con diseño "Visión de Empresa", incluyendo logotipos incrustados (CID) y botones de acción.
 
    Lógica de Notificación Dual: Cada interacción crítica genera un aviso interno (web) y, en casos de eventos o contacto, un correo electrónico profesional.
 
    Formulario de Contacto Pro: Integración de mensajes de usuario con guardado en base de datos y aviso automático por email al administrador.
+
+11. Experiencia de Usuario y Modo Oscuro (Dark Mode) 🌓
+   Armonización de Contraste: Rediseño del bloque horizontal de Eventos Recomendados y de la barra interactiva de pestañas en modo oscuro con fondos oscuros integrados (`var(--bs-body-bg)`), bordes verde turquesa corporativo (`1.5px solid var(--hubs-primary)`), subtítulos y textos no seleccionados en blanco puro (`#ffffff`) y contadores numéricos en badges blancos de alto contraste.
 
 💻 STACK TECNOLÓGICO:
 
@@ -225,12 +251,23 @@ CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contac
 
 [x] Mercadillo de Profesionales: Implementado (Directorio de anuncios, CRUD completo, sistema de valoraciones).
 
-[x] Biblioteca de Artículos: CRUD de artículos de divulgación, integración con TinyMCE y badges de recuento global.
+[x] Biblioteca de Artículos y Casos Clínicos: CRUD de artículos de divulgación, integración con TinyMCE, recuentos globales y extractos con decodificación de entidades HTML.
 
-[x] UI/UX y Accesibilidad: Tema oscuro refinado con utilidades adaptativas, selectores inteligentes (Tom Select) en formularios, estandarización de spinners de carga en todos los formularios, y navbar totalmente unificado con badges de notificaciones de contenido (+999).
+[x] Canal Oficial Institucional "Ágora": Auto-asignación en registro y migración histórica universal, restricción estricta de publicación para `is_staff`, distintivo naranja fuerte con escudo (`.badge-agora`) y fijación en primera posición en todos los feeds principales.
+
+[x] Publicaciones Multimedia Híbridas: Formato no excluyente para combinar imagen, video, enlaces externos genéricos y documento PDF adjunto con descarga.
+
+[x] Exploración de Publicaciones (`/events/posts/`): Vista completa de posts con buscador multi-campo, filtro por terapia, paginación limpia (12/página) y botón simétrico en la Home.
+
+[x] Motor de Sanitización de Texto Plano: Extracción y limpieza en modelos (`plain_text_summary`, `plain_text_caption`, `plain_text_description`) para evitar entidades residuales (`&eacute;`, `&nbsp;`) y separación de párrafos.
+
+[x] UI/UX y Modo Oscuro Refinado: Tema oscuro armonizado con fondos nativos (`var(--bs-body-bg)`), bordes verde corporativo (`1.5px solid var(--hubs-primary)`), subtítulos blancos de alto contraste y badges con contadores numéricos en color.
+
+[x] UI/UX y Accesibilidad: Selectores predictivos alfabéticos con TomSelect en formularios, estandarización de spinners de carga, y navbar totalmente unificado con badges de notificaciones de contenido (+999).
 
 [x] Seguridad y Perfil: `.env.prod` fuera del control de versiones, manejo de excepciones de SMTP, límite de biografía expandido (1500 caracteres) y subida de imágenes locales mediante TinyMCE al servidor.
 
 [x] Backups Automatizados: Configuración de script de volcado de base de datos (MariaDB) y compresión de archivos multimedia con retención rotativa (7 días) mediante cron.
 
 Hubs&Clicks - "Descubre, Comparte, Disfruta"
+

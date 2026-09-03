@@ -514,3 +514,117 @@ class FormValidationTests(TestCase):
         })
         self.assertFalse(form.is_valid())
         # The form might have a custom validation for date or it might just fail at the model level if we use clean. Let's assert it's invalid.
+
+
+@override_settings(
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+)
+class PostMultiContentAndPdfTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="doctor_terapeuta", email="doc@test.com", password="password123"
+        )
+        self.hobby = Hobby.objects.create(name="Osteopatia Bio")
+
+    def test_post_creation_with_pdf_document_and_external_url(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        pdf_file = SimpleUploadedFile("estudio_clinico.pdf", b"%PDF-1.4 test content", content_type="application/pdf")
+        
+        post = Posts.objects.create(
+            user=self.user,
+            title="Tratamiento avanzado en cervicales",
+            caption="Resumen clínico breve. Ver documento adjunto.",
+            category=self.hobby,
+            external_url="https://pubmed.ncbi.nlm.nih.gov/123456/",
+            document=pdf_file,
+        )
+
+        self.assertTrue(post.document.name.endswith(".pdf"))
+        self.assertEqual(post.external_url, "https://pubmed.ncbi.nlm.nih.gov/123456/")
+        self.assertEqual(post.video_url, "https://pubmed.ncbi.nlm.nih.gov/123456/")
+
+    def test_post_create_form_allows_pdf_only_without_image_or_video(self):
+        from posts.forms import PostCreateForm
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        pdf_file = SimpleUploadedFile("manual.pdf", b"%PDF-1.4 test", content_type="application/pdf")
+
+        form = PostCreateForm(
+            data={
+                "title": "Manual de técnicas",
+                "category": self.hobby.pk,
+                "caption": "Manual completo adjunto.",
+            },
+            files={"document": pdf_file}
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_post_form_rejects_non_pdf_extension(self):
+        from posts.forms import PostCreateForm
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        txt_file = SimpleUploadedFile("archivo.txt", b"texto no valido", content_type="text/plain")
+
+        form = PostCreateForm(
+            data={
+                "title": "Archivo invalido",
+                "category": self.hobby.pk,
+                "caption": "Intento de subir texto.",
+            },
+            files={"document": txt_file}
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("document", form.errors)
+
+    def test_post_detail_renders_pdf_and_generic_link(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        pdf_file = SimpleUploadedFile("guia_osteopatia.pdf", b"%PDF-1.4 contenido", content_type="application/pdf")
+        
+        post = Posts.objects.create(
+            user=self.user,
+            title="Guía Práctica",
+            caption="Guía completa con enlaces y PDF",
+            category=self.hobby,
+            external_url="https://recursos-salud.org/articulo",
+            document=pdf_file,
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("posts:post_detail", kwargs={"pk": post.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Enlace de interés / Recurso externo")
+        self.assertContains(response, "https://recursos-salud.org/articulo")
+        self.assertContains(response, "Documento PDF Adjunto")
+        self.assertContains(response, post.document.url)
+
+    def test_category_dropdown_is_sorted_alphabetically(self):
+        from posts.forms import PostCreateForm
+        Hobby.objects.create(name="Zumba Terapéutica")
+        Hobby.objects.create(name="Acupuntura Bio")
+        Hobby.objects.create(name="Maderoterapia")
+
+        form = PostCreateForm(user=self.user)
+        names = list(form.fields["category"].queryset.values_list("name", flat=True))
+        self.assertEqual(names, sorted(names))
+
+    def test_plain_text_caption_and_description_sanitization(self):
+        post = Posts.objects.create(
+            user=self.user,
+            title="Post de prueba",
+            caption="<p>Atenci&oacute;n socios<br><br>Reuni&oacute;n&nbsp;urgente</p>",
+            category=self.hobby,
+        )
+        self.assertEqual(post.plain_text_caption, "Atención socios Reunión urgente")
+
+        event = Event.objects.create(
+            organizer=self.user,
+            title="Quedada",
+            description="<p>Ven a la sesi&oacute;n<br>Pr&aacute;ctica&nbsp;libre</p>",
+            hobby=self.hobby,
+            event_date=timezone.now() + timezone.timedelta(days=1),
+        )
+        self.assertEqual(event.plain_text_description, "Ven a la sesión Práctica libre")
+
+
+

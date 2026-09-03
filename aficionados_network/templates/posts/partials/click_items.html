@@ -47,10 +47,10 @@
                     <p class="text-muted">
                         {% if item.caption %}
                             {# Si es un Post, usamos caption #}
-                            {{ item.caption|truncatewords:30 }}
+                            {{ item.plain_text_caption|truncatewords:30 }}
                         {% elif item.description %}
                             {# Si es un Evento, usamos description #}
-                            {{ item.description|truncatewords:30 }}
+                            {{ item.plain_text_description|truncatewords:30 }}
                         {% else %}
                             {# Fallback por si acaso #}
                             Sin descripción disponible.
