@@ -44,7 +44,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    padding-top: calc(var(--navbar-height) + 20px) !important;
+    padding-top: calc(var(--navbar-height) + 20px);
 }
 
 [data-bs-theme="dark"] {
@@ -85,8 +85,8 @@ h1, h2, h3, h4, h5, h6 {
 
 h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 
-.text-hubs { color: var(--hubs-primary) !important; }
-.border-hubs { border-color: #20c997 !important; } /* Un verde/teal más claro y brillante para mejor contraste */
+.text-hubs { color: var(--hubs-primary); }
+.border-hubs { border-color: #20c997; } /* Un verde/teal más claro y brillante para mejor contraste */
 
 .btn-hubs { 
     /* REFINADO: Gradiente sutil para profundidad táctil */
@@ -150,7 +150,7 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 }
 
 .extra-small {
-    font-size: 0.75rem !important;
+    font-size: 0.75rem;
     font-weight: 600;
 }
 
@@ -158,7 +158,7 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
    3. COMPONENTES DE IMAGEN (BANNERS Y CARDS)
    ============================================================ */
 .object-fit-cover {
-    object-fit: cover !important;
+    object-fit: cover;
 }
 
 .detail-banner-wrapper {
@@ -178,10 +178,10 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 
 
 .detail-banner-img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center center !important;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
 }
 
 @media (max-width: 768px) {
@@ -196,7 +196,7 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 .card-hubs,
 .card-click,
 .sidebar-group {
-    background-color: var(--hubs-card-bg) !important;
+    background-color: var(--hubs-card-bg);
 }
 
 [data-bs-theme="dark"] .profile-post-card,
@@ -204,20 +204,18 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 [data-bs-theme="dark"] .card-hubs,
 [data-bs-theme="dark"] .card-click,
 [data-bs-theme="dark"] .sidebar-group {
-    background-color: var(--bs-dark) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important; /* Fuerza el borde visible y sólido */
+    background-color: var(--bs-card-bg, #1a1e21);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* En modo oscuro, las sombras no se ven, por lo que las cards sin borde (border-0) parecen flotar. 
-   Les forzamos un borde sutil para delimitar su espacio. */
 [data-bs-theme="dark"] .card.border-0 {
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
+
 .profile-post-card, .post-card {
-    
-    border: 1px solid var(--hubs-border) !important;
-    border-radius: var(--hubs-radius) !important;
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+    border: 1px solid var(--hubs-border);
+    border-radius: var(--hubs-radius);
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -225,35 +223,35 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 }
 
 .profile-post-card:hover, .post-card:hover {
-    transform: translateY(-12px) !important;
-   box-shadow: 0 14px 30px rgba(11, 89, 97, 0.18);
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(var(--bs-primary-rgb), 0.15);
 }
 
 .text-truncate-custom {
-    display: block !important;
+    display: block;
     width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--hubs-dark) !important;
+    color: var(--hubs-dark);
     font-weight: 700;
 }
 
 [data-bs-theme="dark"] .text-truncate-custom {
-    color: var(--bs-light) !important;
+    color: var(--bs-body-color);
 }
 
 /* --- SIDEBAR BADGES & ANIMATIONS --- */
 
 .sidebar-badge {
-    font-size: 0.65rem !important;
-    padding: 0.4em 0.6em !important;
+    font-size: 0.65rem;
+    padding: 0.4em 0.6em;
     min-width: 1.5rem;
 }
 
 .sidebar-badge-mini {
-    font-size: 0.55rem !important;
-    padding: 0.25em 0.5em !important;
+    font-size: 0.55rem;
+    padding: 0.25em 0.5em;
     border: 2px solid #fff;
 }
 
@@ -283,7 +281,7 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 }
 
 .sidebar-item:hover {
-    background-color: rgba(11, 89, 97, 0.05) !important;
+    background-color: var(--hubs-primary-subtle);
 }
 
 /* ============================================================
@@ -291,14 +289,15 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
    ============================================================ */
 .card-hubs {
     display: flex; 
-    border-radius: var(--hubs-radius) !important;
+    border-radius: var(--hubs-radius);
     box-shadow: var(--hubs-shadow);
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease;
+    overflow: hidden;
 }
 
 .card-hubs:hover {
-    transform: translateY(-12px) !important;
-    box-shadow: 0 14px 30px rgba(11, 89, 97, 0.18);
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(var(--bs-primary-rgb), 0.15);
 }
 
 .row-cols-1 .card-hubs, 
@@ -309,23 +308,23 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 }
 
 .img-event-wrapper {
-    width: 100% !important;
-    height: 200px !important;
-    overflow: hidden !important;
-    background-color: #dde8ea !important;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background-color: #dde8ea;
     border-bottom: 1px solid rgba(11, 89, 97, 0.12);
-    position: relative !important;
+    position: relative;
 }
 
 [data-bs-theme="dark"] .img-event-wrapper {
-    background-color: var(--bs-dark) !important;
+    background-color: var(--bs-dark);
 }
 
 .img-event-hubs {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center !important;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
     transition: transform 0.5s ease;
 }
 
@@ -349,27 +348,27 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 }
 
 [data-bs-theme="dark"] .text-muted {
-    color: #adb5bd !important;
+    color: #adb5bd;
 }
 
 [data-bs-theme="dark"] .text-dark-mode-white {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 [data-bs-theme="dark"] .text-dark-mode-hubs {
-    color: var(--hubs-primary) !important;
+    color: var(--hubs-primary);
 }
 
 [data-bs-theme="dark"] .dark-mode-text-dark {
-    color: #212529 !important;
+    color: #212529;
 }
 
 [data-bs-theme="dark"] .dark-mode-text-navbar {
-    color: #2b3035 !important; /* Gris del navbar en tema oscuro */
+    color: #2b3035; /* Gris del navbar en tema oscuro */
 }
 
 [data-bs-theme="dark"] .dark-mode-border {
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* ============================================================
@@ -397,8 +396,8 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
    8. UTILIDADES Y ANIMACIÓN
    ============================================================ */
 .bg-light-hover:hover {
-    background-color: var(--hubs-primary-subtle) !important;
-    border-color: var(--hubs-primary) !important;
+    background-color: var(--hubs-primary-subtle);
+    border-color: var(--hubs-primary);
 }
 
 .transition-all { transition: all 0.2s ease-in-out; }
@@ -454,14 +453,14 @@ footer a {
 
 @media (hover: hover) {
     footer a:hover {
-        color: #20c997 !important; /* Verde claro / Teal brillante para fondo oscuro */
+        color: #20c997; /* Verde claro / Teal brillante para fondo oscuro */
         transform: translateX(3px); /* Pequeño desplazamiento a la derecha */
     }
 }
 
 /* Efecto al hacer click (active) */
 footer a:active {
-    color: #198754 !important; /* Verde un poco más oscuro al presionar */
+    color: #198754; /* Verde un poco más oscuro al presionar */
     transform: scale(0.95) translateX(3px); /* Efecto de hundimiento rápido */
 }
 
@@ -491,19 +490,19 @@ footer a:active {
 .progress {
     border-radius: 10px; /* Bordes redondeados modernos */
     overflow: hidden;
-    background-color: var(--hubs-primary-subtle) !important; /* Fondo Teal muy suave */
+    background-color: var(--hubs-primary-subtle); /* Fondo Teal muy suave */
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 /* Relleno de la barra (Estado normal: Teal) */
 .bg-hubs {
-    background-color: var(--hubs-primary) !important;
+    background-color: var(--hubs-primary);
     /* Degradado sutil para un efecto más "premium" */
-    background: linear-gradient(90deg, var(--hubs-primary) 0%, #14a2b1 100%) !important;
+    background: linear-gradient(90deg, var(--hubs-primary) 0%, #14a2b1 100%);
 }
 
 [data-bs-theme="dark"] .bg-hubs {
-    background: linear-gradient(135deg, #0b5961 0%, #35b6c0 100%) !important;
+    background: linear-gradient(135deg, #0b5961 0%, #35b6c0 100%);
 }
 
 /* Animación de carga al entrar o filtrar */
@@ -519,13 +518,13 @@ footer a:active {
 
 /* Color de fondo para el estado "Completo" */
 .bg-danger-subtle {
-    background-color: #fce8e8 !important;
+    background-color: #fce8e8;
 }
 
 /* Badges de Nivel Estilizados */
-.bg-success-subtle { background-color: #e8f5e9 !important; color: #2e7d32 !important; }
-.bg-warning-subtle { background-color: #fff8e1 !important; color: #f57f17 !important; }
-.bg-danger-subtle { background-color: #ffebee !important; color: #c62828 !important; }
+.bg-success-subtle { background-color: #e8f5e9; color: #2e7d32; }
+.bg-warning-subtle { background-color: #fff8e1; color: #f57f17; }
+.bg-danger-subtle { background-color: #ffebee; color: #c62828; }
 
 .badge.small {
     padding: 0.35em 0.5em;
@@ -535,12 +534,12 @@ footer a:active {
 
 /* Estilos para el Match de Nivel */
 .card-match-level {
-    border: 2px solid #0dcaf0 !important; /* Azul cian para resaltar el match */
-    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.1) !important;
+    border: 2px solid #0dcaf0; /* Azul cian para resaltar el match */
+    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.1);
 }
 
 .bg-info {
-    background-color: #0dcaf0 !important;
+    background-color: #0dcaf0;
     font-size: 0.65rem;
     font-weight: 700;
 }
@@ -556,7 +555,7 @@ footer a:active {
     bottom: -2px;
     right: -2px;
     background-color: #ffc107; /* Amarillo/Dorado vibrante */
-    color: white !important;
+    color: white;
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -571,7 +570,7 @@ footer a:active {
 
 /* Asegura que el icono de la estrella dentro del badge sea blanco */
 .badge-organizer i {
-    color: white !important;
+    color: white;
     font-size: 10px;
     line-height: 1;
 }
@@ -602,7 +601,7 @@ footer a:active {
 }
 
 .card-click:hover {
-    transform: translateY(-12px) !important;
+    transform: translateY(-6px);
     box-shadow: 0 14px 30px rgba(11, 89, 97, 0.18);
 }
 
@@ -614,8 +613,8 @@ footer a:active {
 }
 .sidebar-label {
     font-size: 0.8rem;
-    font-weight: 800 !important;
-    color: var(--hubs-primary) !important;
+    font-weight: 800;
+    color: var(--hubs-primary);
     letter-spacing: 1.2px;
     padding-left: 12px;
     margin-bottom: 1rem;
@@ -630,30 +629,30 @@ footer a:active {
 .sidebar-item {
     display: flex;
     align-items: center;
-    padding: 14px 16px !important;
-    border: none !important;
+    padding: 14px 16px;
+    border: none;
     transition: all 0.2s ease-in-out;
 }
 .sidebar-item:hover {
-    background-color: #f8f9fa !important;
+    background-color: #f8f9fa;
     transform: translateX(4px);
 }
 
 [data-bs-theme="dark"] .sidebar-group {
-    background-color: var(--bs-dark) !important;
-    border-color: var(--bs-border-color) !important;
+    background-color: var(--bs-dark);
+    border-color: var(--bs-border-color);
 }
 
 [data-bs-theme="dark"] .sidebar-item:hover {
-    background-color: #343a40 !important;
+    background-color: #343a40;
 }
 
 
 /* --- NAVEGACIÓN DE HOBBIES --- */
 .hobby-name {
     font-size: 0.9rem;
-    font-weight: 700 !important;
-    color: var(--hubs-primary) !important;
+    font-weight: 700;
+    color: var(--hubs-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -661,7 +660,7 @@ footer a:active {
 }
 
 .sidebar-item:hover .hobby-name {
-    color: var(--hubs-primary-hover) !important;
+    color: var(--hubs-primary-hover);
 }
 
 .hobby-dot {
@@ -703,9 +702,9 @@ footer a:active {
    ESTILOS PARA CARGA DE FORMULARIOS (SPINNER)
    ============================================================ */
 .btn-spinner {
-    width: 1rem !important;
-    height: 1rem !important;
-    border-width: 0.15em !important;
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
     vertical-align: middle;
     /* Eliminamos el color blanco fijo para que herede el del botón */
 }
@@ -715,7 +714,7 @@ footer a:active {
 .btn-success .btn-spinner, 
 .btn-danger .btn-spinner,
 .btn-primary .btn-spinner {
-    color: white !important;
+    color: white;
 }
 
 /* Para botones outline, el spinner usará el color del borde/texto automáticamente */
@@ -770,12 +769,12 @@ footer a:active {
 @media (max-width: 991.98px) {
     /* Oculta el sidebar vertical de desktop */
     .sticky-sidebar {
-        display: none !important;
+        display: none;
     }
 
     /* Contenedor de scroll horizontal */
     .mobile-hobby-scroll {
-        display: flex !important;
+        display: flex;
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
@@ -859,8 +858,8 @@ footer a:active {
     }
 
     [data-bs-theme="dark"] .mobile-hobby-pill {
-        background-color: #343a40 !important;
-        color: #f8f9fa !important;
+        background-color: #343a40;
+        color: #f8f9fa;
     }
 
     .mobile-hobby-pill:hover {
@@ -899,8 +898,8 @@ footer a:active {
 
 /* Estilo base para los badges de nivel con texto */
 .badge-level-text {
-    font-size: 0.75rem !important;
-    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -908,10 +907,10 @@ footer a:active {
     gap: 4px; /* Espacio entre icono y texto */
 }
 /* Colores de los estados */
-.bg-all-levels { background-color: #e0f7fa !important; color: #006064 !important; border: 1px solid #b2ebf2; }
-.bg-success-subtle { background-color: #d1f2d5 !important; color: #0f5132 !important; border: 1px solid #badbcc !important; }
-.bg-warning-subtle { background-color: #fff3cd !important; color: #664d03 !important; border: 1px solid #ffecb5 !important; }
-.bg-danger-subtle { background-color: #f8d7da !important; color: #842029 !important; border: 1px solid #f5c2c7 !important; }
+.bg-all-levels { background-color: #e0f7fa; color: #006064; border: 1px solid #b2ebf2; }
+.bg-success-subtle { background-color: #d1f2d5; color: #0f5132; border: 1px solid #badbcc; }
+.bg-warning-subtle { background-color: #fff3cd; color: #664d03; border: 1px solid #ffecb5; }
+.bg-danger-subtle { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
 
 /* Iconos dentro de los badges */
 .badge-level-text i {
@@ -921,54 +920,54 @@ footer a:active {
 
 /* Resaltado de la tarjeta cuando el nivel coincide (Match) */
 .card-match-level {
-    border: 2px solid #0dcaf0 !important;
-    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.15) !important;
+    border: 2px solid #0dcaf0;
+    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.15);
 }
 
 /* Efecto al pasar el ratón por una tarjeta con match */
 .card-match-level:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(13, 202, 240, 0.25) !important;
+    box-shadow: 0 12px 25px rgba(13, 202, 240, 0.25);
 }
 
 /* Badge específico de "Tu nivel" */
 .bg-info {
-    background-color: #0dcaf0 !important;
-    color: #000 !important;
+    background-color: #0dcaf0;
+    color: #000;
     font-weight: 700;
 }
 
 /* Colores de fondo para los niveles (Refinados para lectura) */
 .bg-success-subtle { 
-    background-color: #d1f2d5 !important; 
-    color: #0f5132 !important; 
+    background-color: #d1f2d5; 
+    color: #0f5132; 
 }
 .bg-warning-subtle { 
-    background-color: #fff3cd !important; 
-    color: #664d03 !important; 
+    background-color: #fff3cd; 
+    color: #664d03; 
 }
 .bg-danger-subtle { 
-    background-color: #f8d7da !important; 
-    color: #842029 !important; 
+    background-color: #f8d7da; 
+    color: #842029; 
 }
 /* Nivel Experto: Fondo oscuro y texto blanco para máximo impacto */
 .bg-dark {
-    background-color: #212529 !important;
-    color: #ffffff !important;
-    border: 1px solid #000 !important;
+    background-color: #212529;
+    color: #ffffff;
+    border: 1px solid #000;
 }
 
 /* Opcional: Si quieres que el "Match" de Experto brille más */
 .card-match-level[data-level="expert"] {
-    border-color: #6f42c1 !important; /* Un tono púrpura */
-    box-shadow: 0 4px 20px rgba(111, 66, 193, 0.2) !important;
+    border-color: #6f42c1; /* Un tono púrpura */
+    box-shadow: 0 4px 20px rgba(111, 66, 193, 0.2);
 }
 
 /* Banner de Match en Detalle */
 .alert-info {
     background: linear-gradient(45deg, #e0f7fa, #ffffff);
     color: #0b5961;
-    border-left: 5px solid #0dcaf0 !important;
+    border-left: 5px solid #0dcaf0;
 }
 
 .alert-info i {
@@ -1035,8 +1034,8 @@ footer a:active {
     position: absolute;
     top: -4px;      /* Ajusta este valor para bajarlo o subirlo */
     right: -4px;    /* Ajusta este valor para moverlo lateralmente */
-    font-size: 0.6rem !important;
-    padding: 0.25em 0.5em !important;
+    font-size: 0.6rem;
+    padding: 0.25em 0.5em;
     border: 2px solid #fff; /* Ayuda a que resalte sobre el fondo */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     z-index: 5;
@@ -1046,7 +1045,7 @@ footer a:active {
 .mobile-hobby-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    padding-top: 12px !important; /* Espacio para que el badge respire */
+    padding-top: 12px; /* Espacio para que el badge respire */
 }
 
 @keyframes slideDown {
@@ -1087,24 +1086,24 @@ footer a:active {
 
 /* Media Content */
 .media-max-500 {
-    max-height: 500px !important;
-    width: 100% !important;
-    object-fit: contain !important;
+    max-height: 500px;
+    width: 100%;
+    object-fit: contain;
 }
 
 .media-max-250 {
-    max-height: 250px !important;
-    width: 100% !important;
-    object-fit: cover !important;
+    max-height: 250px;
+    width: 100%;
+    object-fit: cover;
 }
 
 .object-fit-cover {
-    object-fit: cover !important;
+    object-fit: cover;
 }
 
 /* Image Preview Específico para Perfiles */
 .avatar-preview img {
-    border-radius: 50% !important;
+    border-radius: 50%;
     width: 130px;
     height: 130px;
     object-fit: cover;
@@ -1115,13 +1114,13 @@ footer a:active {
     width: 100%;
     max-height: 200px;
     object-fit: cover;
-    border: 2px solid #0b5961 !important;
+    border: 2px solid #0b5961;
 }
 
 .upload-container-hubs {
     cursor: pointer;
     background: #f8f9fa;
-    border: 2px dashed #0b5961 !important;
+    border: 2px dashed #0b5961;
 }
 
 /* Profile List Card */
@@ -1136,11 +1135,11 @@ footer a:active {
 /* Otros */
 .cursor-pointer { cursor: pointer !important; }
 .bg-light-hover { transition: all 0.2s ease; }
-.bg-light-hover:hover { background-color: var(--bs-light) !important; border-color: var(--hubs-primary) !important; }
+.bg-light-hover:hover { background-color: var(--bs-light); border-color: var(--hubs-primary); }
 
 [data-bs-theme="dark"] .bg-light-hover:hover {
-    background-color: var(--bs-secondary-bg) !important;
-    border-color: var(--hubs-primary) !important;
+    background-color: var(--bs-secondary-bg);
+    border-color: var(--hubs-primary);
 }
 .transition-all { transition: all 0.2s ease-in-out; }
 
@@ -1162,9 +1161,9 @@ footer a:active {
 }
 
 [data-bs-theme="dark"] .nav-tabs .nav-link.active {
-    color: var(--hubs-primary) !important;
-    border-color: var(--hubs-primary) var(--hubs-primary) var(--bs-card-bg, #212529) var(--hubs-primary) !important;
-    background-color: var(--bs-card-bg, #212529) !important;
+    color: var(--hubs-primary);
+    border-color: var(--hubs-primary) var(--hubs-primary) var(--bs-card-bg, #212529) var(--hubs-primary);
+    background-color: var(--bs-card-bg, #212529);
 }
 .text-primary-hover:hover { color: #0d6efd; text-decoration: underline; }
 
@@ -1216,18 +1215,18 @@ footer a:active {
 [data-bs-theme="dark"] .form-select,
 [data-bs-theme="dark"] textarea.form-control,
 [data-bs-theme="dark"] input.form-control {
-    color: #ffffff !important;
-    background-color: var(--bs-dark) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff;
+    background-color: var(--bs-dark);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 [data-bs-theme="dark"] .form-control:focus,
 [data-bs-theme="dark"] .form-select:focus,
 [data-bs-theme="dark"] textarea.form-control:focus,
 [data-bs-theme="dark"] input.form-control:focus {
-    color: #ffffff !important;
-    background-color: #2b3035 !important;
-    border-color: var(--hubs-primary) !important;
+    color: #ffffff;
+    background-color: #2b3035;
+    border-color: var(--hubs-primary);
 }
 
 [data-bs-theme="dark"] .form-label,
@@ -1237,152 +1236,151 @@ footer a:active {
 [data-bs-theme="dark"] .text-muted.help-text,
 [data-bs-theme="dark"] span.helptext,
 [data-bs-theme="dark"] .help-block {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 [data-bs-theme="dark"] .form-control::placeholder,
 [data-bs-theme="dark"] textarea.form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5) !important;
+    color: rgba(255, 255, 255, 0.5);
 }
 
 [data-bs-theme="dark"] .input-group-text {
-    color: #ffffff !important;
-    background-color: #343a40 !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff;
+    background-color: #343a40;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ============================================================
    BADGES INSTITUCIONALES PARA ÁGORA (NARANJA FUERTE DESTACADO)
    ============================================================ */
-.badge-agora {
-    background-color: #fff7ed !important;
-    color: #ea580c !important;
-    border: 1.5px solid #fdba74 !important;
-    font-weight: 700 !important;
-    border-radius: 50rem !important;
-    padding: 0.25rem 0.65rem !important;
-    font-size: 0.72rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.3rem !important;
-    box-shadow: 0 1px 4px rgba(234, 88, 12, 0.15) !important;
+.badge.badge-agora {
+    background-color: #fff7ed;
+    color: #ea580c;
+    border: 1.5px solid #fdba74;
+    font-weight: 700;
+    border-radius: 50rem;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.72rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    box-shadow: 0 1px 4px rgba(234, 88, 12, 0.15);
 }
 
-.badge-agora i {
-    color: #ea580c !important;
+.badge.badge-agora i {
+    color: #ea580c;
 }
 
-.badge-agora-solid {
-    background-color: #ea580c !important;
-    color: #ffffff !important;
-    border: 1.5px solid #c2410c !important;
-    font-weight: 700 !important;
-    border-radius: 50rem !important;
-    padding: 0.3rem 0.75rem !important;
-    font-size: 0.75rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.3rem !important;
-    box-shadow: 0 3px 8px rgba(234, 88, 12, 0.35) !important;
+.badge.badge-agora-solid {
+    background-color: #ea580c;
+    color: #ffffff;
+    border: 1.5px solid #c2410c;
+    font-weight: 700;
+    border-radius: 50rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    box-shadow: 0 3px 8px rgba(234, 88, 12, 0.35);
 }
 
-.badge-agora-solid i {
-    color: #ffffff !important;
+.badge.badge-agora-solid i {
+    color: #ffffff;
 }
 
-[data-bs-theme="dark"] .badge-agora {
-    background-color: rgba(234, 88, 12, 0.22) !important;
-    color: #fb923c !important;
-    border-color: rgba(251, 146, 60, 0.55) !important;
+[data-bs-theme="dark"] .badge.badge-agora {
+    background-color: rgba(234, 88, 12, 0.22);
+    color: #fb923c;
+    border-color: rgba(251, 146, 60, 0.55);
 }
 
-[data-bs-theme="dark"] .badge-agora i {
-    color: #fb923c !important;
+[data-bs-theme="dark"] .badge.badge-agora i {
+    color: #fb923c;
 }
 
 /* ============================================================
    SECCIÓN DE EVENTOS RECOMENDADOS (HOME - MODO CLARO Y OSCURO)
    ============================================================ */
 .recommended-events-box {
-    background-color: var(--hubs-light) !important;
-    border: 1px solid var(--hubs-border) !important;
+    background-color: var(--hubs-light);
+    border: 1px solid var(--hubs-border);
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .badge-recommended-icon {
-    background-color: #ffffff !important;
-    color: var(--hubs-primary) !important;
+    background-color: #ffffff;
+    color: var(--hubs-primary);
 }
 
 [data-bs-theme="dark"] .recommended-events-box {
-    background-color: var(--bs-body-bg) !important; /* Fondo negro como el resto */
-    border: 1.5px solid var(--hubs-primary) !important; /* Borde verde claro distintivo */
-    box-shadow: 0 4px 20px rgba(43, 161, 171, 0.12) !important;
+    background-color: var(--bs-body-bg);
+    border: 1.5px solid var(--hubs-primary);
+    box-shadow: 0 4px 20px rgba(43, 161, 171, 0.12);
 }
 
 [data-bs-theme="dark"] .recommended-events-box .recommended-events-subtitle {
-    color: #ffffff !important; /* Texto en blanco como pidió el usuario */
+    color: #ffffff;
 }
 
 [data-bs-theme="dark"] .badge-recommended-icon {
-    background-color: rgba(43, 161, 171, 0.15) !important;
-    border: 1px solid rgba(43, 161, 171, 0.35) !important;
+    background-color: rgba(43, 161, 171, 0.15);
+    border: 1px solid rgba(43, 161, 171, 0.35);
 }
 
 [data-bs-theme="dark"] .badge-recommended-icon i {
-    color: var(--hubs-primary) !important;
+    color: var(--hubs-primary);
 }
 
 /* ============================================================
    BARRA DE PESTAÑAS (HOME TABS - MODO CLARO Y OSCURO)
    ============================================================ */
 .nav-pills-hubs {
-    background-color: var(--hubs-light) !important;
-    border: 1px solid var(--hubs-border) !important;
+    background-color: var(--hubs-light);
+    border: 1px solid var(--hubs-border);
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .tab-counter-badge {
-    background-color: rgba(11, 89, 97, 0.12) !important;
-    color: var(--hubs-primary) !important;
+    background-color: rgba(11, 89, 97, 0.12);
+    color: var(--hubs-primary);
     font-weight: 700;
     transition: all 0.2s ease;
 }
 
 .nav-pills-hubs .nav-link.active .tab-counter-badge {
-    background-color: rgba(255, 255, 255, 0.35) !important;
-    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs {
-    background-color: var(--bs-body-bg) !important;
-    border: 1.5px solid var(--hubs-primary) !important;
-    box-shadow: 0 4px 20px rgba(43, 161, 171, 0.12) !important;
+    background-color: var(--bs-body-bg);
+    border: 1.5px solid var(--hubs-primary);
+    box-shadow: 0 4px 20px rgba(43, 161, 171, 0.12);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) i {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active):hover {
-    background-color: rgba(43, 161, 171, 0.15) !important;
-    color: var(--hubs-primary) !important;
+    background-color: rgba(43, 161, 171, 0.15);
+    color: var(--hubs-primary);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active):hover i {
-    color: var(--hubs-primary) !important;
+    color: var(--hubs-primary);
 }
 
-/* Badge no seleccionado en modo oscuro: fondo blanco y número con color corporativo */
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) .tab-counter-badge {
-    background-color: #ffffff !important;
-    color: var(--hubs-primary) !important;
-    font-weight: 800 !important;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35) !important;
+    background-color: #ffffff;
+    color: var(--hubs-primary);
+    font-weight: 800;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
 }
 
 
