@@ -1,68 +1,87 @@
 /* ============================================================
    1. VARIABLES GLOBALES Y RESET (BOOTSTRAP 5.3 MAPPING)
+   Tema: Medicina Natural - Oliva & Bambú Minimalista
    ============================================================ */
 :root {
     /* --- Bootstrap 5.3 Native Theme Mapping --- */
-    --bs-primary: #0b5961;
-    --bs-primary-rgb: 11, 89, 97;
-    --bs-primary-text-emphasis: #05262a;
-    --bs-primary-bg-subtle: #e7eff0;
-    --bs-primary-border-subtle: #b7d1d5;
-    --bs-link-color: #0b5961;
-    --bs-link-hover-color: #084349;
-    --bs-link-color-rgb: 11, 89, 97;
+    --bs-primary: #234938;
+    --bs-primary-rgb: 35, 73, 56;
+    --bs-primary-text-emphasis: #142d22;
+    --bs-primary-bg-subtle: #edf4ef;
+    --bs-primary-border-subtle: #c5ded0;
+    --bs-link-color: #2b5643;
+    --bs-link-hover-color: #1a392b;
+    --bs-link-color-rgb: 43, 86, 67;
 
-    /* Curvaturas modernas Bootstrap 5.3 */
-    --bs-border-radius: 12px;
+    /* Curvaturas orgánicas y modernas */
+    --bs-border-radius: 14px;
     --bs-border-radius-sm: 8px;
-    --bs-border-radius-lg: 16px;
-    --bs-border-radius-xl: 20px;
-    --bs-border-radius-2xl: 24px;
+    --bs-border-radius-lg: 18px;
+    --bs-border-radius-xl: 22px;
+    --bs-border-radius-2xl: 26px;
     --bs-border-radius-pill: 50rem;
 
     /* --- Hubs Brand Compatibility Aliases --- */
     --hubs-primary: var(--bs-primary);
     --hubs-primary-hover: var(--bs-link-hover-color);
     --hubs-primary-subtle: var(--bs-primary-bg-subtle);
-    --hubs-dark: #333333;
-    --hubs-text-muted: #6c757d;
-    --hubs-light: #eef4f5; 
-    --hubs-border: #e0e0e0;
-    --hubs-success: #198754;
-    --hubs-danger: #dc3545;
-    --hubs-radius: var(--bs-border-radius-lg);
-    --hubs-shadow: 0 4px 16px rgba(11, 89, 97, 0.12);
-    --navbar-height: 90px;
-    --hubs-text-shadow-depth: 1px 2px 4px rgba(11, 89, 97, 0.15); 
-    --hubs-card-bg: #fdfefe;
+    --hubs-accent: #4e7c59;
+    --hubs-accent-rgb: 78, 124, 89;
+    --hubs-dark: #202722;
+    --hubs-text-muted: #616e65;
+    --hubs-light: #f8f9f6; 
+    --hubs-border: #e3eae5;
+    --hubs-success: #2d6a4f;
+    --hubs-danger: #c94a4a;
+    --hubs-radius: 14px;
+    --hubs-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 14px rgba(35, 73, 56, 0.05);
+    --hubs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --navbar-height: 76px;
+    --hubs-text-shadow-depth: none; 
+    --hubs-card-bg: #ffffff;
 }
 
 body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.01em;
     color: var(--hubs-dark);
     background-color: var(--hubs-light);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    padding-top: calc(var(--navbar-height) + 20px);
+    padding-top: calc(var(--navbar-height) + 12px);
+}
+
+@media (min-width: 992px) {
+    body {
+        padding-top: calc(var(--navbar-height) + 20px);
+    }
 }
 
 [data-bs-theme="dark"] {
-    /* Bootstrap 5.3 Dark Mode Overrides */
-    --bs-primary: #2ba1ab;
-    --bs-primary-rgb: 43, 161, 171;
-    --bs-primary-text-emphasis: #7adbe2;
-    --bs-primary-bg-subtle: rgba(43, 161, 171, 0.18);
-    --bs-primary-border-subtle: rgba(43, 161, 171, 0.35);
-    --bs-link-color: #35b6c0;
-    --bs-link-hover-color: #5ad3dc;
-    --bs-link-color-rgb: 53, 182, 192;
+    /* Bootstrap 5.3 Dark Mode Overrides (Ciprés y Bambú Luminoso) */
+    --bs-primary: #52a378;
+    --bs-primary-rgb: 82, 163, 120;
+    --bs-primary-text-emphasis: #a3e2bf;
+    --bs-primary-bg-subtle: rgba(82, 163, 120, 0.16);
+    --bs-primary-border-subtle: rgba(82, 163, 120, 0.3);
+    --bs-link-color: #5ebd88;
+    --bs-link-hover-color: #82d8a6;
+    --bs-link-color-rgb: 94, 189, 136;
+
+    --bs-body-bg: #0f1813;
+    --bs-body-color: #e1eae4;
+    --bs-card-bg: #15221b;
+    --bs-border-color: rgba(255, 255, 255, 0.08);
 
     /* Hubs Aliases in Dark Mode */
     --hubs-primary: var(--bs-primary);
     --hubs-primary-hover: var(--bs-link-hover-color);
     --hubs-primary-subtle: var(--bs-primary-bg-subtle);
-    --hubs-card-bg: var(--bs-body-bg);
+    --hubs-dark: #e1eae4;
+    --hubs-border: rgba(255, 255, 255, 0.08);
+    --hubs-light: #0f1813;
+    --hubs-card-bg: #15221b;
 }
 
 [data-bs-theme="dark"] body {
@@ -75,53 +94,53 @@ main, .container {
 }
 
 /* ============================================================
-   2. TIPOGRAFÍA Y BOTONES (AJUSTE DE VOLUMEN)
+   2. TIPOGRAFÍA Y BOTONES (MEDICINA NATURAL & BIENESTAR)
    ============================================================ */
 h1, h2, h3, h4, h5, h6 {
     color: var(--hubs-primary);
     font-weight: 700;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.025em;
 }
 
-h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
+h1, h2 { text-shadow: none; }
 
 .text-hubs { color: var(--hubs-primary); }
-.border-hubs { border-color: #20c997; } /* Un verde/teal más claro y brillante para mejor contraste */
+.border-hubs { border-color: var(--hubs-accent); }
 
 .btn-hubs { 
-    /* REFINADO: Gradiente sutil para profundidad táctil */
-    background: linear-gradient(135deg, var(--hubs-primary) 0%, var(--hubs-primary-hover) 100%); 
-    color: white; 
-    border: none; 
-    border-radius: 50px;
-    padding: 0.6rem 1.6rem;
-    font-weight: 600; /* Texto más firme */
-    box-shadow: 0 4px 12px rgba(11, 89, 97, 0.25); /* Sombra con matiz Teal */
-    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    background: var(--hubs-primary);
+    color: #ffffff; 
+    border: 1px solid transparent; 
+    border-radius: 50rem;
+    padding: 0.55rem 1.4rem;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(35, 73, 56, 0.15), 0 3px 8px rgba(35, 73, 56, 0.12);
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .btn-hubs:hover { 
-    color: white; 
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(11, 89, 97, 0.35);
+    color: #ffffff; 
+    background-color: var(--bs-link-hover-color);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(35, 73, 56, 0.22);
 }
 
 .btn-outline-hubs {
     color: var(--hubs-primary);
-    border: 2px solid var(--hubs-primary);
+    border: 1.5px solid var(--hubs-primary);
     background-color: transparent;
     font-weight: 600;
-    border-radius: 50px;
-    padding: 0.6rem 1.6rem;
-    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border-radius: 50rem;
+    padding: 0.55rem 1.4rem;
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .btn-outline-hubs:hover {
-    color: white;
+    color: #ffffff;
     background-color: var(--hubs-primary);
     border-color: var(--hubs-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(11, 89, 97, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(35, 73, 56, 0.15);
 }
 
 /* Armonización de botones nativos de Bootstrap 5.3 */
@@ -134,7 +153,8 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
     --bs-btn-active-border-color: var(--bs-link-hover-color);
     --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
     font-weight: 600;
-    transition: all 0.25s ease;
+    border-radius: 50rem;
+    transition: all 0.2s ease;
 }
 
 .btn-outline-primary {
@@ -146,7 +166,8 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
     --bs-btn-active-border-color: var(--bs-primary);
     --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
     font-weight: 600;
-    transition: all 0.25s ease;
+    border-radius: 50rem;
+    transition: all 0.2s ease;
 }
 
 .extra-small {
@@ -166,9 +187,9 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
     width: 100%;
     height: 400px;
     overflow: hidden;
-    background-color: #dde8ea;
+    background-color: var(--bs-primary-bg-subtle);
     border-radius: var(--hubs-radius);
-    border-bottom: 1px solid rgba(11, 89, 97, 0.12);
+    border-bottom: 1px solid var(--hubs-border);
 }
 
 [data-bs-theme="dark"] .detail-banner-wrapper {
@@ -189,7 +210,7 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 }
 
 /* ============================================================
-   5. PERFIL DE USUARIO Y TARJETAS DE POSTS
+   5. PERFIL DE USUARIO Y TARJETAS DE POSTS (MINIMALISTAS)
    ============================================================ */
 .profile-post-card,
 .post-card,
@@ -204,18 +225,18 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 [data-bs-theme="dark"] .card-hubs,
 [data-bs-theme="dark"] .card-click,
 [data-bs-theme="dark"] .sidebar-group {
-    background-color: var(--bs-card-bg, #1a1e21);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background-color: var(--bs-card-bg);
+    border: 1px solid var(--bs-border-color);
 }
 
 [data-bs-theme="dark"] .card.border-0 {
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--bs-border-color);
 }
 
 .profile-post-card, .post-card {
     border: 1px solid var(--hubs-border);
     border-radius: var(--hubs-radius);
-    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease;
+    transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.25s ease, border-color 0.25s ease;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -223,8 +244,9 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 }
 
 .profile-post-card:hover, .post-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 25px rgba(var(--bs-primary-rgb), 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(35, 73, 56, 0.08);
+    border-color: rgba(35, 73, 56, 0.2);
 }
 
 .text-truncate-custom {
@@ -257,21 +279,21 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 
 /* Animación de pulso para el contador de match */
 .match-pulse {
-    animation: sidebar-glow 2s infinite ease-in-out;
+    animation: sidebar-glow 2.5s infinite ease-in-out;
 }
 
 @keyframes sidebar-glow {
     0% {
         transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(13, 202, 240, 0.7);
+        box-shadow: 0 0 0 0 rgba(78, 124, 89, 0.5);
     }
     70% {
-        transform: scale(1.1);
-        box-shadow: 0 0 0 6px rgba(13, 202, 240, 0);
+        transform: scale(1.08);
+        box-shadow: 0 0 0 5px rgba(78, 124, 89, 0);
     }
     100% {
         transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(13, 202, 240, 0);
+        box-shadow: 0 0 0 0 rgba(78, 124, 89, 0);
     }
 }
 
@@ -289,15 +311,17 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
    ============================================================ */
 .card-hubs {
     display: flex; 
+    border: 1px solid var(--hubs-border);
     border-radius: var(--hubs-radius);
     box-shadow: var(--hubs-shadow);
-    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease;
+    transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.25s ease, border-color 0.25s ease;
     overflow: hidden;
 }
 
 .card-hubs:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 25px rgba(var(--bs-primary-rgb), 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(35, 73, 56, 0.08);
+    border-color: rgba(35, 73, 56, 0.2);
 }
 
 .row-cols-1 .card-hubs, 
@@ -311,8 +335,8 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
     width: 100%;
     height: 200px;
     overflow: hidden;
-    background-color: #dde8ea;
-    border-bottom: 1px solid rgba(11, 89, 97, 0.12);
+    background-color: #f1f4f2;
+    border-bottom: 1px solid var(--hubs-border);
     position: relative;
 }
 
@@ -490,21 +514,20 @@ footer a:active {
 
 /* Contenedor de la barra */
 .progress {
-    border-radius: 10px; /* Bordes redondeados modernos */
+    border-radius: 50rem;
     overflow: hidden;
-    background-color: var(--hubs-primary-subtle); /* Fondo Teal muy suave */
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    background-color: var(--hubs-primary-subtle);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* Relleno de la barra (Estado normal: Teal) */
+/* Relleno de la barra (Verde Oliva a Bambú) */
 .bg-hubs {
     background-color: var(--hubs-primary);
-    /* Degradado sutil para un efecto más "premium" */
-    background: linear-gradient(90deg, var(--hubs-primary) 0%, #14a2b1 100%);
+    background: linear-gradient(90deg, var(--hubs-primary) 0%, var(--hubs-accent) 100%);
 }
 
 [data-bs-theme="dark"] .bg-hubs {
-    background: linear-gradient(135deg, #0b5961 0%, #35b6c0 100%);
+    background: linear-gradient(135deg, #2d5e49 0%, #52a378 100%);
 }
 
 /* Animación de carga al entrar o filtrar */
@@ -520,13 +543,13 @@ footer a:active {
 
 /* Color de fondo para el estado "Completo" */
 .bg-danger-subtle {
-    background-color: #fce8e8;
+    background-color: #fdf0f0;
 }
 
 /* Badges de Nivel Estilizados */
-.bg-success-subtle { background-color: #e8f5e9; color: #2e7d32; }
-.bg-warning-subtle { background-color: #fff8e1; color: #f57f17; }
-.bg-danger-subtle { background-color: #ffebee; color: #c62828; }
+.bg-success-subtle { background-color: #edf7f0; color: #1e5a38; border: 1px solid #cce8d6; }
+.bg-warning-subtle { background-color: #fdf8eb; color: #8a6508; border: 1px solid #fae8b8; }
+.bg-danger-subtle { background-color: #fdf0f0; color: #a32d2d; border: 1px solid #f8c8c8; }
 
 .badge.small {
     padding: 0.35em 0.5em;
@@ -536,12 +559,13 @@ footer a:active {
 
 /* Estilos para el Match de Nivel */
 .card-match-level {
-    border: 2px solid #0dcaf0; /* Azul cian para resaltar el match */
-    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.1);
+    border: 1.5px solid var(--hubs-accent);
+    box-shadow: 0 2px 12px rgba(78, 124, 89, 0.12);
 }
 
 .bg-info {
-    background-color: #0dcaf0;
+    background-color: var(--hubs-accent);
+    color: #ffffff;
     font-size: 0.65rem;
     font-weight: 700;
 }
@@ -556,7 +580,7 @@ footer a:active {
     position: absolute;
     bottom: -2px;
     right: -2px;
-    background-color: #ffc107; /* Amarillo/Dorado vibrante */
+    background-color: #d4a373; /* Tono arena / madera noble cálido */
     color: white;
     width: 20px;
     height: 20px;
@@ -565,8 +589,8 @@ footer a:active {
     align-items: center;
     justify-content: center;
     font-size: 10px;
-    border: 2px solid white; /* Crea un anillo blanco que lo separa de la foto */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     z-index: 10;
 }
 
@@ -595,16 +619,17 @@ footer a:active {
 @media (min-width: 1100px) { .grid-item { width: 33.333%; } }
 
 .card-click {
-    border: none;
-    border-radius: 15px;
+    border: 1px solid var(--hubs-border);
+    border-radius: var(--hubs-radius);
     overflow: hidden;
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: var(--hubs-shadow);
 }
 
 .card-click:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 14px 30px rgba(11, 89, 97, 0.18);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(35, 73, 56, 0.08);
+    border-color: rgba(35, 73, 56, 0.2);
 }
 
 /* --- SIDEBAR PERSISTENTE --- */
@@ -614,47 +639,48 @@ footer a:active {
     z-index: 10;
 }
 .sidebar-label {
-    font-size: 0.8rem;
-    font-weight: 800;
+    font-size: 0.78rem;
+    font-weight: 700;
     color: var(--hubs-primary);
-    letter-spacing: 1.2px;
-    padding-left: 12px;
-    margin-bottom: 1rem;
+    letter-spacing: 0.8px;
+    padding-left: 10px;
+    margin-bottom: 0.85rem;
     text-transform: uppercase;
 }
 .sidebar-group {
-    border-radius: 16px;
+    border-radius: var(--hubs-radius);
     overflow: hidden;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--hubs-border);
+    box-shadow: var(--hubs-shadow-sm);
     background: white;
 }
 .sidebar-item {
     display: flex;
     align-items: center;
-    padding: 14px 16px;
+    padding: 12px 14px;
     border: none;
     transition: all 0.2s ease-in-out;
 }
 .sidebar-item:hover {
-    background-color: #f8f9fa;
-    transform: translateX(4px);
+    background-color: var(--hubs-primary-subtle);
+    transform: translateX(3px);
 }
 
 [data-bs-theme="dark"] .sidebar-group {
-    background-color: var(--bs-dark);
+    background-color: var(--bs-card-bg);
     border-color: var(--bs-border-color);
 }
 
 [data-bs-theme="dark"] .sidebar-item:hover {
-    background-color: #343a40;
+    background-color: rgba(82, 163, 120, 0.12);
 }
 
 
 /* --- NAVEGACIÓN DE HOBBIES --- */
 .hobby-name {
     font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--hubs-primary);
+    font-weight: 600;
+    color: var(--hubs-dark);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -662,22 +688,22 @@ footer a:active {
 }
 
 .sidebar-item:hover .hobby-name {
-    color: var(--hubs-primary-hover);
+    color: var(--hubs-primary);
 }
 
 .hobby-dot {
-     width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 700;
     margin-right: 12px;
     background-color: var(--hubs-primary);
-    box-shadow: 0 4px 10px rgba(11, 89, 97, 0.35);
+    box-shadow: 0 2px 6px rgba(35, 73, 56, 0.2);
     border: 2px solid #ffffff;
 }
 
@@ -781,15 +807,15 @@ footer a:active {
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         scroll-behavior: smooth;
+        scroll-snap-type: x mandatory;
         gap: 0.75rem;
         padding-bottom: 0.5rem;
         margin-left: -0.25rem;  /* evita padding extra a la izquierda */
         padding-left: 0.25rem;
         padding-right: 2rem; /* Espacio extra para asegurar que el ultimo elemento se vea completo antes del fade */
         
-        /* Firefox support */
-        scrollbar-width: thin;
-        scrollbar-color: rgba(11, 89, 97, 0.5) transparent;
+        /* Firefox & Webkit scrollbar hiding */
+        scrollbar-width: none;
     }
 
     /* 1. Flechas indicadoras de scroll (Izquierda y Derecha) */
@@ -847,26 +873,31 @@ footer a:active {
         flex: 0 0 auto;
         display: inline-flex;
         align-items: center;
+        scroll-snap-align: start;
         gap: 0.6rem;
         padding: 0.5rem 1rem;
         background-color: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        border: 1px solid var(--hubs-border);
+        border-radius: 50rem;
+        box-shadow: var(--hubs-shadow);
         text-decoration: none;
         color: var(--hubs-dark);
         white-space: nowrap;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         font-size: 0.95rem;
     }
 
     [data-bs-theme="dark"] .mobile-hobby-pill {
-        background-color: #343a40;
-        color: #f8f9fa;
+        background-color: var(--bs-body-bg);
+        border-color: var(--hubs-border);
+        color: var(--hubs-light);
     }
 
     .mobile-hobby-pill:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 12px rgba(11, 89, 97, 0.15);
+        box-shadow: 0 4px 12px rgba(35, 73, 56, 0.12);
+        color: var(--hubs-primary);
+        border-color: var(--bs-primary-border-subtle);
     }
 
     /* Círculo con inicial */
@@ -901,18 +932,18 @@ footer a:active {
 /* Estilo base para los badges de nivel con texto */
 .badge-level-text {
     font-size: 0.75rem;
-    padding: 0.4rem 0.6rem;
+    padding: 0.35rem 0.65rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    border-radius: 6px;
-    gap: 4px; /* Espacio entre icono y texto */
+    border-radius: 50rem;
+    gap: 4px;
 }
-/* Colores de los estados */
-.bg-all-levels { background-color: #e0f7fa; color: #006064; border: 1px solid #b2ebf2; }
-.bg-success-subtle { background-color: #d1f2d5; color: #0f5132; border: 1px solid #badbcc; }
-.bg-warning-subtle { background-color: #fff3cd; color: #664d03; border: 1px solid #ffecb5; }
-.bg-danger-subtle { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+/* Colores de los estados - Tonalidades Medicina Natural */
+.bg-all-levels { background-color: #edf4ef; color: #234938; border: 1px solid #c5ded0; }
+.bg-success-subtle { background-color: #edf7f0; color: #1e5a38; border: 1px solid #cce8d6; }
+.bg-warning-subtle { background-color: #fdf8eb; color: #8a6508; border: 1px solid #fae8b8; }
+.bg-danger-subtle { background-color: #fdf0f0; color: #a32d2d; border: 1px solid #f8c8c8; }
 
 /* Iconos dentro de los badges */
 .badge-level-text i {
@@ -922,58 +953,58 @@ footer a:active {
 
 /* Resaltado de la tarjeta cuando el nivel coincide (Match) */
 .card-match-level {
-    border: 2px solid #0dcaf0;
-    box-shadow: 0 4px 15px rgba(13, 202, 240, 0.15);
+    border: 1.5px solid var(--hubs-accent);
+    box-shadow: 0 2px 14px rgba(78, 124, 89, 0.12);
 }
 
 /* Efecto al pasar el ratón por una tarjeta con match */
 .card-match-level:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(13, 202, 240, 0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(78, 124, 89, 0.18);
 }
 
 /* Badge específico de "Tu nivel" */
 .bg-info {
-    background-color: #0dcaf0;
-    color: #000;
+    background-color: var(--hubs-accent);
+    color: #ffffff;
     font-weight: 700;
 }
 
 /* Colores de fondo para los niveles (Refinados para lectura) */
 .bg-success-subtle { 
-    background-color: #d1f2d5; 
-    color: #0f5132; 
+    background-color: #edf7f0; 
+    color: #1e5a38; 
 }
 .bg-warning-subtle { 
-    background-color: #fff3cd; 
-    color: #664d03; 
+    background-color: #fdf8eb; 
+    color: #8a6508; 
 }
 .bg-danger-subtle { 
-    background-color: #f8d7da; 
-    color: #842029; 
+    background-color: #fdf0f0; 
+    color: #a32d2d; 
 }
 /* Nivel Experto: Fondo oscuro y texto blanco para máximo impacto */
 .bg-dark {
-    background-color: #212529;
+    background-color: #202722;
     color: #ffffff;
-    border: 1px solid #000;
+    border: 1px solid #141a16;
 }
 
-/* Opcional: Si quieres que el "Match" de Experto brille más */
+/* Match de Experto */
 .card-match-level[data-level="expert"] {
-    border-color: #6f42c1; /* Un tono púrpura */
-    box-shadow: 0 4px 20px rgba(111, 66, 193, 0.2);
+    border-color: #6f42c1;
+    box-shadow: 0 4px 18px rgba(111, 66, 193, 0.15);
 }
 
 /* Banner de Match en Detalle */
 .alert-info {
-    background: linear-gradient(45deg, #e0f7fa, #ffffff);
-    color: #0b5961;
-    border-left: 5px solid #0dcaf0;
+    background: linear-gradient(45deg, #edf4ef, #ffffff);
+    color: var(--hubs-primary);
+    border-left: 4px solid var(--hubs-accent);
 }
 
 .alert-info i {
-    color: #0dcaf0;
+    color: var(--hubs-accent);
     animation: shine 2s infinite;
 }
 
@@ -985,9 +1016,9 @@ footer a:active {
 
 /* Banner de Mentor (Púrpura/Dorado) */
 .mentor-banner {
-    background: linear-gradient(90deg, #f3e5f5 0%, #ffffff 100%);
+    background: linear-gradient(90deg, #f9f5fa 0%, #ffffff 100%);
     border-left: 4px solid #6f42c1;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 12px 16px;
     color: #4a148c;
 }
@@ -998,27 +1029,27 @@ footer a:active {
 }
 
 .mentor-icon-container i {
-    filter: drop-shadow(0 0 5px rgba(111, 66, 193, 0.3));
+    filter: drop-shadow(0 0 5px rgba(111, 66, 193, 0.25));
 }
 /* Animación de brillo suave para el icono de Match */
 .match-pulse {
-    animation: match-glow 2s infinite ease-in-out;
-    display: inline-block; /* Necesario para que la transformación funcione bien */
+    animation: match-glow 2.5s infinite ease-in-out;
+    display: inline-block;
 }
 
 @keyframes match-glow {
     0% {
         transform: scale(1);
-        text-shadow: 0 0 0px rgba(13, 202, 240, 0);
+        text-shadow: 0 0 0px rgba(78, 124, 89, 0);
     }
     50% {
-        transform: scale(1.2);
-        text-shadow: 0 0 8px rgba(13, 202, 240, 0.8);
-        color: #00e5ff; /* Un azul un poco más vibrante en el pico del brillo */
+        transform: scale(1.15);
+        text-shadow: 0 0 8px rgba(78, 124, 89, 0.6);
+        color: #52a378;
     }
     100% {
         transform: scale(1);
-        text-shadow: 0 0 0px rgba(13, 202, 240, 0);
+        text-shadow: 0 0 0px rgba(78, 124, 89, 0);
     }
 }
 
@@ -1140,13 +1171,15 @@ footer a:active {
     width: 100%;
     max-height: 200px;
     object-fit: cover;
-    border: 2px solid #0b5961;
+    border-radius: var(--bs-border-radius);
+    border: 2px solid var(--hubs-primary);
 }
 
 .upload-container-hubs {
     cursor: pointer;
-    background: #f8f9fa;
-    border: 2px dashed #0b5961;
+    background: var(--hubs-light);
+    border-radius: var(--bs-border-radius);
+    border: 2px dashed var(--hubs-primary);
 }
 
 /* Profile List Card */
@@ -1326,23 +1359,41 @@ footer a:active {
 }
 
 /* ============================================================
+   NAVBAR HUBS (Efecto Glassmorphism sutil y bordes orgánicos)
+   ============================================================ */
+.navbar-hubs {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.94) !important;
+    border-bottom: 1px solid var(--hubs-border);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+[data-bs-theme="dark"] .navbar-hubs {
+    background-color: rgba(21, 34, 27, 0.92) !important;
+    border-bottom: 1px solid var(--hubs-border);
+}
+
+/* ============================================================
    SECCIÓN DE EVENTOS RECOMENDADOS (HOME - MODO CLARO Y OSCURO)
    ============================================================ */
 .recommended-events-box {
     background-color: var(--hubs-light);
     border: 1px solid var(--hubs-border);
+    border-radius: var(--bs-border-radius);
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .badge-recommended-icon {
     background-color: #ffffff;
     color: var(--hubs-primary);
+    box-shadow: 0 1px 3px rgba(35, 73, 56, 0.08);
 }
 
 [data-bs-theme="dark"] .recommended-events-box {
     background-color: var(--bs-body-bg);
-    border: 1.5px solid var(--hubs-primary);
-    box-shadow: 0 4px 20px rgba(43, 161, 171, 0.12);
+    border: 1px solid var(--hubs-border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 [data-bs-theme="dark"] .recommended-events-box .recommended-events-subtitle {
@@ -1350,8 +1401,8 @@ footer a:active {
 }
 
 [data-bs-theme="dark"] .badge-recommended-icon {
-    background-color: rgba(43, 161, 171, 0.15);
-    border: 1px solid rgba(43, 161, 171, 0.35);
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+    border: 1px solid rgba(var(--bs-primary-rgb), 0.4);
 }
 
 [data-bs-theme="dark"] .badge-recommended-icon i {
@@ -1364,11 +1415,12 @@ footer a:active {
 .nav-pills-hubs {
     background-color: var(--hubs-light);
     border: 1px solid var(--hubs-border);
+    border-radius: var(--bs-border-radius-pill);
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .tab-counter-badge {
-    background-color: rgba(11, 89, 97, 0.12);
+    background-color: rgba(var(--bs-primary-rgb), 0.12);
     color: var(--hubs-primary);
     font-weight: 700;
     transition: all 0.2s ease;
@@ -1381,20 +1433,20 @@ footer a:active {
 
 [data-bs-theme="dark"] .nav-pills-hubs {
     background-color: var(--bs-body-bg);
-    border: 1.5px solid var(--hubs-primary);
-    box-shadow: 0 4px 20px rgba(43, 161, 171, 0.12);
+    border: 1px solid var(--hubs-border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) {
-    color: #ffffff;
+    color: var(--hubs-light);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) i {
-    color: #ffffff;
+    color: var(--hubs-light);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active):hover {
-    background-color: rgba(43, 161, 171, 0.15);
+    background-color: rgba(var(--bs-primary-rgb), 0.18);
     color: var(--hubs-primary);
 }
 
@@ -1403,10 +1455,10 @@ footer a:active {
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) .tab-counter-badge {
-    background-color: #ffffff;
-    color: var(--hubs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.25);
+    color: var(--hubs-light);
     font-weight: 800;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 
