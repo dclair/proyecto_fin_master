@@ -11,8 +11,7 @@
         <div class="col-md-2 text-center">
             <img src="{{ user_profile.profile_picture_url }}" 
                  alt="{{ user_profile.user.username }}" 
-                 class="rounded-circle img-thumbnail" 
-                 style="width: 150px; height: 150px; object-fit: cover;">
+                 class="rounded-circle img-thumbnail avatar-xl">
         </div>
         <div class="col-md-10">
             <div class="d-flex align-items-center mb-3">
@@ -124,8 +123,8 @@
                         <div class="col-6 col-md-4">
                             <div class="card border-0 shadow-sm overflow-hidden profile-post-card">
                                 <a href="{% url 'posts:post_detail' post.pk %}">
-                                    <img src="{{ post.image.url }}" class="card-img-top" 
-                                        alt="{{ post.title }}" style="height: 250px; object-fit: cover;">
+                                    <img src="{{ post.image.url }}" class="card-img-top media-max-250 object-fit-cover" 
+                                        alt="{{ post.title }}">
                                 </a>
                                 
                                 <div class="p-3 bg-white">
@@ -150,14 +149,14 @@
                 </div>
             {% else %}
                 <div class="text-center py-5">
-                    <i class="bi bi-camera" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <i class="bi bi-camera fs-3xl opacity-25"></i>
                     <h4 class="mt-3">No hay publicaciones</h4>
                 </div>
             {% endif %}
         </div>
         
         <div class="tab-pane fade text-center py-5" id="saved">
-            <i class="bi bi-bookmark-star" style="font-size: 3rem; opacity: 0.3;"></i>
+            <i class="bi bi-bookmark-star fs-3xl opacity-25"></i>
             <h4 class="mt-3">Publicaciones guardadas</h4>
             <p class="text-muted">Solo tú puedes ver qué has guardado.</p>
         </div>

@@ -122,7 +122,7 @@
                         {% else %}
                             <img src="{% static 'img/default_event.png' %}" class="detail-banner-img" alt="Evento">
                         {% endif %}
-                        <div class="position-absolute top-50 start-50 translate-middle w-100 text-center" style="z-index: 10;">
+                        <div class="position-absolute top-50 start-50 translate-middle w-100 text-center z-10">
                             <a href="{{ event.stream_url }}" target="_blank" class="btn btn-primary btn-lg shadow rounded-pill">
                                 <i class="bi bi-box-arrow-up-right me-2"></i>Unirse a la videollamada
                             </a>
@@ -221,7 +221,7 @@
             {% for comment in event.comments.all %}
             <div class="d-flex mb-3">
                 <img src="{% if comment.user.profile.profile_picture %}{{ comment.user.profile.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ comment.user.username }}&background=0b5961&color=fff{% endif %}"
-                     class="rounded-circle border shadow-sm" style="width:45px;height:45px;object-fit:cover;">
+                     class="rounded-circle border shadow-sm avatar-45">
                 <div class="ms-3 bg-white p-3 rounded-4 shadow-sm flex-grow-1 dark-mode-text-dark dark-mode-border">
                     <div class="d-flex justify-content-between mb-1">
                         <strong class="text-hubs">@{{ comment.user.username }}</strong>
@@ -237,7 +237,7 @@
     </div>
 
     <div class="col-lg-4">
-        <div class="sticky-top pt-3" style="top: 140px;">
+        <div class="sticky-top pt-3 top-140">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0 mb-3">
@@ -261,7 +261,7 @@
                 </h5>
 
                 {# BARRA DE PROGRESO VISUAL (Solo presencial) #}
-                <div class="progress mb-4" style="height: 8px; background-color: var(--hubs-primary-subtle);">
+                <div class="progress mb-4 h-8px">
                     <div class="progress-bar {% if event.physical_participants_count >= event.max_participants %}bg-danger{% else %}bg-hubs{% endif %}"
                          role="progressbar"
                          style="width: {% widthratio event.physical_participants_count event.max_participants 100 %}%">
@@ -272,8 +272,7 @@
                     {% for attendance in attendances %}
                     <div class="position-relative">
                         <img src="{% if attendance.user.profile.profile_picture %}{{ attendance.user.profile.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ attendance.user.username }}&background=random{% endif %}"
-                             class="rounded-circle border shadow-sm"
-                             style="width:48px;height:48px;object-fit:cover;"
+                             class="rounded-circle border shadow-sm avatar-48"
                              title="{{ attendance.user.username }} ({{ attendance.get_attendance_type_display }})">
                         {% if attendance.user == event.organizer %}
                         <span class="badge-organizer" title="Organizador"><i class="bi bi-star-fill"></i></span>

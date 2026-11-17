@@ -92,7 +92,7 @@
                 <a href="{% url 'posts:event_detail' event.id %}" class="text-decoration-none">
                     <div class="img-event-wrapper">
                         {% if event.is_canceled %}
-                            <div class="position-absolute top-50 start-50 translate-middle w-100 text-center" style="z-index: 10;">
+                            <div class="position-absolute top-50 start-50 translate-middle w-100 text-center z-10">
                                 <span class="badge bg-danger px-3 py-2">PLAN CANCELADO</span>
                             </div>
                         {% endif %}
@@ -168,7 +168,7 @@
                             </span>
                         </div>
                         
-                        <div class="progress mb-3" style="height: 6px; background-color: var(--hubs-primary-subtle);">
+                        <div class="progress mb-3 h-6px">
                             <div class="progress-bar {% if event.physical_participants_count >= event.max_participants %}bg-danger{% else %}bg-hubs{% endif %}" 
                                  style="width: {% widthratio event.physical_participants_count event.max_participants 100 %}%">
                             </div>

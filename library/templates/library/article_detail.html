@@ -39,10 +39,10 @@
             </div>
 
             {% if article.cover_image %}
-                <img src="{{ article.cover_image.url }}" class="img-fluid rounded mb-4 shadow-sm w-100 object-fit-cover" style="max-height: 400px;" alt="{{ article.title }}">
+                <img src="{{ article.cover_image.url }}" class="img-fluid rounded mb-4 shadow-sm w-100 object-fit-cover max-h-400" alt="{{ article.title }}">
             {% endif %}
 
-            <div class="article-content fs-5 mb-5" style="line-height: 1.8;">
+            <div class="article-content fs-5 mb-5 lh-lg">
                 {{ article.content|sanitize_html }}
             </div>
 
@@ -132,7 +132,7 @@
 
         <!-- Sidebar / Ratings -->
         <div class="col-lg-4 mt-5 mt-lg-0">
-            <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
+            <div class="card border-0 shadow-sm sticky-top top-100">
                 <div class="card-body text-center">
                     <h5 class="fw-bold mb-3">Valoración de la Comunidad</h5>
                     <div class="display-4 fw-bold text-warning mb-2">

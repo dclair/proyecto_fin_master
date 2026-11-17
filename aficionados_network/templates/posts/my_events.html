@@ -35,7 +35,7 @@
   {# TABLA DE GESTIÓN #}
   <div class="card shadow-sm border-0 card-visible">
     <!-- Indicador de scroll horizontal para móviles -->
-    <div class="d-block d-md-none bg-light text-secondary text-center py-1 small fw-bold border-bottom" style="font-size: 0.75rem;">
+    <div class="d-block d-md-none bg-light text-secondary text-center py-1 small fw-bold border-bottom fs-xs">
       <i class="bi bi-arrow-left-right me-1"></i> Desliza la tabla para ver más detalles
     </div>
     <div class="table-responsive border-0 table-responsive-visible">
@@ -73,8 +73,7 @@
             <td class="text-center d-none d-sm-table-cell">
               {% if event.event_date|date:"Y-m-d" == now|date:"Y-m-d" %}
               <span
-                class="badge rounded-pill bg-info-subtle text-info extra-small mb-1"
-                style="font-size: 0.65rem"
+                class="badge rounded-pill bg-info-subtle text-info extra-small mb-1 fs-nano"
                 >¡HOY!</span
               >
               <div class="small fw-bold text-info">

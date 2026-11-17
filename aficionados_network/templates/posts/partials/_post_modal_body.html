@@ -4,13 +4,13 @@
     {# 2. Quitamos h-100 y usamos post-modal-image-col para controlar el alto en móvil #}
     <div class="col-lg-7 bg-black d-flex align-items-center justify-content-center post-modal-image-col">
         {% if post.image %}
-            <img src="{{ post.image.url }}" class="img-fluid post-main-img" style="max-height: 100%; object-fit: contain;">
+            <img src="{{ post.image.url }}" class="img-fluid post-main-img">
         {% elif post.video %}
-            <video src="{{ post.video.url }}" controls class="img-fluid post-main-img" style="max-height: 100%; width: 100%; object-fit: contain;"></video>
+            <video src="{{ post.video.url }}" controls class="img-fluid post-main-img"></video>
         {% elif post.video_url %}
             <div class="text-center w-100">
                 <a href="{{ post.video_url }}" target="_blank" class="text-decoration-none d-flex flex-column align-items-center justify-content-center">
-                    <i class="bi bi-play-circle-fill text-danger mb-3" style="font-size: 4rem;"></i>
+                    <i class="bi bi-play-circle-fill text-danger mb-3 fs-4xl"></i>
                     <span class="fw-bold text-white fs-5">Ver vídeo externo</span>
                 </a>
             </div>
@@ -23,14 +23,14 @@
         <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
                 <img src="{% if post.user.profile.profile_picture %}{{ post.user.profile.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ post.user.username }}{% endif %}" 
-                     class="rounded-circle border me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                     class="rounded-circle border me-2 avatar-xxs">
                 <span class="fw-bold small">@{{ post.user.username }}</span>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         {# 4. Usamos la clase post-comments-scroll que tiene el fix para el dedo del iPhone #}
-        <div class="flex-grow-1 p-3 post-comments-scroll" id="scroll-container-{{ post.id }}" style="background-color: #f8f9fa;">
+        <div class="flex-grow-1 p-3 post-comments-scroll" id="scroll-container-{{ post.id }}">
             <div class="mb-3">
                 <p class="small mb-0"><strong>{{ post.title }}</strong></p>
                 <p class="text-muted small dark-mode-text-dark">{{ post.caption }}</p>

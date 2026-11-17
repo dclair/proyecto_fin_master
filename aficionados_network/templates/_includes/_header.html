@@ -44,7 +44,7 @@
                                 <i class="bi bi-book me-2 text-info"></i> Biblioteca
                                 {% get_articles_count as articles_count %}
                                 {% if articles_count != '0' %}
-                                    <span class="badge bg-success rounded-pill ms-auto" style="font-size: 0.65rem;">{{ articles_count }}</span>
+                                    <span class="badge bg-success rounded-pill ms-auto fs-nano">{{ articles_count }}</span>
                                 {% endif %}
                             </a>
                         </li>
@@ -56,7 +56,7 @@
                                 <i class="bi bi-calendar3 me-2 text-warning"></i> Eventos
                                 {% get_events_count as events_count %}
                                 {% if events_count != '0' %}
-                                    <span class="badge bg-success rounded-pill ms-auto" style="font-size: 0.65rem;">{{ events_count }}</span>
+                                    <span class="badge bg-success rounded-pill ms-auto fs-nano">{{ events_count }}</span>
                                 {% endif %}
                             </a>
                         </li>
@@ -67,7 +67,7 @@
                                 <i class="bi bi-people me-2 text-primary"></i> Profesionales
                                 {% get_professionals_count as profs_count %}
                                 {% if profs_count != '0' %}
-                                    <span class="badge bg-success rounded-pill ms-auto" style="font-size: 0.65rem;">{{ profs_count }}</span>
+                                    <span class="badge bg-success rounded-pill ms-auto fs-nano">{{ profs_count }}</span>
                                 {% endif %}
                             </a>
                         </li>
@@ -78,7 +78,7 @@
                                 <i class="bi bi-shop me-2 text-success"></i> Mercadillo
                                 {% get_active_listings_count as listings_count %}
                                 {% if listings_count != '0' %}
-                                    <span class="badge bg-success rounded-pill ms-auto" style="font-size: 0.65rem;">{{ listings_count }}</span>
+                                    <span class="badge bg-success rounded-pill ms-auto fs-nano">{{ listings_count }}</span>
                                 {% endif %}
                             </a>
                         </li>
@@ -201,8 +201,7 @@
                                     <button hx-delete="{% url 'notifications:delete_notification' n.id %}" 
                                             hx-target="closest .list-group-item" 
                                             hx-swap="outerHTML swap:0.5s"
-                                            class="btn btn-sm btn-link text-muted position-absolute top-50 end-0 translate-middle-y shadow-none"
-                                            style="z-index: 2;"
+                                            class="btn btn-sm btn-link text-muted position-absolute top-50 end-0 translate-middle-y shadow-none z-2"
                                             title="Borrar aviso">
                                         <i class="bi bi-x fs-5"></i>
                                     </button>
@@ -211,7 +210,7 @@
                                 <div class="text-center py-4"><p class="small text-muted mb-0">Sin notificaciones</p></div>
                             {% endfor %}
                         </div>
-                        <li><a class="dropdown-item text-center py-2 small fw-bold text-primary bg-light position-relative" style="z-index: 3;" href="{% url 'notifications:list' %}">Ver historial</a></li>
+                        <li><a class="dropdown-item text-center py-2 small fw-bold text-primary bg-light position-relative z-3" href="{% url 'notifications:list' %}">Ver historial</a></li>
                     </ul>
                 </li>
                 {% endif %}

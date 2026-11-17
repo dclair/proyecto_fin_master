@@ -19,9 +19,9 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0 mb-4">
                 {% if listing.image %}
-                    <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title }}" style="max-height: 500px; object-fit: contain; background: #f8f9fa;">
+                    <img src="{{ listing.image.url }}" class="card-img-top media-max-500 bg-light" alt="{{ listing.title }}">
                 {% else %}
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 400px;">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted h-400">
                         <i class="fas fa-image fa-5x"></i>
                     </div>
                 {% endif %}
@@ -47,7 +47,7 @@
                     {% if listing.video %}
                     <div class="mb-4">
                         <h5 class="fw-bold mb-3"><i class="fas fa-video me-2"></i>Video</h5>
-                        <video controls class="w-100 rounded shadow-sm" style="max-height: 400px; background: #000;">
+                        <video controls class="w-100 rounded shadow-sm max-h-400 bg-black">
                             <source src="{{ listing.video.url }}" type="video/mp4">
                             Tu navegador no soporta la reproducción de videos.
                         </video>
@@ -55,7 +55,7 @@
                     {% endif %}
 
                     <h5 class="fw-bold mb-3">Descripción</h5>
-                    <div class="text-muted" style="white-space: pre-line;">
+                    <div class="text-muted pre-line">
                         {{ listing.description }}
                     </div>
                 </div>
@@ -87,11 +87,11 @@
 
         <!-- Columna Vendedor -->
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 sticky-top" style="top: 100px;">
+            <div class="card shadow-sm border-0 sticky-top top-100">
                 <div class="card-body p-4 text-center">
                     <h5 class="card-title fw-bold border-bottom pb-3 mb-3">Información del Vendedor</h5>
                     
-                    <img src="{{ listing.seller.profile.profile_picture_url }}" class="rounded-circle mb-3" width="100" height="100" style="object-fit: cover; border: 3px solid #e9ecef;">
+                    <img src="{{ listing.seller.profile.profile_picture_url }}" class="rounded-circle mb-3 avatar-100">
                     <h5 class="fw-bold mb-1"><a href="{% url 'profiles:profile' listing.seller.pk %}" class="text-dark text-decoration-none">{{ listing.seller.username }}</a></h5>
                     
                     <!-- Estrellas -->
@@ -139,7 +139,7 @@
                                 </small>
                             </div>
                             <small class="text-muted d-block">{{ review.comment }}</small>
-                            <small class="text-muted" style="font-size: 0.7rem;">{{ review.created_at|date:"d M Y" }}</small>
+                            <small class="text-muted fs-xxs">{{ review.created_at|date:"d M Y" }}</small>
                         </div>
                         {% endfor %}
                     </div>

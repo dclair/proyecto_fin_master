@@ -414,6 +414,7 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
 
 /* --- BANNER DE COOKIES --- */
 .cookie-banner-hubs {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -422,6 +423,7 @@ h1, h2 { text-shadow: var(--hubs-text-shadow-depth); }
     border-radius: 0;
     background-color: var(--hubs-primary); /* El fondo Teal corporativo */
     box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Sombra para separar del fondo */
+    animation: slideDown 0.5s ease-out;
 }
 
 #cookie-banner {
@@ -1060,8 +1062,12 @@ footer a:active {
 .avatar-xxl { width: 160px; height: 160px; object-fit: cover; }
 .avatar-xl { width: 150px; height: 150px; object-fit: cover; }
 .avatar-lg { width: 130px; height: 130px; object-fit: cover; }
+.avatar-100 { width: 100px; height: 100px; object-fit: cover; border: 3px solid #e9ecef; }
 .avatar-md { width: 80px; height: 80px; object-fit: cover; }
 .avatar-65 { width: 65px; height: 65px; object-fit: cover; }
+.avatar-60 { width: 60px; height: 60px; font-size: 24px; font-weight: bold; }
+.avatar-48 { width: 48px; height: 48px; object-fit: cover; }
+.avatar-45 { width: 45px; height: 45px; object-fit: cover; }
 .avatar-sm { width: 40px; height: 40px; object-fit: cover; }
 .avatar-xs { width: 35px; height: 35px; object-fit: cover; }
 .avatar-xxs { width: 32px; height: 32px; object-fit: cover; }
@@ -1079,10 +1085,30 @@ footer a:active {
 
 /* Layout y Contenedores */
 .min-w-45 { min-width: 45px !important; }
+.min-w-80 { min-width: 80px !important; }
 .min-w-200 { min-width: 200px !important; }
 .min-w-320 { min-width: 320px !important; }
 .max-h-350 { max-height: 350px !important; overflow-y: auto !important; }
 .logo-hubs { height: 45px; }
+.h-400 { height: 400px; }
+.h-200 { height: 200px; }
+.h-180 { height: 180px; }
+.h-160 { height: 160px; }
+.h-5px { height: 5px; }
+.h-6px { height: 6px; }
+.h-8px { height: 8px; }
+.max-h-400 { max-height: 400px; }
+.max-h-300 { max-height: 300px; }
+.min-h-200 { min-height: 200px; }
+.max-w-90 { max-width: 90px; }
+.max-w-120 { max-width: 120px; }
+.max-w-130 { max-width: 130px; }
+.min-w-0 { min-width: 0; }
+.top-140 { top: 140px; }
+.top-100 { top: 100px; }
+.min-h-20 { min-height: 20px; }
+.z-10 { z-index: 10; }
+.pre-line { white-space: pre-line; }
 
 /* Media Content */
 .media-max-500 {

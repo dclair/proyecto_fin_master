@@ -10,11 +10,9 @@
                             <a href="{% url 'profiles:profile' post.user.profile.id %}" class="text-decoration-none text-dark d-flex align-items-center">
                                 {% if post.user.profile.profile_picture %}
                                     <img src="{{ post.user.profile.profile_picture.url }}" 
-                                         class="rounded-circle me-2" 
-                                         style="width: 32px; height: 32px; object-fit: cover;">
+                                         class="rounded-circle me-2 avatar-xxs">
                                 {% else %}
-                                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center me-2" 
-                                         style="width: 32px; height: 32px;">
+                                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center me-2 avatar-xxs">
                                         <i class="bi bi-person text-muted small"></i>
                                     </div>
                                 {% endif %}
@@ -22,7 +20,7 @@
                                 <div class="d-flex flex-column">
                                     <span class="fw-bold extra-small lh-1">{{ post.user.username }}</span>
                                     {% if post.location %}
-                                        <small class="text-dark extra-small mt-1" style="font-size: 0.65rem;">
+                                        <small class="text-dark extra-small mt-1 fs-nano">
                                             <i class="bi bi-geo-alt-fill text-danger opacity-75"></i> {{ post.location }}
                                         </small>
                                     {% endif %}
@@ -45,7 +43,7 @@
                         {% endif %}
 
                         <div class="ms-auto d-flex align-items-center gap-2">
-                            <small class="text-dark" style="font-size: 0.7rem;">
+                            <small class="text-dark fs-xxs">
                                 {{ post.created_at|date:"d M" }}
                             </small>
 
@@ -77,21 +75,20 @@
                 <div class="ratio ratio-4x3"> 
                     <a href="{% url 'posts:post_detail' post.pk %}">
                         <img src="{{ post.image.url }}" 
-                             class="card-img-top"
+                             class="card-img-top object-fit-cover"
                              loading="lazy"
-                             style="object-fit: cover;"
                              alt="{{ post.title|default:'Publicación' }}">
                     </a>
                 </div>
                 {% elif post.video %}
                 <div class="ratio ratio-4x3 bg-dark position-relative">
                     {% if user.is_authenticated %}
-                        <video src="{{ post.video.url }}" controls class="w-100 h-100" style="object-fit: cover;"></video>
+                        <video src="{{ post.video.url }}" controls class="w-100 h-100 object-fit-cover"></video>
                     {% else %}
                         <a href="{% url 'posts:post_detail' post.pk %}" class="d-block w-100 h-100 text-decoration-none">
-                            <video src="{{ post.video.url }}" class="w-100 h-100" style="object-fit: cover; pointer-events: none;"></video>
+                            <video src="{{ post.video.url }}" class="w-100 h-100 object-fit-cover pe-none"></video>
                             <div class="position-absolute top-50 start-50 translate-middle">
-                                <i class="bi bi-play-circle-fill text-white opacity-75 shadow-sm" style="font-size: 4rem;"></i>
+                                <i class="bi bi-play-circle-fill text-white opacity-75 shadow-sm fs-4xl"></i>
                             </div>
                         </a>
                     {% endif %}
@@ -99,7 +96,7 @@
                 {% elif post.document %}
                 <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center border-bottom position-relative">
                     <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
-                        <i class="bi bi-file-earmark-pdf-fill text-danger mb-2" style="font-size: 3rem;"></i>
+                        <i class="bi bi-file-earmark-pdf-fill text-danger mb-2 fs-3xl"></i>
                         <span class="fw-bold text-dark small">Documento PDF</span>
                         <span class="badge bg-danger-subtle text-danger extra-small mt-1">Artículo Extenso</span>
                     </a>
@@ -107,7 +104,7 @@
                 {% elif post.external_url %}
                 <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center border-bottom position-relative">
                     <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
-                        <i class="bi bi-link-45deg text-primary mb-2" style="font-size: 3rem;"></i>
+                        <i class="bi bi-link-45deg text-primary mb-2 fs-3xl"></i>
                         <span class="fw-bold text-dark small">Enlace Externo</span>
                         <span class="badge bg-primary-subtle text-primary extra-small mt-1">Recurso de interés</span>
                     </a>
@@ -116,7 +113,7 @@
 
                 <div class="card-body p-3 d-flex flex-column">
                     <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-dark">
-                        <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">{{ post.title|default:"" }}</h6>
+                        <h6 class="fw-bold mb-1 fs-xs">{{ post.title|default:"" }}</h6>
                         <p class="small text-muted mb-2">{{ post.plain_text_caption|truncatechars:60 }}</p>
                     </a>
 

@@ -65,14 +65,13 @@
                                 </div>
                             </div>
                             <div class="d-flex align-items-center">
-                                <small class="text-secondary ms-2 text-end me-3" style="min-width: 80px;">
+                                <small class="text-secondary ms-2 text-end me-3 min-w-80">
                                     {{ n.created_at|timesince }}
                                 </small>
                                 <button hx-delete="{% url 'notifications:delete_notification' n.id %}" 
                                         hx-target="closest .list-group-item" 
                                         hx-swap="outerHTML swap:0.5s"
-                                        class="btn btn-sm btn-outline-secondary border-0 rounded-circle position-relative shadow-none"
-                                        style="z-index: 2;"
+                                        class="btn btn-sm btn-outline-secondary border-0 rounded-circle position-relative shadow-none z-2"
                                         title="Borrar aviso">
                                     <i class="bi bi-x fs-5"></i>
                                 </button>

@@ -8,7 +8,7 @@
                     <div class="hobby-dot-sm bg-hubs flex-shrink-0">
                         {{ hobby.name|slice:":1"|upper }}
                     </div>
-                    <span class="text-truncate d-inline-block" style="max-width: 130px;">{{ hobby.name }}</span>
+                    <span class="text-truncate d-inline-block max-w-130">{{ hobby.name }}</span>
                     
                     {% if hobby.match_count > 0 %}
                         <span class="badge rounded-pill bg-info text-dark mobile-hobby-badge">
@@ -40,7 +40,7 @@
             {% for hobby in my_hobbies %}
                 <a href="{% url 'posts:hobby_hub' hobby.slug %}" 
                    class="list-group-item list-group-item-action sidebar-item d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center" style="min-width: 0;">
+                    <div class="d-flex align-items-center min-w-0">
                         <div class="hobby-dot bg-hubs flex-shrink-0">
                             {{ hobby.name|slice:":1"|upper }}
                         </div>

@@ -17,7 +17,7 @@
             <a href="{{ item.video.url }}" class="glightbox" data-type="video"
                data-glightbox="title: {{ item.title }}; description: .desc-{{ forloop.counter }}-p{{ clicks.number }}">
                 <div class="position-relative">
-                    <video src="{{ item.video.url }}" class="card-img-top object-fit-cover" style="max-height: 300px;"></video>
+                    <video src="{{ item.video.url }}" class="card-img-top object-fit-cover max-h-300"></video>
                     <div class="position-absolute top-50 start-50 translate-middle">
                         <i class="bi bi-play-circle-fill text-white opacity-75 display-3"></i>
                     </div>
@@ -26,7 +26,7 @@
             {% elif item.video_url %}
             <a href="{{ item.video_url }}" class="glightbox" data-type="video"
                data-glightbox="title: {{ item.title }}; description: .desc-{{ forloop.counter }}-p{{ clicks.number }}">
-                <div class="bg-dark d-flex align-items-center justify-content-center p-5 card-img-top" style="min-height: 200px;">
+                <div class="bg-dark d-flex align-items-center justify-content-center p-5 card-img-top min-h-200">
                     <i class="bi bi-play-btn-fill text-white opacity-75 display-3"></i>
                 </div>
             </a>

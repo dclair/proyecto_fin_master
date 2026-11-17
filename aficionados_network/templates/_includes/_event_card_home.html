@@ -7,11 +7,10 @@
         <a href="{% url 'posts:event_detail' event.id %}">
             {% if event.image %}
                 <img src="{{ event.image.url }}" 
-                     class="card-img-top object-fit-cover {% if event.is_canceled %}grayscale-filter{% endif %}" 
-                     style="height: 180px;" 
+                     class="card-img-top object-fit-cover h-180 {% if event.is_canceled %}grayscale-filter{% endif %}" 
                      alt="{{ event.title }}">
             {% else %}
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center h-180">
                     <i class="bi bi-calendar-check text-muted display-4"></i>
                 </div>
             {% endif %}
@@ -46,11 +45,11 @@
                 <i class="bi bi-person-circle me-1"></i>@{{ event.organizer.username }}
             </small>
             {% if request.user.is_authenticated and match_status.is_match %}
-                <span class="badge rounded-pill bg-info text-dark shadow-sm extra-small" style="font-size: 0.65rem;">
+                <span class="badge rounded-pill bg-info text-dark shadow-sm extra-small fs-nano">
                     <i class="bi bi-star-fill text-warning"></i> ¡Tu nivel!
                 </span>
             {% elif request.user.is_authenticated and match_status.is_mentor %}
-                <span class="badge rounded-pill bg-primary text-white shadow-sm extra-small" style="font-size: 0.65rem;">
+                <span class="badge rounded-pill bg-primary text-white shadow-sm extra-small fs-nano">
                     <i class="bi bi-mortarboard-fill"></i> Referente
                 </span>
             {% endif %}
@@ -84,7 +83,7 @@
                 <span class="extra-small text-muted">
                     <i class="bi bi-people me-1"></i>{{ event.participants.count }}/{{ event.max_participants }} plazas
                 </span>
-                <div class="progress flex-grow-1 ms-2" style="height: 5px; max-width: 90px; background-color: var(--hubs-primary-subtle);">
+                <div class="progress flex-grow-1 ms-2 h-5px max-w-90">
                     <div class="progress-bar {% if event.participants.count >= event.max_participants %}bg-danger{% else %}bg-hubs{% endif %}" 
                          role="progressbar" 
                          style="width: {% widthratio event.participants.count event.max_participants 100 %}%">

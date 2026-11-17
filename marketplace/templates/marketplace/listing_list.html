@@ -62,9 +62,9 @@
         <div class="col">
             <div class="card h-100 border-0 shadow-sm transition-hover">
                 {% if listing.image %}
-                    <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title }}" style="height: 200px; object-fit: cover;">
+                    <img src="{{ listing.image.url }}" class="card-img-top h-200 object-fit-cover" alt="{{ listing.title }}">
                 {% else %}
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 200px;">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted h-200">
                         <i class="fas fa-image fa-3x"></i>
                     </div>
                 {% endif %}
