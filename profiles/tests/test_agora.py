@@ -56,7 +56,7 @@ class AgoraInstitutionalTests(TestCase):
         self.client.force_login(self.user)
         user_hobby = UserHobby.objects.get(profile=self.user.profile, hobby=self.agora)
 
-        response = self.client.get(reverse("profiles:delete_hobby", kwargs={"hobby_id": user_hobby.id}))
+        response = self.client.post(reverse("profiles:delete_hobby", kwargs={"hobby_id": user_hobby.id}))
         self.assertRedirects(response, reverse("profiles:profile_edit"))
 
         # Debe seguir existiendo

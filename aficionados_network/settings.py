@@ -262,10 +262,14 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", EMAIL_HOST_USER)
 SERVER_EMAIL = os.getenv("SERVER_EMAIL", EMAIL_HOST_USER)
 
-# Configuración de Sesión
+# Configuración de Sesión y Seguridad de Cookies
 SESSION_COOKIE_AGE = 3600  # 1 hora de inactividad
 SESSION_SAVE_EVERY_REQUEST = True  # Renueva el tiempo con cada request
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expira al cerrar el navegador
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # Requerido en False para que el cliente frontend lea el csrftoken
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

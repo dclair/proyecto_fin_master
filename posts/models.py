@@ -10,6 +10,7 @@ from PIL import Image
 import os
 from django.urls import reverse
 from aficionados_network.models import SoftDeleteModel
+from aficionados_network.utils.sanitizer import sanitize_html
 
 def validate_image_size(image):
     """Valida que la imagen no sea mayor a 5MB"""
@@ -354,6 +355,11 @@ class Event(SoftDeleteModel):
     def get_absolute_url(self):
         # Esto le dice a Django que la página "maestra" de un evento es su detalle
         return reverse("posts:event_detail", kwargs={"pk": self.pk})
+
+    def save(self, *args, **kwargs):
+        if self.description:
+            self.description = sanitize_html(self.description)
+        super().save(*args, **kwargs)
 
     @property
     def plain_text_description(self):

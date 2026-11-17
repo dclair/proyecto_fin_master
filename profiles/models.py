@@ -9,6 +9,7 @@ from django.utils import timezone
 from datetime import date
 from django.core.validators import MinValueValidator, MaxValueValidator
 from aficionados_network.models import SoftDeleteModel
+from aficionados_network.utils.sanitizer import sanitize_html
 
 def validate_birth_date(value):
     if value > date.today():
@@ -149,6 +150,8 @@ class UserProfile(models.Model):
         return None
 
     def save(self, *args, **kwargs):
+        if self.bio:
+            self.bio = sanitize_html(self.bio)
         # Primero guardamos el objeto para obtener un ID
         super().save(*args, **kwargs)
 

@@ -1,5 +1,6 @@
 {% extends "general/layout.html" %}
 {% load static %}
+{% load sanitizer_tags %}
 
 {# 1. TÍTULO DE LA PESTAÑA #}
 {% block head_title %}
@@ -132,7 +133,7 @@
                     {% if user_profile.bio %}
                         <div class="mb-3">
                             <h6 class="fw-bold small text-uppercase text-dark mb-1">Sobre mí</h6>
-                            <div class="mb-0 small text-dark">{{ user_profile.bio|safe }}</div>
+                            <div class="mb-0 small text-dark">{{ user_profile.bio|sanitize_html }}</div>
                         </div>
                     {% endif %}
 

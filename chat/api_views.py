@@ -1,3 +1,4 @@
+import os
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from .models import Conversation, Message, ConversationParticipant
@@ -286,27 +287,38 @@ class MessageUploadView(APIView):
             return Response({'error': 'Either file or content is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         attachment_type = None
+        ALLOWED_IMAGE_EXTS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+        ALLOWED_VIDEO_EXTS = {'.mp4', '.webm', '.mov'}
+        ALLOWED_AUDIO_EXTS = {'.mp3', '.wav', '.ogg', '.webm', '.m4a'}
+        ALLOWED_DOCUMENT_EXTS = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.odt', '.ods', '.zip'}
+
         if file_obj:
-            mime_type = file_obj.content_type
+            ext = os.path.splitext(file_obj.name)[1].lower()
+            mime_type = getattr(file_obj, 'content_type', '') or ''
             file_size = file_obj.size
             
             MB = 1024 * 1024
-            if mime_type.startswith('image/'):
+            if mime_type.startswith('image/') and ext in ALLOWED_IMAGE_EXTS:
                 attachment_type = 'image'
                 if file_size > 5 * MB:
                     return Response({'error': 'Image file size exceeds 5MB limit'}, status=status.HTTP_400_BAD_REQUEST)
-            elif mime_type.startswith('video/'):
+            elif mime_type.startswith('video/') and ext in ALLOWED_VIDEO_EXTS:
                 attachment_type = 'video'
                 if file_size > 15 * MB:
                     return Response({'error': 'Video file size exceeds 15MB limit'}, status=status.HTTP_400_BAD_REQUEST)
-            elif mime_type.startswith('audio/'):
+            elif (mime_type.startswith('audio/') or mime_type in ('video/webm', 'audio/webm')) and ext in ALLOWED_AUDIO_EXTS:
                 attachment_type = 'audio'
                 if file_size > 10 * MB:
                     return Response({'error': 'Audio file size exceeds 10MB limit'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
+            elif ext in ALLOWED_DOCUMENT_EXTS:
                 attachment_type = 'document'
                 if file_size > 5 * MB:
                     return Response({'error': 'Document file size exceeds 5MB limit'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(
+                    {'error': f'Tipo de archivo no permitido ({ext}). Formatos permitidos: imágenes (jpg, png, webp, gif), audio (mp3, wav, ogg, webm), video (mp4, webm) y documentos (pdf, doc, docx, xls, xlsx, txt, zip).'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         # Crear el mensaje
         msg = Message.objects.create(

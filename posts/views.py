@@ -800,6 +800,7 @@ class EventReactivateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 # la clase siguiente es para duplicar un evento
 @login_required
+@require_POST
 def duplicate_event(request, pk):
     # 1. Buscamos el evento original (asegurándonos de que sea de el usuario que lo crea)
     original_event = get_object_or_404(Event, pk=pk, organizer=request.user)

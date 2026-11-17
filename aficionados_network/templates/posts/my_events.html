@@ -132,11 +132,12 @@
                     >
                   </li>
                   <li>
-                    <a
-                      class="dropdown-item py-2 text-primary"
-                      href="{% url 'posts:event_duplicate' event.pk %}"
-                      ><i class="bi bi-files me-2"></i> Duplicar</a
-                    >
+                    <form method="post" action="{% url 'posts:event_duplicate' event.pk %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown-item py-2 text-primary border-0 bg-transparent w-100 text-start">
+                        <i class="bi bi-files me-2"></i> Duplicar
+                      </button>
+                    </form>
                   </li>
 
                   {% if not event.is_canceled and event.event_date > now %}

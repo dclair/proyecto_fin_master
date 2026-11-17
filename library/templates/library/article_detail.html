@@ -1,5 +1,6 @@
 {% extends "general/layout.html" %}
 {% load static %}
+{% load sanitizer_tags %}
 {% block head_title %}{{ article.title }} | Aficionados{% endblock %}
 
 {% block content %}
@@ -42,7 +43,7 @@
             {% endif %}
 
             <div class="article-content fs-5 mb-5" style="line-height: 1.8;">
-                {{ article.content|safe }}
+                {{ article.content|sanitize_html }}
             </div>
 
             <!-- Media Attachments -->

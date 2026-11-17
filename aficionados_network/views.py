@@ -321,7 +321,7 @@ class ContactFormView(FormView):
             text_content,
             settings.DEFAULT_FROM_EMAIL,
             [recipient_email],
-            cc=[contact_message.email],
+            reply_to=[contact_message.email],
         )
         email.attach_alternative(html_content, "text/html")
 

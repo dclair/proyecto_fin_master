@@ -3,6 +3,7 @@ asttokens==3.0.1
 attrs==26.1.0
 autobahn==25.12.2
 Automat==25.4.16
+beautifulsoup4>=4.12.3
 cbor2==6.1.2
 cffi==2.0.0
 channels==4.3.2
@@ -30,6 +31,7 @@ jedi==0.19.2
 matplotlib-inline==0.2.1
 msgpack==1.1.2
 mysqlclient==2.2.8
+nh3>=0.2.14
 packaging==26.0
 parso==0.8.5
 pexpect==4.9.0

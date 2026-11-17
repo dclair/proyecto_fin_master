@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
@@ -129,8 +130,14 @@ def add_seller_review(request, username):
             else:
                 messages.success(request, f"Has actualizado tu valoración para {seller.username}.")
                 
-            # Redirigir a donde venía (probablemente detail view de un listing)
-            next_url = request.POST.get('next', reverse('marketplace:listing_list'))
+            # Redirigir a donde venía de forma segura (prevención de Open Redirect)
+            next_url = request.POST.get('next')
+            if not next_url or not url_has_allowed_host_and_scheme(
+                url=next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
+                next_url = reverse('marketplace:listing_list')
             return redirect(next_url)
     
     return redirect('marketplace:listing_list')

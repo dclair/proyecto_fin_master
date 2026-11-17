@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -240,6 +241,7 @@ def add_hobby(request):
 
 # Vista para eliminar una terapia del perfil
 @login_required
+@require_POST
 def delete_hobby(request, hobby_id):
     user_hobby = get_object_or_404(UserHobby, id=hobby_id, profile=request.user.profile)
     if user_hobby.hobby.slug == "agora":
@@ -328,7 +330,9 @@ def upload_image_tinymce(request):
         if ext not in [".jpg", ".jpeg", ".png", ".gif", ".webp"]:
             return JsonResponse({"error": "Formato no válido"}, status=400)
             
-        file_path = default_storage.save(f"tinymce/{file.name}", file)
+        import uuid
+        safe_filename = f"{uuid.uuid4().hex}{ext}"
+        file_path = default_storage.save(f"tinymce/{safe_filename}", file)
         file_url = default_storage.url(file_path)
         
         return JsonResponse({"location": file_url})

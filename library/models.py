@@ -7,6 +7,7 @@ from django.core.validators import FileExtensionValidator, MinValueValidator, Ma
 from posts.models import validate_image_size
 from marketplace.models import validate_video_size
 import os
+from aficionados_network.utils.sanitizer import sanitize_html
 
 def validate_document_size(value):
     filesize = value.size
@@ -70,6 +71,8 @@ class Article(models.Model):
         ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
+        if self.content:
+            self.content = sanitize_html(self.content)
         if not self.slug:
             base_slug = slugify(self.title)
             slug = f"{base_slug}-{self.author.id}"
