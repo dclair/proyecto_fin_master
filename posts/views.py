@@ -45,44 +45,14 @@ from django.utils.safestring import mark_safe
 from profiles.models import UserHobby, Hobby
 
 
-# Funcion Maestra para enviar correos con el diseño de Hubs&Clicks
+# Funcion Maestra para enviar correos con el diseño de Hubs&Clicks (No bloqueante)
 def send_hubs_email(subject, recipient, message_body, action_url):
     """
     Función universal para enviar correos con el diseño de Hubs&Clicks.
+    Se ejecuta de forma asíncrona en un hilo en segundo plano para no congelar la petición del usuario.
     """
-    if not recipient.email:
-        return  # Si no hay email, no hacemos nada
-
-    context = {
-        "recipient_name": recipient.username,
-        "message_body": message_body,
-        "action_url": action_url,
-    }
-
-    # 1. Renderizar el HTML y el texto plano
-    html_content = render_to_string("general/emails/notification_email.html", context)
-    text_content = strip_tags(html_content)
-
-    # 2. Crear el objeto de email
-    email = EmailMultiAlternatives(
-        subject,
-        text_content,
-        settings.DEFAULT_FROM_EMAIL,
-        [recipient.email],
-    )
-    email.attach_alternative(html_content, "text/html")
-
-    # 3. Adjuntar el Logo físicamente
-    logo_path = os.path.join(settings.BASE_DIR, "static", "img", "logo_hubs_email.png")
-    if os.path.exists(logo_path):
-        with open(logo_path, "rb") as f:
-            logo_data = f.read()
-            logo_image = MIMEImage(logo_data)
-            logo_image.add_header("Content-ID", "<logo_hubs_email>")
-            email.attach(logo_image)
-
-    # 4. Enviar
-    email.send(fail_silently=True)
+    from aficionados_network.utils.mailer import send_hubs_email_async
+    send_hubs_email_async(subject, recipient, message_body, action_url)
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):

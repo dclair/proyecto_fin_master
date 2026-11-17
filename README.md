@@ -4,7 +4,7 @@ Hubs&Clicks es una plataforma web de caracter privado, diseñada para conectar a
 🛠️ Características Principales (Features)
 
 1. Gestión de Eventos 360º
-   Creación y Edición: Los usuarios pueden proponer planes detallando lugar, fecha, terapia, nivel deseado de experiencia y límite de asistentes. Se contempla la posibilidad de que sea un evento presencial o online.
+   Creación y Edición: Los usuarios pueden proponer planes detallando lugar, fecha, terapia, nivel deseado de experiencia y límite de asistentes. Se contempla la posibilidad de que sea un evento presencial u online.
 
    Sistema de Duplicado: Función inteligente para clonar eventos pasados y ahorrar tiempo al organizador.
 
