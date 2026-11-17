@@ -130,3 +130,4 @@ export const useChatRecorder = ({ onRecorded, onError }: UseChatRecorderOptions)
 };
 
 export default useChatRecorder;
+

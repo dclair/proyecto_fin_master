@@ -1,7 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import get_object_or_404, redirect
-from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.views.generic import (
     CreateView,
     DetailView,
@@ -9,40 +10,22 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
 )
-from django.http import HttpResponse, HttpResponseForbidden
 from django.views import View
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from .models import Posts, Event, Hobby, EventAttendance
-from .forms import PostCreateForm, CommentForm, EventForm, EventCommentForm
-from notifications.models import Notification
-from django.db.models import Q, Case, When, Value, IntegerField
-from django.db.models import Exists, OuterRef
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.conf import settings
+from django.db.models import Q, Case, When, Value, IntegerField, Exists, OuterRef, Count
 from itertools import chain
 from operator import attrgetter
 
-
-from django.core.paginator import Paginator
-from django.contrib import messages
-from django.core.mail import send_mail
-from django.conf import settings
-from django.views import View
-from django.urls import reverse
-from django.template.loader import render_to_string
-from django.core.mail import EmailMultiAlternatives
-from django.utils.html import strip_tags
-from email.mime.image import MIMEImage
-import os
-from profiles.models import Review
-from django.db.models import Count  # Importante para contar los posts
-
-# --- VISTA PARA CREAR POST ---
-# Añadimos LoginRequiredMixin para que no puedan crear si no están logueados
-from django.contrib.auth.models import User
-from django.shortcuts import render
-from django.utils.safestring import mark_safe
-from profiles.models import UserHobby, Hobby
+from .models import Posts, Event, EventAttendance
+from .forms import PostCreateForm, CommentForm, EventForm, EventCommentForm
+from notifications.models import Notification
+from profiles.models import Review, UserHobby, Hobby
+from aficionados_network.utils.mailer import send_hubs_email_async
 
 
 # Funcion Maestra para enviar correos con el diseño de Hubs&Clicks (No bloqueante)
@@ -51,7 +34,6 @@ def send_hubs_email(subject, recipient, message_body, action_url):
     Función universal para enviar correos con el diseño de Hubs&Clicks.
     Se ejecuta de forma asíncrona en un hilo en segundo plano para no congelar la petición del usuario.
     """
-    from aficionados_network.utils.mailer import send_hubs_email_async
     send_hubs_email_async(subject, recipient, message_body, action_url)
 
 

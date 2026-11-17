@@ -46,3 +46,4 @@ export interface UploadAttachmentPayload {
   file: File;
   content?: string;
 }
+

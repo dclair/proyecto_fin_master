@@ -61,3 +61,4 @@ export const AttachmentPreview = ({ selectedFile, previewUrl, onCancel }) => {
 };
 
 export default AttachmentPreview;
+

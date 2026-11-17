@@ -1,5 +1,5 @@
 from .models import Badge, UserBadge
-from posts.models import Posts, Event, EventAttendance
+from posts.models import Posts, Event
 from notifications.models import Notification
 from django.core.mail import send_mail
 from django.conf import settings
