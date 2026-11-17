@@ -1,448 +1,270 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ArrowLeft, Users, Trash2, UserCheck, UserPlus } from 'lucide-react';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Send, ArrowLeft, Smile, UserPlus, Check, UserCheck, Trash2, Paperclip, X, FileText, Image as ImageIcon, Video, Mic, Trash, Users } from 'lucide-react';
-import EmojiPicker from 'emoji-picker-react';
+import { useChatRecorder } from '../hooks/useChatRecorder';
+import chatService from '../api/chat.service';
 
-const renderMessageWithLinks = (text) => {
-  if (!text) return null;
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const parts = text.split(urlRegex);
-  
-  return parts.map((part, i) => {
-    if (part.match(urlRegex)) {
-      return (
-        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-reset text-decoration-underline" style={{ fontWeight: '500' }}>
-          {part}
-        </a>
-      );
-    }
-    return part;
-  });
-};
+// Subcomponentes presentacionales (Dumb Components)
+import MessageTimeline from './chat/MessageTimeline';
+import MessageInput from './chat/MessageInput';
+import AttachmentPreview from './chat/AttachmentPreview';
+import GroupParticipants from './chat/GroupParticipants';
+import GroupPendingRequests from './chat/GroupPendingRequests';
+import GroupAddMember from './chat/GroupAddMember';
 
-const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConversation, onBack, onConversationDeleted, currentUsername }) => {
+/**
+ * MessageArea (Smart Container Component)
+ * Pattern: Container - Presentational (Gentleman Programming)
+ * Responsibilities: State orchestration, API service calls, and component composition.
+ */
+const MessageArea = ({
+  conversationId,
+  conversationTitle,
+  isGroup,
+  activeConversation,
+  onBack,
+  onConversationDeleted,
+  currentUsername,
+}) => {
+  // WebSocket hook
   const { messages, setMessages, sendMessage, setInitialMessages } = useWebSocket(conversationId);
+
+  // UI state
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(true);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  
-  // File upload states
+  const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef(null);
 
-  // Audio recording states
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const timerIntervalRef = useRef(null);
-
-  // States for adding members
-  const [showAddMember, setShowAddMember] = useState(false);
-  const [usersToAdd, setUsersToAdd] = useState([]);
-  const [selectedUsersToAdd, setSelectedUsersToAdd] = useState([]);
-  const [addingUsers, setAddingUsers] = useState(false);
-  const [userSearchQuery, setUserSearchQuery] = useState('');
-  
-  // States for pending requests
-  const [pendingRequests, setPendingRequests] = useState([]);
-  const [showPending, setShowPending] = useState(false);
-
-  // States for participants
+  // Group Admin UI states
   const [showParticipants, setShowParticipants] = useState(false);
-  const [participantSearchQuery, setParticipantSearchQuery] = useState('');
+  const [showPending, setShowPending] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [usersToAdd, setUsersToAdd] = useState([]);
+  const [addingUsers, setAddingUsers] = useState(false);
 
   const messagesEndRef = useRef(null);
-  const emojiPickerRef = useRef(null);
-  const addMemberRef = useRef(null);
-  const pendingRef = useRef(null);
-  const participantsRef = useRef(null);
 
-  const me = activeConversation?.participants?.find(p => p.username === currentUsername);
-  const isAdmin = isGroup && me && activeConversation.admin === me.id;
+  // Auth & Permissions
+  const me = activeConversation?.participants?.find((p) => p.username === currentUsername);
+  const isAdmin = isGroup && me && activeConversation?.admin === me.id;
 
-  // Cerrar emoji picker al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
-        setShowEmojiPicker(false);
-      }
-    };
-    
-    if (showEmojiPicker) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showEmojiPicker]);
-
-  // Limpiar timer si el componente se desmonta
-  useEffect(() => {
-    return () => {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    };
+  // Voice recording integration
+  const handleAudioRecorded = useCallback((audioFile) => {
+    setSelectedFile(audioFile);
+    setPreviewUrl('audio');
   }, []);
 
-  // Cerrar add member al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutsideAdd = (event) => {
-      if (addMemberRef.current && !addMemberRef.current.contains(event.target)) {
-        setShowAddMember(false);
-        setUserSearchQuery('');
-      }
-    };
-    
-    if (showAddMember) {
-      document.addEventListener('mousedown', handleClickOutsideAdd);
-      // Fetch users when opened
-      axios.get('/api/chat/users/')
-        .then(res => setUsersToAdd(res.data))
-        .catch(err => console.error("Error loading users:", err));
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutsideAdd);
-  }, [showAddMember]);
+  const {
+    isRecording,
+    formattedTime,
+    startRecording,
+    stopRecording,
+    cancelRecording,
+  } = useChatRecorder({
+    onRecorded: handleAudioRecorded,
+  });
 
-  // Fetch pending requests for admin
+  // Marcar como leído
+  const markAsRead = useCallback(() => {
+    if (!conversationId) return;
+    chatService.markAsRead(conversationId).catch((err) =>
+      console.warn('[MessageArea]: Error al marcar como leído:', err)
+    );
+  }, [conversationId]);
+
+  // Cargar historial de mensajes
+  useEffect(() => {
+    setLoading(true);
+    chatService
+      .getMessages(conversationId)
+      .then((data) => {
+        setInitialMessages(data);
+        setLoading(false);
+        markAsRead();
+      })
+      .catch((err) => {
+        console.error('[MessageArea]: Error cargando mensajes:', err);
+        setLoading(false);
+      });
+  }, [conversationId, setInitialMessages, markAsRead]);
+
+  // Scroll automático y auto-lectura al llegar mensajes
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > 0) {
+      markAsRead();
+    }
+  }, [messages, markAsRead]);
+
+  // Cargar solicitudes pendientes para el administrador
   useEffect(() => {
     if (isAdmin) {
-      axios.get('/api/chat/groups/join_requests/')
-        .then(res => {
-          setPendingRequests(res.data.filter(r => r.conversation === conversationId));
+      chatService
+        .getPendingRequests()
+        .then((requests) => {
+          setPendingRequests(requests.filter((r) => r.conversation === conversationId));
         })
         .catch(console.error);
     }
   }, [isAdmin, conversationId, showPending]);
 
-  // Cerrar panel de solicitudes al hacer clic fuera
+  // Cargar lista de usuarios al abrir el modal de añadir participantes
   useEffect(() => {
-    const handleClickOutsidePending = (event) => {
-      if (pendingRef.current && !pendingRef.current.contains(event.target)) {
-        setShowPending(false);
-      }
-    };
-    if (showPending) {
-      document.addEventListener('mousedown', handleClickOutsidePending);
+    if (showAddMember) {
+      chatService
+        .getUsers()
+        .then((users) => setUsersToAdd(users))
+        .catch((err) => console.error('[MessageArea]: Error cargando usuarios:', err));
     }
-    return () => document.removeEventListener('mousedown', handleClickOutsidePending);
-  }, [showPending]);
+  }, [showAddMember]);
 
-  // Cerrar panel de participantes al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutsideParticipants = (event) => {
-      if (participantsRef.current && !participantsRef.current.contains(event.target)) {
-        setShowParticipants(false);
-        setParticipantSearchQuery('');
-      }
-    };
-    if (showParticipants) {
-      document.addEventListener('mousedown', handleClickOutsideParticipants);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutsideParticipants);
-  }, [showParticipants]);
-
-  const handleAddUsers = () => {
-    if (selectedUsersToAdd.length === 0) return;
-    setAddingUsers(true);
-    const token = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
-    
-    axios.post(`/api/chat/groups/${conversationId}/add_users/`, {
-      user_ids: selectedUsersToAdd
-    }, {
-      headers: { 'X-CSRFToken': token }
-    })
-    .then(() => {
-      setShowAddMember(false);
-      setSelectedUsersToAdd([]);
-      setAddingUsers(false);
-      // Opcional: mostrar una notificación de éxito o enviar un mensaje automático
-    })
-    .catch(err => {
-      console.error("Error adding users", err);
-      setAddingUsers(false);
-    });
-  };
-
-  const handleManageRequest = (requestId, action) => {
-    const token = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
-    axios.post(`/api/chat/groups/join_requests/${requestId}/manage/`, { action }, { headers: { 'X-CSRFToken': token }})
-      .then(() => {
-        setPendingRequests(prev => prev.filter(r => r.id !== requestId));
-      })
-      .catch(console.error);
-  };
-
-  const handleDeleteConversation = () => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar este chat permanentemente? Esta acción no se puede deshacer y borrará el chat para todos.")) {
-      const token = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
-      axios.delete(`/api/chat/conversations/${conversationId}/delete/`, {
-        headers: { 'X-CSRFToken': token }
-      })
-      .then(() => {
-        if (onConversationDeleted) onConversationDeleted();
-        else onBack();
-      })
-      .catch(err => {
-        console.error("Error al eliminar conversación:", err);
-        alert("No tienes permiso para eliminar este chat o hubo un error.");
-      });
-    }
-  };
-
-  const handleDeleteMessage = (messageId, isMe) => {
-    const token = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
-    
-    let type = 'me';
-    if (isMe) {
-        const delAll = window.confirm("¿Deseas eliminar este mensaje para TODOS?");
-        if (delAll) {
-            type = 'all';
-        } else {
-            const delMe = window.confirm("¿Deseas eliminar este mensaje solo para TI?");
-            if (!delMe) return;
-        }
-    } else {
-        const delMe = window.confirm("¿Deseas eliminar este mensaje solo para TI?");
-        if (!delMe) return;
-    }
-
-    if (type === 'all') {
-      axios.delete(`/api/chat/messages/${messageId}/delete/`, {
-        headers: { 'X-CSRFToken': token }
-      })
-      .then(() => {
-        // The message will be removed via WebSocket
-      })
-      .catch(err => {
-        console.error("Error al eliminar mensaje:", err);
-        alert("Hubo un error al intentar eliminar el mensaje.");
-      });
-    } else {
-      axios.post(`/api/chat/messages/${messageId}/hide/`, {}, {
-        headers: { 'X-CSRFToken': token }
-      })
-      .then(() => {
-        setMessages(prev => prev.filter(m => m.id !== messageId));
-      })
-      .catch(err => {
-        console.error("Error al ocultar mensaje:", err);
-        alert("Hubo un error al intentar ocultar el mensaje.");
-      });
-    }
-  };
-
-  const onEmojiClick = (emojiObject) => {
-    setInputValue(prevInput => prevInput + emojiObject.emoji);
-  };
-
-  // Marcar como leído
-  const markAsRead = () => {
-    // Para asegurar que Django CSRF se maneja correctamente, o usar el default de axios.
-    // Asumimos que los endpoints en /api/ no requieren CSRF fuerte o axios lo toma de las cookies
-    axios.post(`/api/chat/conversations/${conversationId}/read/`, {}, {
-      headers: {
-        'X-CSRFToken': document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1]
-      }
-    }).catch(e => console.error("Error al marcar como leído:", e));
-  };
-
-  // Obtener historial al abrir la conversación
-  useEffect(() => {
-    setLoading(true);
-    axios.get(`/api/chat/conversations/${conversationId}/messages/`)
-      .then(response => {
-        setInitialMessages(response.data);
-        setLoading(false);
-        markAsRead(); // Marcar al cargar el historial
-      })
-      .catch(error => {
-        console.error("Error cargando mensajes:", error);
-        setLoading(false);
-      });
-  }, [conversationId, setInitialMessages]);
-
-  // Hacer scroll abajo cuando hay mensajes nuevos y marcar como leído
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    // Si hay mensajes nuevos y tenemos la ventana abierta, marcamos como leído
-    if (messages.length > 0) {
-      markAsRead();
-    }
-  }, [messages]);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const mimeType = file.type;
-    const MB = 1024 * 1024;
-    
-    // Frontend validation
-    if (mimeType.startsWith('video/')) {
-      if (file.size > 15 * MB) {
-        alert("El vídeo es demasiado grande (Máximo 15 MB).");
-        return;
-      }
-    } else if (mimeType.startsWith('image/')) {
-      if (file.size > 5 * MB) {
-        alert("La imagen es demasiado grande (Máximo 5 MB).");
-        return;
-      }
-    } else {
-      if (file.size > 5 * MB) {
-        alert("El documento es demasiado grande (Máximo 5 MB).");
-        return;
-      }
-    }
-
-    setSelectedFile(file);
-    if (mimeType.startsWith('image/')) {
-      setPreviewUrl(URL.createObjectURL(file));
-    } else if (mimeType.startsWith('video/')) {
-      setPreviewUrl('video');
-    } else {
-      setPreviewUrl('document');
-    }
-    
-    // Reset file input value so same file can be selected again if canceled
-    e.target.value = null;
-  };
-
-  const cancelAttachment = () => {
+  // Cancelar archivo seleccionado
+  const handleCancelAttachment = () => {
     setSelectedFile(null);
-    if (previewUrl && previewUrl !== 'video' && previewUrl !== 'document') {
+    if (previewUrl && !['video', 'document', 'audio'].includes(previewUrl)) {
       URL.revokeObjectURL(previewUrl);
     }
     setPreviewUrl(null);
   };
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType || 'audio/webm' });
-        const ext = mediaRecorder.mimeType && mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
-        const file = new File([audioBlob], `voice_message_${Date.now()}.${ext}`, {
-          type: mediaRecorder.mimeType || 'audio/webm',
-        });
-        
-        setSelectedFile(file);
-        setPreviewUrl('audio');
-        setIsRecording(false);
-        setRecordingTime(0);
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-      
-      timerIntervalRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
-      }, 1000);
-      
-    } catch (err) {
-      console.error("Error accessing microphone:", err);
-      alert("No se pudo acceder al micrófono. Por favor, verifica los permisos.");
+  // Manejar selección de archivos desde el input
+  const handleFileSelect = (file) => {
+    setSelectedFile(file);
+    const mime = file.type;
+    if (mime.startsWith('image/')) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else if (mime.startsWith('video/')) {
+      setPreviewUrl('video');
+    } else {
+      setPreviewUrl('document');
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-      clearInterval(timerIntervalRef.current);
-    }
-  };
-
-  const cancelRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.onstop = null; // Prevent sending
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-      clearInterval(timerIntervalRef.current);
-      setIsRecording(false);
-      setRecordingTime(0);
-      audioChunksRef.current = [];
-    }
-  };
-  
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
-
-  const handleSend = (e) => {
+  // Enviar mensaje o adjunto
+  const handleSend = async (e) => {
     e.preventDefault();
     if (uploading) return;
-    
+
     if (selectedFile) {
       setUploading(true);
-      const token = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      if (inputValue.trim()) {
-        formData.append('content', inputValue.trim());
-      }
-      
-      axios.post(`/api/chat/conversations/${conversationId}/upload/`, formData, {
-        headers: { 
-          'X-CSRFToken': token,
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-      .then(() => {
+      try {
+        await chatService.uploadAttachment(conversationId, selectedFile, inputValue);
         setInputValue('');
-        cancelAttachment();
+        handleCancelAttachment();
+      } catch (err) {
+        console.error('[MessageArea]: Error subiendo archivo:', err);
+        alert('Ocurrió un error al subir el archivo.');
+      } finally {
         setUploading(false);
-      })
-      .catch(err => {
-        console.error("Error subiendo archivo:", err);
-        alert("Ocurrió un error al subir el archivo.");
-        setUploading(false);
-      });
-      
+      }
     } else if (inputValue.trim()) {
       sendMessage(inputValue);
       setInputValue('');
     }
   };
 
+  // Eliminar o esconder mensaje
+  const handleDeleteMessage = async (messageId, isMe) => {
+    let type = 'me';
+    if (isMe) {
+      const delAll = window.confirm('¿Deseas eliminar este mensaje para TODOS?');
+      if (delAll) {
+        type = 'all';
+      } else {
+        const delMe = window.confirm('¿Deseas eliminar este mensaje solo para TI?');
+        if (!delMe) return;
+      }
+    } else {
+      const delMe = window.confirm('¿Deseas eliminar este mensaje solo para TI?');
+      if (!delMe) return;
+    }
+
+    try {
+      if (type === 'all') {
+        await chatService.deleteMessage(messageId);
+      } else {
+        await chatService.hideMessage(messageId);
+        setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      }
+    } catch (err) {
+      console.error('[MessageArea]: Error al procesar mensaje:', err);
+      alert('Hubo un error al intentar eliminar u ocultar el mensaje.');
+    }
+  };
+
+  // Eliminar conversación completa
+  const handleDeleteConversation = async () => {
+    const confirmed = window.confirm(
+      '¿Estás seguro de que quieres eliminar este chat permanentemente? Esta acción no se puede deshacer y borrará el chat para todos.'
+    );
+    if (!confirmed) return;
+
+    try {
+      await chatService.deleteConversation(conversationId);
+      if (onConversationDeleted) onConversationDeleted();
+      else onBack();
+    } catch (err) {
+      console.error('[MessageArea]: Error al eliminar conversación:', err);
+      alert('No tienes permiso para eliminar este chat o hubo un error.');
+    }
+  };
+
+  // Gestionar solicitudes de acceso a grupo
+  const handleManageRequest = async (requestId, action) => {
+    try {
+      await chatService.manageJoinRequest(requestId, action);
+      setPendingRequests((prev) => prev.filter((r) => r.id !== requestId));
+    } catch (err) {
+      console.error('[MessageArea]: Error gestionando solicitud:', err);
+    }
+  };
+
+  // Añadir miembros seleccionados al grupo
+  const handleAddUsers = async (userIds) => {
+    setAddingUsers(true);
+    try {
+      await chatService.addUsersToGroup(conversationId, userIds);
+      setShowAddMember(false);
+    } catch (err) {
+      console.error('[MessageArea]: Error añadiendo miembros:', err);
+      alert('No se pudieron añadir los usuarios al grupo.');
+    } finally {
+      setAddingUsers(false);
+    }
+  };
+
   return (
     <div className="message-area">
+      {/* Header Container */}
       <div className="message-header" style={{ position: 'relative' }}>
-        <button className="back-btn" onClick={onBack}>
+        <button type="button" className="back-btn" onClick={onBack}>
           <ArrowLeft size={20} />
         </button>
-        <div className="header-title text-truncate" style={{maxWidth: '220px'}}>
+        <div className="header-title text-truncate" style={{ maxWidth: '220px' }}>
           {conversationTitle || `Chat #${conversationId}`}
         </div>
-        
+
         <div className="d-flex ms-auto gap-2">
           {isGroup && (
-            <button 
+            <button
+              type="button"
               className="btn btn-sm btn-link text-primary p-0 d-flex align-items-center"
-              onClick={() => setShowParticipants(!showParticipants)}
+              onClick={() => setShowParticipants((prev) => !prev)}
               title="Ver participantes"
               style={{ textDecoration: 'none' }}
             >
               <Users size={18} />
-              <span className="ms-1" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>{activeConversation?.participants?.length || 0}</span>
+              <span className="ms-1" style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>
+                {activeConversation?.participants?.length || 0}
+              </span>
             </button>
           )}
 
           {(!isGroup || isAdmin) && (
-            <button 
+            <button
+              type="button"
               className="btn btn-sm btn-link text-danger p-0"
               onClick={handleDeleteConversation}
               title="Eliminar chat"
@@ -454,20 +276,25 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
           {isAdmin && (
             <>
               {pendingRequests.length > 0 && (
-                <button 
+                <button
+                  type="button"
                   className="btn btn-sm btn-link text-warning p-0 position-relative"
-                  onClick={() => setShowPending(!showPending)}
+                  onClick={() => setShowPending((prev) => !prev)}
                   title="Solicitudes de acceso"
                 >
                   <UserCheck size={18} />
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.5rem', padding: '0.15rem 0.25rem'}}>
+                  <span
+                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                    style={{ fontSize: '0.5rem', padding: '0.15rem 0.25rem' }}
+                  >
                     {pendingRequests.length}
                   </span>
                 </button>
               )}
-              <button 
+              <button
+                type="button"
                 className="btn btn-sm btn-link text-dark p-0"
-                onClick={() => setShowAddMember(!showAddMember)}
+                onClick={() => setShowAddMember((prev) => !prev)}
                 title="Añadir participante"
               >
                 <UserPlus size={18} />
@@ -476,275 +303,60 @@ const MessageArea = ({ conversationId, conversationTitle, isGroup, activeConvers
           )}
         </div>
 
-        {showPending && (
-          <div ref={pendingRef} className="position-absolute shadow rounded p-2" style={{ top: '100%', right: '10px', width: '250px', zIndex: 1000, border: '1px solid #ccc', backgroundColor: 'white' }}>
-            <div className="text-dark fw-bold mb-2" style={{fontSize: '0.85rem'}}>Solicitudes Pendientes</div>
-            <div className="list-group list-group-flush mb-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
-              {pendingRequests.map(r => (
-                <div key={r.id} className="list-group-item py-2 px-2 d-flex flex-column border-bottom">
-                  <div className="d-flex align-items-center mb-1">
-                    <img src={r.user.profile_picture_url} alt="" className="rounded-circle me-2" style={{width: '20px', height: '20px', objectFit: 'cover'}} />
-                    <span className="text-truncate text-dark fw-bold" style={{fontSize: '0.8rem'}}>{r.user.first_name || r.user.username}</span>
-                  </div>
-                  <div className="d-flex gap-1 mt-1">
-                    <button className="btn btn-sm btn-success py-0 flex-grow-1" style={{fontSize: '0.75rem'}} onClick={() => handleManageRequest(r.id, 'accept')}>Aceptar</button>
-                    <button className="btn btn-sm btn-outline-danger py-0 flex-grow-1" style={{fontSize: '0.75rem'}} onClick={() => handleManageRequest(r.id, 'reject')}>Rechazar</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Popovers presentacionales */}
+        <GroupPendingRequests
+          isOpen={showPending}
+          onClose={() => setShowPending(false)}
+          requests={pendingRequests}
+          onManageRequest={handleManageRequest}
+        />
 
-        {showParticipants && isGroup && (
-          <div ref={participantsRef} className="position-absolute shadow rounded p-2" style={{ top: '100%', right: '10px', width: '250px', zIndex: 1000, border: '1px solid #ccc', backgroundColor: 'white' }}>
-            <div className="text-dark fw-bold mb-2" style={{fontSize: '0.85rem'}}>Participantes ({activeConversation?.participants?.length || 0})</div>
-            <input 
-              type="text" 
-              className="form-control form-control-sm mb-2" 
-              placeholder="Buscar participante..." 
-              value={participantSearchQuery}
-              onChange={(e) => setParticipantSearchQuery(e.target.value)}
-            />
-            <div className="list-group list-group-flush mb-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
-              {activeConversation?.participants?.filter(p => {
-                const query = participantSearchQuery.toLowerCase();
-                const fullName = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase();
-                const username = (p.username || '').toLowerCase();
-                return fullName.includes(query) || username.includes(query);
-              }).map(p => (
-                <div key={p.id} className="list-group-item py-1 px-2 d-flex align-items-center border-0">
-                  <img src={p.profile_picture_url} alt="" className="rounded-circle me-2" style={{width: '24px', height: '24px', objectFit: 'cover'}} />
-                  <span className="text-truncate text-dark flex-grow-1" style={{fontSize: '0.8rem'}}>
-                    {p.first_name || p.username}
-                    {activeConversation.admin === p.id && <span className="ms-1 badge bg-primary" style={{fontSize: '0.6rem'}}>Admin</span>}
-                  </span>
-                </div>
-              ))}
-              {activeConversation?.participants?.filter(p => {
-                const query = participantSearchQuery.toLowerCase();
-                const fullName = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase();
-                const username = (p.username || '').toLowerCase();
-                return fullName.includes(query) || username.includes(query);
-              }).length === 0 && (
-                <div className="text-muted" style={{fontSize: '0.8rem'}}>No se encontraron participantes.</div>
-              )}
-            </div>
-          </div>
-        )}
+        <GroupParticipants
+          isOpen={showParticipants && isGroup}
+          onClose={() => setShowParticipants(false)}
+          participants={activeConversation?.participants}
+          adminId={activeConversation?.admin}
+        />
 
-        {showAddMember && (
-          <div ref={addMemberRef} className="position-absolute shadow rounded p-2" style={{ top: '100%', right: '10px', width: '250px', zIndex: 1000, border: '1px solid #ccc', backgroundColor: 'white' }}>
-            <div className="text-dark fw-bold mb-2" style={{fontSize: '0.85rem'}}>Añadir miembros</div>
-            <input 
-              type="text" 
-              className="form-control form-control-sm mb-2" 
-              placeholder="Buscar usuario..." 
-              value={userSearchQuery}
-              onChange={(e) => setUserSearchQuery(e.target.value)}
-            />
-            <div className="list-group list-group-flush mb-2" style={{maxHeight: '150px', overflowY: 'auto'}}>
-              {usersToAdd.filter(u => {
-                const query = userSearchQuery.toLowerCase();
-                const fullName = `${u.first_name || ''} ${u.last_name || ''}`.toLowerCase();
-                const username = (u.username || '').toLowerCase();
-                const email = (u.email || '').toLowerCase();
-                return fullName.includes(query) || username.includes(query) || email.includes(query);
-              }).map(u => {
-                const isSelected = selectedUsersToAdd.includes(u.id);
-                return (
-                  <button 
-                    key={u.id} 
-                    type="button" 
-                    className={`list-group-item list-group-item-action py-1 px-2 d-flex align-items-center border-0 ${isSelected ? 'bg-light' : ''}`} 
-                    onClick={() => setSelectedUsersToAdd(prev => prev.includes(u.id) ? prev.filter(id => id !== u.id) : [...prev, u.id])}
-                  >
-                    <img src={u.profile_picture_url} alt="" className="rounded-circle me-2" style={{width: '28px', height: '28px', objectFit: 'cover'}} />
-                    <div className="text-truncate text-dark" style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
-                      <span style={{fontSize: '0.8rem'}}>{u.first_name || u.username}</span>
-                      <span className="text-muted" style={{fontSize: '0.65rem'}}>{u.email}</span>
-                    </div>
-                    {isSelected && <Check size={14} className="text-primary" />}
-                  </button>
-                );
-              })}
-              {usersToAdd.length === 0 && <div className="text-muted" style={{fontSize: '0.8rem'}}>No hay usuarios.</div>}
-            </div>
-            <button 
-              className="btn btn-sm text-white w-100" 
-              style={{backgroundColor: '#0b5961'}}
-              onClick={handleAddUsers} 
-              disabled={addingUsers || selectedUsersToAdd.length === 0}
-            >
-              {addingUsers ? 'Añadiendo...' : 'Añadir al grupo'}
-            </button>
-          </div>
-        )}
-      </div>
-      
-      <div className="messages-list">
-        {loading ? (
-          <div className="loading">Cargando historial...</div>
-        ) : (
-          messages.map((msg, idx) => {
-            // Verificar si el mensaje lo envié yo (si el username coincide)
-            const isMe = msg.sender.username === currentUsername;
-            
-            return (
-              <div key={msg.id || `temp-${idx}`} className={`message-bubble-wrapper ${isMe ? 'me' : 'them'}`}>
-                <div className="message-bubble">
-                  {!isMe && <div className="sender-name">{msg.sender.first_name || msg.sender.username}</div>}
-                  
-                  {msg.attachment && (
-                    <div className="message-attachment mb-1">
-                      {msg.attachment_type === 'image' && (
-                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
-                          <img src={msg.attachment} alt="Adjunto" style={{maxHeight: '200px', maxWidth: '100%', borderRadius: '8px', cursor: 'pointer'}} />
-                        </a>
-                      )}
-                      {msg.attachment_type === 'video' && (
-                        <video controls style={{maxHeight: '200px', maxWidth: '100%', borderRadius: '8px'}}>
-                          <source src={msg.attachment} />
-                          Tu navegador no soporta el video.
-                        </video>
-                      )}
-                      {msg.attachment_type === 'document' && (
-                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center gap-2 p-2 rounded text-decoration-none text-reset" style={{backgroundColor: 'rgba(0,0,0,0.05)'}}>
-                          <FileText size={24} />
-                          <span style={{wordBreak: 'break-all', fontSize: '0.85rem'}}>{msg.attachment.split('/').pop()}</span>
-                        </a>
-                      )}
-                      {msg.attachment_type === 'audio' && (
-                        <audio controls src={msg.attachment} className="d-block mt-1" style={{ maxWidth: '100%', height: '40px' }} preload="metadata" />
-                      )}
-                    </div>
-                  )}
-
-                  {msg.content && <div className="message-content" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{renderMessageWithLinks(msg.content)}</div>}
-                  
-                  <button 
-                    className={`btn btn-sm btn-link p-0 position-absolute ${isMe ? 'text-danger' : 'text-secondary'}`}
-                    style={{ [isMe ? 'left' : 'right']: '-25px', top: '5px', opacity: 0.6 }}
-                    onClick={() => handleDeleteMessage(msg.id, isMe)}
-                    title={isMe ? "Eliminar mensaje" : "Eliminar para mí"}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
-        <div ref={messagesEndRef} />
+        <GroupAddMember
+          isOpen={showAddMember}
+          onClose={() => setShowAddMember(false)}
+          users={usersToAdd}
+          onAddUsers={handleAddUsers}
+          adding={addingUsers}
+        />
       </div>
 
-      {/* Preview Area */}
-      {selectedFile && (
-        <div className="p-2 border-top bg-light position-relative" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {previewUrl && previewUrl !== 'video' && previewUrl !== 'document' && previewUrl !== 'audio' ? (
-            <img src={previewUrl} alt="Preview" style={{ height: '60px', borderRadius: '4px', objectFit: 'cover' }} />
-          ) : previewUrl === 'video' ? (
-            <div className="d-flex align-items-center justify-content-center bg-secondary text-white rounded" style={{ height: '60px', width: '60px' }}>
-              <Video size={24} />
-            </div>
-          ) : previewUrl === 'audio' ? (
-            <div className="d-flex align-items-center justify-content-center bg-secondary text-white rounded" style={{ height: '60px', width: '60px' }}>
-              <Mic size={24} />
-            </div>
-          ) : (
-            <div className="d-flex align-items-center justify-content-center bg-secondary text-white rounded" style={{ height: '60px', width: '60px' }}>
-              <FileText size={24} />
-            </div>
-          )}
-          <div className="text-truncate flex-grow-1" style={{ fontSize: '0.8rem' }}>
-            <div className="fw-bold">{selectedFile.name}</div>
-            <div className="text-muted">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
-          </div>
-          <button 
-            className="btn btn-sm btn-light rounded-circle p-1" 
-            onClick={cancelAttachment}
-            style={{ border: '1px solid #ccc', flexShrink: 0 }}
-            title="Cancelar adjunto"
-          >
-            <X size={14} className="text-danger" />
-          </button>
-        </div>
-      )}
+      {/* Timeline presentacional */}
+      <MessageTimeline
+        messages={messages}
+        loading={loading}
+        currentUsername={currentUsername}
+        onDeleteMessage={handleDeleteMessage}
+        messagesEndRef={messagesEndRef}
+      />
 
-      <form className="message-input-area" onSubmit={handleSend} style={{ position: 'relative' }}>
-        {showEmojiPicker && (
-          <div ref={emojiPickerRef} style={{ position: 'absolute', bottom: '60px', left: '10px', zIndex: 1000, boxShadow: '0 5px 15px rgba(0,0,0,0.1)', borderRadius: '8px' }}>
-            <EmojiPicker 
-              onEmojiClick={onEmojiClick} 
-              width={300} 
-              height={350}
-              searchPlaceholder="Buscar emoji..."
-              lazyLoadEmojis={true}
-            />
-          </div>
-        )}
+      {/* Previsualización de adjuntos */}
+      <AttachmentPreview
+        selectedFile={selectedFile}
+        previewUrl={previewUrl}
+        onCancel={handleCancelAttachment}
+      />
 
-        {isRecording ? (
-          <div className="d-flex align-items-center justify-content-between w-100 px-2 py-1">
-            <div className="d-flex align-items-center text-danger">
-              <div className="recording-dot me-2" style={{width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'red', animation: 'pulse 1s infinite'}}></div>
-              <span className="fw-bold">{formatTime(recordingTime)}</span>
-            </div>
-            <div className="d-flex align-items-center gap-3">
-              <button type="button" onClick={cancelRecording} className="btn btn-link text-secondary p-0" title="Cancelar grabación">
-                <Trash size={20} />
-              </button>
-              <button type="button" onClick={stopRecording} className="btn btn-danger rounded-circle p-0 d-flex align-items-center justify-content-center text-white" title="Enviar audio" style={{width: '32px', height: '32px'}}>
-                <Send size={16} />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <button 
-              type="button" 
-              onClick={() => setShowEmojiPicker(val => !val)}
-              style={{ background: 'none', border: 'none', color: showEmojiPicker ? '#0d6efd' : '#6c757d', cursor: 'pointer', padding: '0 8px 0 0', display: 'flex', alignItems: 'center' }}
-              title="Insertar emoji"
-            >
-              <Smile size={24} />
-            </button>
-
-            <button 
-              type="button" 
-              onClick={() => fileInputRef.current?.click()}
-              style={{ background: 'none', border: 'none', color: '#6c757d', cursor: 'pointer', padding: '0 8px 0 0', display: 'flex', alignItems: 'center' }}
-              title="Adjuntar archivo"
-            >
-              <Paperclip size={24} />
-            </button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              style={{ display: 'none' }} 
-              onChange={handleFileChange} 
-            />
-
-            <input 
-              type="text" 
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Escribe un mensaje..."
-              className="msg-input"
-            />
-            
-            {inputValue.trim() || selectedFile ? (
-              <button type="submit" className="send-btn" disabled={uploading}>
-                <Send size={18} />
-              </button>
-            ) : (
-              <button type="button" className="btn btn-link text-secondary p-0 ms-1" onClick={startRecording} title="Grabar nota de voz" style={{ border: 'none', background: 'none' }}>
-                <Mic size={22} />
-              </button>
-            )}
-          </>
-        )}
-      </form>
+      {/* Input de mensajes y media recorder */}
+      <MessageInput
+        inputValue={inputValue}
+        onChangeInput={setInputValue}
+        onSubmit={handleSend}
+        onFileSelect={handleFileSelect}
+        isRecording={isRecording}
+        recordingTimeFormatted={formattedTime}
+        onStartRecording={startRecording}
+        onStopRecording={stopRecording}
+        onCancelRecording={cancelRecording}
+        uploading={uploading}
+        hasAttachment={Boolean(selectedFile)}
+      />
     </div>
   );
 };

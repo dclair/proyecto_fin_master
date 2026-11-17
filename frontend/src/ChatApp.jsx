@@ -1,14 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import axios from 'axios';
 import { MessageCircle, X } from 'lucide-react';
 import ConversationList from './components/ConversationList';
 import MessageArea from './components/MessageArea';
 import GroupCreator from './components/GroupCreator';
 import GroupExplorer from './components/GroupExplorer';
 import UserExplorer from './components/UserExplorer';
+import chatService from './api/chat.service';
 import './ChatApp.css';
 
+/**
+ * ChatApp Main Shell
+ * Architecture: Clean & decoupled with centralized ChatService
+ */
 const ChatApp = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [conversations, setConversations] = useState([]);
@@ -19,13 +23,13 @@ const ChatApp = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const panelRef = useRef(null);
-  
+
   // Estados para el arrastre (Drag & Drop)
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
-  
-  const currentUsername = window.DJANGO_USER || "";
+
+  const currentUsername = window.DJANGO_USER || '';
 
   // Detectar cambios en pantalla para centrar o ajustar en móvil
   useEffect(() => {
@@ -36,30 +40,21 @@ const ChatApp = () => {
 
   // Funciones de arrastre
   const handleDragStart = (e) => {
-    // Para ratón: click izquierdo
     if (e.type === 'mousedown' && e.button !== 0) return;
-    
-    // Evitar scroll en táctil al empezar a arrastrar
-    if (e.type === 'touchstart' && e.cancelable) {
-      // Opcional: e.preventDefault() podría bloquear el click de botones dentro, lo aplicamos al move
-    }
-    
     setIsDragging(true);
-    
+
     const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
     const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-    
+
     dragStartPos.current = {
       x: clientX - position.x,
-      y: clientY - position.y
+      y: clientY - position.y,
     };
   };
 
   useEffect(() => {
     const handleDragMove = (e) => {
       if (!isDragging) return;
-      
-      // Prevenir scroll de la página en móvil al arrastrar el chat
       if (e.type === 'touchmove' && e.cancelable) {
         e.preventDefault();
       }
@@ -69,7 +64,7 @@ const ChatApp = () => {
 
       setPosition({
         x: clientX - dragStartPos.current.x,
-        y: clientY - dragStartPos.current.y
+        y: clientY - dragStartPos.current.y,
       });
     };
 
@@ -91,109 +86,121 @@ const ChatApp = () => {
     };
   }, [isDragging]);
 
-  // Obtener mensajes no leídos periódicamente
-  useEffect(() => {
-    const fetchUnreadCount = () => {
-      axios.get('/api/chat/unread_count/')
-        .then(response => {
-          setUnreadCount(response.data.unread_count || 0);
-        })
-        .catch(error => {
-          console.error("Error obteniendo no leídos:", error);
-        });
-    };
-
-    // Consultar inmediatamente
-    fetchUnreadCount();
-
-    // Luego cada 15 segundos
-    const interval = setInterval(fetchUnreadCount, 15000);
-    return () => clearInterval(interval);
+  // Cargar contador de no leídos de forma inteligente
+  const refreshUnreadCount = useCallback(() => {
+    chatService
+      .getUnreadCount()
+      .then((count) => setUnreadCount(count))
+      .catch((err) => console.warn('[ChatApp]: Error al obtener no leídos:', err));
   }, []);
 
+  // Cargar lista de conversaciones
+  const refreshConversations = useCallback(() => {
+    chatService
+      .getConversations()
+      .then((data) => setConversations(data))
+      .catch((err) => console.warn('[ChatApp]: Error cargando conversaciones:', err));
+  }, []);
+
+  // Polling inteligente: sincronizar inmediatamente y al recuperar el foco
   useEffect(() => {
-    let interval;
-    const fetchConversations = () => {
-      axios.get('/api/chat/conversations/')
-        .then(response => {
-          setConversations(response.data);
-        })
-        .catch(error => {
-          console.error("Error cargando conversaciones:", error);
-        });
+    refreshUnreadCount();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshUnreadCount();
+        if (isOpen) refreshConversations();
+      }
     };
 
-    if (isOpen) {
-      fetchConversations();
-      interval = setInterval(fetchConversations, 15000);
-    }
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+
+    // Intervalo de respaldo relajado (30s) solo si la pestaña está activa
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        refreshUnreadCount();
+      }
+    }, 30000);
 
     return () => {
-      if (interval) clearInterval(interval);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+      clearInterval(timer);
     };
-  }, [isOpen]);
+  }, [refreshUnreadCount, refreshConversations, isOpen]);
+
+  // Cargar conversaciones al abrir el panel
+  useEffect(() => {
+    if (!isOpen) return;
+
+    refreshConversations();
+
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        refreshConversations();
+      }
+    }, 30000);
+
+    return () => clearInterval(timer);
+  }, [isOpen, refreshConversations]);
 
   // Escuchar evento global para iniciar chat desde perfiles
   useEffect(() => {
     const handleOpenChat = (event) => {
       const { userId } = event.detail;
       setIsOpen(true);
-      
-      axios.post('/api/chat/conversations/create/', { user_id: userId }, {
-        headers: {
-          'X-CSRFToken': document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1]
-        }
-      })
-      .then(response => {
-        // Refrescar lista de conversaciones para incluir la nueva si no estaba
-        axios.get('/api/chat/conversations/').then(res => setConversations(res.data));
-        setActiveConversationId(response.data.id);
-      })
-      .catch(error => console.error("Error al iniciar chat:", error));
+
+      chatService
+        .createPrivateConversation(userId)
+        .then((conv) => {
+          refreshConversations();
+          setActiveConversationId(conv.id);
+        })
+        .catch((err) => console.error('[ChatApp]: Error al iniciar chat:', err));
     };
 
     window.addEventListener('openChatWith', handleOpenChat);
     return () => window.removeEventListener('openChatWith', handleOpenChat);
-  }, []);
-
-  // Se eliminó el cierre automático al hacer clic fuera para permitir que 
-  // el usuario navegue o cierre el menú hamburguesa sin perder el chat.
-  // El chat ahora solo se cierra con la "X" o volviendo a pulsar el botón del menú.
+  }, [refreshConversations]);
 
   const handleBackToList = () => {
     setActiveConversationId(null);
     setIsCreatingGroup(false);
     setIsExploringGroups(false);
     setIsExploringUsers(false);
+    refreshConversations();
+    refreshUnreadCount();
   };
 
-  const handleStartPrivateChat = (userId) => {
-    const token = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
-    axios.post('/api/chat/conversations/create/', { user_id: userId }, {
-      headers: { 'X-CSRFToken': token }
-    })
-    .then(response => {
-      setConversations(prev => {
-        const exists = prev.find(c => c.id === response.data.id);
+  const handleStartPrivateChat = async (userId) => {
+    try {
+      const conv = await chatService.createPrivateConversation(userId);
+      setConversations((prev) => {
+        const exists = prev.find((c) => c.id === conv.id);
         if (exists) return prev;
-        return [response.data, ...prev];
+        return [conv, ...prev];
       });
-      setActiveConversationId(response.data.id);
+      setActiveConversationId(conv.id);
       setIsExploringUsers(false);
-    })
-    .catch(error => console.error("Error al iniciar chat privado:", error));
+    } catch (err) {
+      console.error('[ChatApp]: Error al iniciar chat privado:', err);
+    }
   };
 
   const handleConversationDeleted = () => {
     setActiveConversationId(null);
-    axios.get('/api/chat/conversations/')
-      .then(response => setConversations(response.data))
-      .catch(error => console.error("Error recargando conversaciones:", error));
+    refreshConversations();
+    refreshUnreadCount();
   };
 
-  const activeConversation = conversations.find(c => c.id === activeConversationId);
-  const conversationTitle = activeConversation ? 
-    (activeConversation.is_group ? (activeConversation.name || "Chat Grupal") : activeConversation.participants.map(p => p.first_name || p.username).join(", ")) 
+  const activeConversation = conversations.find((c) => c.id === activeConversationId);
+  const conversationTitle = activeConversation
+    ? activeConversation.is_group
+      ? activeConversation.name || 'Chat Grupal'
+      : activeConversation.participants
+          .map((p) => p.first_name || p.username)
+          .join(', ')
     : `Chat #${activeConversationId}`;
   const isGroup = activeConversation?.is_group || false;
 
@@ -207,33 +214,41 @@ const ChatApp = () => {
 
   return (
     <>
-      <a 
+      <a
         id="chat-toggle-link"
-        className="nav-link px-2 d-flex align-items-center text-nowrap position-relative" 
-        href="#" 
-        onClick={(e) => { e.preventDefault(); setIsOpen(!isOpen); }}
+        className="nav-link px-2 d-flex align-items-center text-nowrap position-relative"
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          setIsOpen(!isOpen);
+        }}
         title="Chat de la comunidad"
         style={{ cursor: 'pointer' }}
       >
         <span className="me-2 fw-medium">Chat</span>
         <div style={{ position: 'relative', display: 'inline-block' }}>
-          <div 
-            className="d-flex align-items-center justify-content-center text-white shadow-sm" 
-            style={{ 
-              backgroundColor: '#0b5961', 
-              width: '28px', 
-              height: '28px', 
+          <div
+            className="d-flex align-items-center justify-content-center text-white shadow-sm"
+            style={{
+              backgroundColor: '#0b5961',
+              width: '28px',
+              height: '28px',
               borderRadius: '50%',
               transition: 'transform 0.2s',
-              transform: isOpen ? 'scale(1.05)' : 'scale(1)'
+              transform: isOpen ? 'scale(1.05)' : 'scale(1)',
             }}
           >
             <MessageCircle size={16} />
           </div>
           {unreadCount > 0 && (
-            <span 
+            <span
               className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white"
-              style={{ fontSize: '0.55rem', padding: '0.2rem 0.35rem', marginTop: '2px', marginLeft: '-5px' }}
+              style={{
+                fontSize: '0.55rem',
+                padding: '0.2rem 0.35rem',
+                marginTop: '2px',
+                marginLeft: '-5px',
+              }}
             >
               {unreadCount}
             </span>
@@ -241,109 +256,120 @@ const ChatApp = () => {
         </div>
       </a>
 
-      {isOpen && createPortal(
-        <div 
-          ref={panelRef}
-          className="chat-panel shadow-lg"
-          data-bs-theme="light"
-          style={{
-            position: 'fixed',
-            top: isMobile ? '10vh' : 'auto',
-            bottom: isMobile ? 'auto' : '80px',
-            left: isMobile ? '5%' : 'auto',
-            right: isMobile ? 'auto' : '20px',
-            width: isMobile ? '90vw' : '350px',
-            height: isMobile ? '70vh' : '450px',
-            minWidth: isMobile ? '250px' : '300px',
-            minHeight: isMobile ? '300px' : '400px',
-            maxWidth: '100vw',
-            maxHeight: '100vh',
-            resize: 'both',
-            backgroundColor: 'white',
-            border: '1px solid #e5e5e5',
-            borderRadius: '12px',
-            zIndex: 99999, // Superar al navbar offcanvas
-            overflow: 'hidden',
-            transform: `translate(${position.x}px, ${position.y}px)`,
-            transition: isDragging ? 'none' : 'box-shadow 0.2s',
-            boxShadow: isDragging ? '0 15px 30px rgba(0,0,0,0.2)' : '0 10px 20px rgba(0,0,0,0.1)'
-          }}
-        >
-          <div 
-            className="chat-panel-header" 
-            onMouseDown={handleDragStart}
-            onTouchStart={handleDragStart}
+      {isOpen &&
+        createPortal(
+          <div
+            ref={panelRef}
+            className="chat-panel shadow-lg"
+            data-bs-theme="light"
             style={{
-              backgroundColor: '#0b5961', // Color "hubs"
-              color: 'white',
-              padding: '12px 15px',
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: isDragging ? 'grabbing' : 'grab',
-              userSelect: 'none',
-              touchAction: 'none' // Evitar comportamiento nativo de pan/scroll en móviles
+              position: 'fixed',
+              top: isMobile ? '10vh' : 'auto',
+              bottom: isMobile ? 'auto' : '80px',
+              left: isMobile ? '5%' : 'auto',
+              right: isMobile ? 'auto' : '20px',
+              width: isMobile ? '90vw' : '350px',
+              height: isMobile ? '70vh' : '450px',
+              minWidth: isMobile ? '250px' : '300px',
+              minHeight: isMobile ? '300px' : '400px',
+              maxWidth: '100vw',
+              maxHeight: '100vh',
+              resize: 'both',
+              backgroundColor: 'white',
+              border: '1px solid #e5e5e5',
+              borderRadius: '12px',
+              zIndex: 99999,
+              overflow: 'hidden',
+              transform: `translate(${position.x}px, ${position.y}px)`,
+              transition: isDragging ? 'none' : 'box-shadow 0.2s',
+              boxShadow: isDragging
+                ? '0 15px 30px rgba(0,0,0,0.2)'
+                : '0 10px 20px rgba(0,0,0,0.1)',
             }}
           >
-            <span>Chat Terapeutas</span>
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen(false);
+            <div
+              className="chat-panel-header"
+              onMouseDown={handleDragStart}
+              onTouchStart={handleDragStart}
+              style={{
+                backgroundColor: '#0b5961',
+                color: 'white',
+                padding: '12px 15px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: isDragging ? 'grabbing' : 'grab',
+                userSelect: 'none',
+                touchAction: 'none',
               }}
-              onTouchEnd={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setIsOpen(false);
-              }}
-              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <X size={18} />
-            </button>
-          </div>
-          
-          {isCreatingGroup ? (
-            <GroupCreator 
-              onBack={() => setIsCreatingGroup(false)}
-              onGroupCreated={(id) => {
-                setIsCreatingGroup(false);
-                setActiveConversationId(id);
-                axios.get('/api/chat/conversations/').then(res => setConversations(res.data));
-              }}
-            />
-          ) : isExploringGroups ? (
-            <GroupExplorer 
-              onBack={() => setIsExploringGroups(false)}
-            />
-          ) : isExploringUsers ? (
-            <UserExplorer
-              onBack={() => setIsExploringUsers(false)}
-              onStartChat={handleStartPrivateChat}
-            />
-          ) : activeConversationId ? (
-            <MessageArea 
-              conversationId={activeConversationId} 
-              conversationTitle={conversationTitle}
-              isGroup={isGroup}
-              activeConversation={activeConversation}
-              onBack={handleBackToList}
-              onConversationDeleted={handleConversationDeleted}
-              currentUsername={currentUsername}
-            />
-          ) : (
-            <ConversationList 
-              conversations={sortedConversations} 
-              onSelect={(id) => setActiveConversationId(id)}
-              activeId={activeConversationId}
-              onCreateGroup={() => setIsCreatingGroup(true)}
-              onExploreGroups={() => setIsExploringGroups(true)}
-              onExploreUsers={() => setIsExploringUsers(true)}
-            />
-          )}
-        </div>,
-        document.body
-      )}
+              <span>Chat Terapeutas</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setIsOpen(false);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '5px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {isCreatingGroup ? (
+              <GroupCreator
+                onBack={() => setIsCreatingGroup(false)}
+                onGroupCreated={(id) => {
+                  setIsCreatingGroup(false);
+                  setActiveConversationId(id);
+                  refreshConversations();
+                }}
+              />
+            ) : isExploringGroups ? (
+              <GroupExplorer onBack={() => setIsExploringGroups(false)} />
+            ) : isExploringUsers ? (
+              <UserExplorer
+                onBack={() => setIsExploringUsers(false)}
+                onStartChat={handleStartPrivateChat}
+              />
+            ) : activeConversationId ? (
+              <MessageArea
+                conversationId={activeConversationId}
+                conversationTitle={conversationTitle}
+                isGroup={isGroup}
+                activeConversation={activeConversation}
+                onBack={handleBackToList}
+                onConversationDeleted={handleConversationDeleted}
+                currentUsername={currentUsername}
+              />
+            ) : (
+              <ConversationList
+                conversations={sortedConversations}
+                onSelect={(id) => setActiveConversationId(id)}
+                activeId={activeConversationId}
+                onCreateGroup={() => setIsCreatingGroup(true)}
+                onExploreGroups={() => setIsExploringGroups(true)}
+                onExploreUsers={() => setIsExploringUsers(true)}
+              />
+            )}
+          </div>,
+          document.body
+        )}
     </>
   );
 };
