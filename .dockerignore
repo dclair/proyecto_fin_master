@@ -1,0 +1,66 @@
+# ==============================================================================
+# .dockerignore - Producción Segura
+# Evita la fuga de secretos, historial de git y volcados a la imagen Docker
+# ==============================================================================
+
+# Control de versiones e historial
+.git
+.gitignore
+.dockerignore
+
+# Secretos y variables de entorno
+.env
+.env.*
+!.env.example
+!.env.prod.example
+
+# Volcados de base de datos y copias de seguridad
+*.sql
+*.sql.gz
+*.sqlite3
+*.sqlite3.backup
+*.sqlite3-journal
+backup_*
+*.backup
+db_full_backup.json
+
+# Cookies y credenciales de depuración
+cookies.txt
+chat_debug.log
+*.log
+
+# Scripts de depuración ad-hoc
+test_hide.py
+
+# Entornos virtuales locales
+env/
+venv/
+.venv/
+ENV/
+
+# Python Cache y binarios
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Archivos estáticos y multimedia en local
+staticfiles/
+media/
+
+# Node / Frontend interno (se compila en STAGE 1 del Dockerfile)
+frontend/node_modules/
+frontend/.vite/
+frontend/dist/
+frontend/*.log
+package-analysis.md
+
+# Carpetas de desarrollo y configuración del IDE/Agente
+.agent/
+.sdd/
+.vscode/
+.codex/
+Proyecto_Final_Docs_varios/
