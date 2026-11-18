@@ -78,3 +78,55 @@ class ChatAPITests(TestCase):
         res_ok = self.client.delete(delete_url)
         self.assertEqual(res_ok.status_code, 200)
         self.assertFalse(Message.objects.filter(id=msg.id).exists())
+
+    def test_protected_attachment_download_permissions(self):
+        conv = Conversation.objects.create(is_group=False)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user1)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user2)
+
+        file = SimpleUploadedFile("informe.pdf", b"%PDF-1.4 test document", content_type="application/pdf")
+        msg = Message.objects.create(conversation=conv, sender=self.user1, attachment=file, attachment_type="document")
+
+        download_url = reverse("api-message-attachment", kwargs={"message_id": msg.id})
+
+        # User 1 (participante) -> 200 OK
+        self.client.force_login(self.user1)
+        res_ok = self.client.get(download_url)
+        self.assertEqual(res_ok.status_code, 200)
+
+        # User 3 (NO participante) -> 403 Forbidden
+        self.client.force_login(self.user3)
+        res_denied = self.client.get(download_url)
+        self.assertEqual(res_denied.status_code, 403)
+
+    def test_magic_bytes_rejects_disguised_file(self):
+        conv = Conversation.objects.create(is_group=False)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user1)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user2)
+
+        upload_url = reverse("api-messages-upload", kwargs={"conversation_id": conv.id})
+
+        # Archivo con extension .png pero contenido texto/script (sin magic bytes PNG)
+        fake_png = SimpleUploadedFile("fake.png", b"echo 'hack'", content_type="image/png")
+        res = self.client.post(upload_url, {"file": fake_png, "content": "Fake"})
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("firma de bytes", res.data["error"].lower())
+
+    def test_valid_image_reencoded_with_pillow(self):
+        import io
+        from PIL import Image
+        conv = Conversation.objects.create(is_group=False)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user1)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user2)
+
+        upload_url = reverse("api-messages-upload", kwargs={"conversation_id": conv.id})
+
+        img_io = io.BytesIO()
+        image = Image.new("RGB", (100, 100), color="blue")
+        image.save(img_io, format="JPEG")
+        img_io.seek(0)
+
+        valid_jpg = SimpleUploadedFile("foto.jpg", img_io.getvalue(), content_type="image/jpeg")
+        res = self.client.post(upload_url, {"file": valid_jpg, "content": "Foto segura"})
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res.data["attachment_type"], "image")

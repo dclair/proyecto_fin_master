@@ -263,6 +263,119 @@ class ConversationDeleteView(APIView):
         conv.delete()
         return Response({'status': 'ok'})
 
+import io
+import mimetypes
+from django.conf import settings
+from django.http import HttpResponse, Http404, FileResponse
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
+
+def validate_file_magic_bytes(file_obj, attachment_type):
+    """
+    Valida las firmas de bytes (magic numbers) para asegurar que el contenido
+    coincide con el tipo de archivo declarado y no es un ejecutable disfrazado.
+    """
+    pos = file_obj.tell()
+    header = file_obj.read(32)
+    file_obj.seek(pos)
+
+    if not header:
+        return False
+
+    if attachment_type == 'image':
+        if header.startswith(b'\xff\xd8\xff'):
+            return True
+        if header.startswith(b'\x89PNG\r\n\x1a\n'):
+            return True
+        if header.startswith(b'GIF87a') or header.startswith(b'GIF89a'):
+            return True
+        if header.startswith(b'RIFF') and len(header) >= 12 and header[8:12] == b'WEBP':
+            return True
+        return False
+
+    elif attachment_type == 'document':
+        if header.startswith(b'%PDF-'):
+            return True
+        if header.startswith(b'PK\x03\x04'):
+            return True
+        if header.startswith(b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1'):
+            return True
+        ext = os.path.splitext(file_obj.name)[1].lower()
+        if ext == '.txt' and b'\x00' not in header:
+            return True
+        return False
+
+    elif attachment_type == 'video':
+        if len(header) >= 8 and header[4:8] in (b'ftyp', b'moov', b'wide'):
+            return True
+        if header.startswith(b'\x1a\x45\xdf\xa3'):
+            return True
+        return False
+
+    elif attachment_type == 'audio':
+        if header.startswith(b'ID3') or (len(header) >= 2 and header[0] == 0xff and (header[1] & 0xe0) == 0xe0):
+            return True
+        if header.startswith(b'RIFF') and len(header) >= 12 and header[8:12] == b'WAVE':
+            return True
+        if header.startswith(b'OggS'):
+            return True
+        if len(header) >= 8 and header[4:8] == b'ftyp':
+            return True
+        if header.startswith(b'\x1a\x45\xdf\xa3'):
+            return True
+        return False
+
+    return False
+
+def sanitize_and_reencode_image(file_obj):
+    """
+    Abre la imagen con Pillow, verifica su integridad y la re-codifica
+    limpiando metadatos EXIF, coordenadas GPS y posibles payloads políglotas.
+    """
+    pos = file_obj.tell()
+    try:
+        file_obj.seek(0)
+        with Image.open(file_obj) as img:
+            img.verify()
+
+        file_obj.seek(0)
+        with Image.open(file_obj) as img:
+            fmt = img.format
+            if fmt not in ['JPEG', 'PNG', 'WEBP', 'GIF']:
+                raise ValueError(f"Formato de imagen no permitido: {fmt}")
+
+            output_io = io.BytesIO()
+
+            if fmt == 'GIF' and getattr(img, 'is_animated', False):
+                img.save(output_io, format='GIF', save_all=True)
+                out_ext = '.gif'
+                out_mime = 'image/gif'
+            elif img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                clean_img = Image.new('RGBA', img.size)
+                clean_img.paste(img, (0, 0))
+                clean_img.save(output_io, format='PNG', optimize=True)
+                out_ext = '.png'
+                out_mime = 'image/png'
+            else:
+                clean_img = Image.new('RGB', img.size)
+                clean_img.paste(img, (0, 0))
+                clean_img.save(output_io, format='JPEG', quality=85, optimize=True)
+                out_ext = '.jpg'
+                out_mime = 'image/jpeg'
+
+            output_io.seek(0)
+            base_name = os.path.splitext(file_obj.name)[0]
+            sanitized_file = SimpleUploadedFile(
+                name=f"{base_name}{out_ext}",
+                content=output_io.getvalue(),
+                content_type=out_mime
+            )
+            return sanitized_file
+    except Exception as e:
+        raise ValueError(f"Imagen inválida o corrupta: {e}")
+    finally:
+        file_obj.seek(pos)
+
 from rest_framework.parsers import MultiPartParser, FormParser
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -320,6 +433,20 @@ class MessageUploadView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            # Validar firmas de bytes reales (magic bytes)
+            if not validate_file_magic_bytes(file_obj, attachment_type):
+                return Response(
+                    {'error': f'Contenido de archivo no válido para el tipo {attachment_type} (firma de bytes errónea).'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Re-codificar imágenes con Pillow y eliminar metadatos EXIF
+            if attachment_type == 'image':
+                try:
+                    file_obj = sanitize_and_reencode_image(file_obj)
+                except ValueError as err:
+                    return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
+
         # Crear el mensaje
         msg = Message.objects.create(
             conversation=conv,
@@ -341,7 +468,10 @@ class MessageUploadView(APIView):
         
         # Make absolute URL for the attachment if it exists
         if msg.attachment:
-            message_data['attachment'] = request.build_absolute_uri(msg.attachment.url)
+            from django.urls import reverse
+            message_data['attachment'] = request.build_absolute_uri(
+                reverse('api-message-attachment', kwargs={'message_id': msg.id})
+            )
 
         async_to_sync(channel_layer.group_send)(
             room_group_name,
@@ -400,3 +530,39 @@ class MessageHideView(APIView):
 
         msg.hidden_by.add(request.user)
         return Response({'status': 'hidden'})
+
+class ProtectedAttachmentDownloadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, message_id):
+        try:
+            msg = Message.objects.select_related('conversation').get(id=message_id)
+        except Message.DoesNotExist:
+            raise Http404("Mensaje no encontrado")
+
+        if not msg.attachment:
+            raise Http404("El mensaje no tiene archivos adjuntos")
+
+        # Validar que el usuario sea participante de la conversación o superusuario
+        if not ConversationParticipant.objects.filter(conversation=msg.conversation, user=request.user).exists() and not request.user.is_superuser:
+            return Response({'error': 'No tienes permiso para acceder a este archivo privado'}, status=status.HTTP_403_FORBIDDEN)
+
+        file_path = msg.attachment.name  # ej: 'chat_attachments/informe.pdf'
+        filename = os.path.basename(file_path)
+        content_type, _ = mimetypes.guess_type(filename)
+        content_type = content_type or 'application/octet-stream'
+
+        # En producción (Nginx con X-Accel-Redirect)
+        if not settings.DEBUG:
+            response = HttpResponse()
+            response['X-Accel-Redirect'] = f'/protected_media/{file_path}'
+            response['Content-Type'] = content_type
+            response['Content-Disposition'] = f'inline; filename="{filename}"'
+            return response
+
+        # En desarrollo o pruebas (servir con FileResponse de Django)
+        full_disk_path = os.path.join(settings.MEDIA_ROOT, file_path)
+        if not os.path.exists(full_disk_path):
+            raise Http404("El archivo no se encuentra en el servidor")
+
+        return FileResponse(open(full_disk_path, 'rb'), content_type=content_type)

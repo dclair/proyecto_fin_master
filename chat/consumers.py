@@ -3,6 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import Conversation, ConversationParticipant, Message
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
@@ -45,11 +46,35 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # Recibir mensaje desde el WebSocket
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        try:
+            text_data_json = json.loads(text_data)
+            message = text_data_json.get('message', '')
+            if not isinstance(message, str):
+                await self.send(text_data=json.dumps({'error': 'El mensaje debe ser una cadena de texto'}))
+                return
+            message = message.strip()
+        except (json.JSONDecodeError, AttributeError):
+            await self.send(text_data=json.dumps({'error': 'Formato JSON inválido'}))
+            return
+
+        if not message:
+            await self.send(text_data=json.dumps({'error': 'El mensaje no puede estar vacío'}))
+            return
+
+        if len(message) > 4000:
+            await self.send(text_data=json.dumps({'error': 'El mensaje excede el límite máximo de 4000 caracteres'}))
+            return
+
+        # Re-verificar que sigue siendo participante activo antes de despachar
+        is_participant = await self.is_participant(self.user_id, self.conversation_id)
+        if not is_participant:
+            await self.send(text_data=json.dumps({'error': 'No eres participante de esta conversación'}))
+            await self.close()
+            return
 
         # Guardar en DB
         new_msg = await self.save_message(self.user_id, self.conversation_id, message)
+        await self.update_last_read(self.user_id, self.conversation_id)
 
         # Enviar el mensaje al grupo
         await self.channel_layer.group_send(
@@ -93,3 +118,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             conversation_id=conversation_id,
             content=content
         )
+
+    @database_sync_to_async
+    def update_last_read(self, user_id, conversation_id):
+        ConversationParticipant.objects.filter(
+            user_id=user_id, conversation_id=conversation_id
+        ).update(last_read_timestamp=timezone.now())
