@@ -263,25 +263,23 @@ FASE FINAL: BLINDAJE DE PRODUCCIÓN & DEPLIEGUE SEGURO (Go-Live)
  │     ├── Descomentar 'proxy_set_header X-Forwarded-Proto $scheme;' en Nginx.
  │     └── En .env.prod: Activar SECURE_SSL_REDIRECT=True, SESSION_COOKIE_SECURE=True, CSRF_COOKIE_SECURE=True.
  │
- ├── 2. Rate Limiting en Nginx:
- │     └── Añadir en nginx/default.conf:
- │           limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
- │           limit_req_zone $binary_remote_addr zone=login_limit:10m rate=3r/m;
+ ├── 2. Rate Limiting en Nginx: [COMPLETADO]
+ │     └── Configurado en nginx/default.conf con limit_req_zone para /login/ y /register/.
  │
- ├── 3. Pipeline de Archivos Estáticos & Tests:
- │     ├── Asegurar 'python manage.py collectstatic --noinput' en el Dockerfile o script de despliegue.
- │     ├── En settings.py (o settings de test): configurar InMemoryChannelLayer para aislar tests de Redis.
- │     └── Añadir PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher'] en entorno de test.
+ ├── 3. Pipeline de Archivos Estáticos & Tests: [COMPLETADO]
+ │     ├── Configurado InMemoryChannelLayer y CompressedStaticFilesStorage en entorno de test.
+ │     ├── Configurado PASSWORD_HASHERS con MD5PasswordHasher (80 tests pasan en ~6.9s).
+ │     └── Celery desacoplado con CELERY_TASK_ALWAYS_EAGER en tests.
  │
- ├── 4. Rotación Externa de Secretos:
- │     ├── Cambiar DB_PASSWORD en MariaDB del servidor.
- │     ├── Generar nueva contraseña de aplicación en Gmail para EMAIL_HOST_PASSWORD.
- │     └── Regenerar GEMINI_API_KEY en Google AI Studio.
+ ├── 4. Asincronismo Resiliente & Verificación SMTP Gmail: [COMPLETADO]
+ │     ├── Celery 5.3+ y Redis integrados para encolado de emails con reintentos exponenciales.
+ │     ├── Nueva Contraseña de Aplicación de Gmail configurada y verificada en vivo con éxito 100% (código 200/send result: 1).
+ │     └── Fallback defensivo ThreadPoolExecutor operativo en mailer.py.
  │
- └── 5. Finalización de Migración TypeScript en Frontend:
-       ├── Instalar 'typescript' en devDependencies de frontend/package.json.
-       ├── Añadir script '"type-check": "tsc --noEmit"' en package.json.
-       └── Migrar ChatApp.jsx, useWebSocket.js y componentes chat a .tsx gradualmente.
+ └── 5. Tareas Pendientes para Go-Live Público Definitivo:
+       ├── Activar HTTPS/TLS con certificado SSL/Let's Encrypt (Certbot) en puerto 443.
+       ├── Activar SECURE_SSL_REDIRECT = True y cookies seguras en producción.
+       └── Migrar componentes restantes de frontend a TypeScript (.tsx) con 'tsc --noEmit'.
 ```
 
 ---

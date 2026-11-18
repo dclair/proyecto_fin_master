@@ -1,6 +1,6 @@
 # Decision Log
 
-**Last reviewed:** 2026-06-01  
+**Last reviewed:** 2026-11-18  
 **Purpose:** record important technical/product decisions and why they were made.
 
 This is not a commit log. It captures decisions that future developers and AI agents should understand before changing direction.
@@ -233,4 +233,84 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 **Implications:**
 - Se mantiene perfecta armonía visual entre bloques contiguos en la Home.
 - Las insignias y textos inactivos conservan máxima legibilidad (accesibilidad WCAG AA).
+
+## D-016: Blindaje de Archivos Privados en Media con Nginx Internal y X-Accel-Redirect
+
+**Date:** 2026-11-18  
+**Decision:** Bloquear en Nginx el acceso directo a `/media/chat_attachments/` (`deny all; return 404;`) y servir los adjuntos privados exclusivamente a través de una vista Django autenticada (`ProtectedAttachmentDownloadView`) que emite la cabecera `X-Accel-Redirect: /protected_media/...` apuntando a un bloque Nginx con directiva `internal;`.
+
+**Why:**
+- Evita el IDOR (Insecure Direct Object Reference) y la fuga de privacidad donde cualquier usuario no autenticado con la URL directa podía descargar adjuntos confidenciales de conversaciones ajenas.
+- Descarga el peso del streaming de bytes de Python/Django a Nginx una vez superado el control de permisos de la conversación en Django.
+
+**Implications:**
+- Los adjuntos de chat se descargan vía `/api/chat/attachments/<uuid:message_id>/download/`.
+- Django valida que `request.user` pertenezca a `conversation.participants`.
+- En modo `DEBUG`, se recurre a `FileResponse` transparente para desarrollo local sin Nginx.
+
+## D-017: Validación de Archivos por Magic Bytes y Sanitización EXIF con Pillow
+
+**Date:** 2026-11-18  
+**Decision:** En `MessageUploadView` (`chat/api_views.py`), los adjuntos no se validan únicamente por la extensión del archivo (`.jpg`, `.png`, etc.), sino leyendo las firmas binarias reales (*magic bytes* para JPG, PNG, GIF, WEBP y PDF) y re-encodeando las imágenes con Pillow para eliminar metadatos EXIF sensibles (geolocalización, cámara) antes de guardarlas en disco.
+
+**Why:**
+- Evita la subida de ejecutables o scripts maliciosos camuflados con doble extensión (ej. `payload.php.jpg`).
+- Protege la privacidad de los usuarios eliminando coordenadas GPS incrustadas en fotos tomadas con dispositivos móviles.
+
+**Implications:**
+- Cualquier archivo cuya firma real no coincida con el MIME permitido es rechazado con error 400.
+- Todas las imágenes subidas al chat quedan estandarizadas y limpias de metadatos.
+
+## D-018: Autorización Estricta en Reseñas de Eventos (Anti-Auto-Reseña y Verificación de Asistencia)
+
+**Date:** 2026-11-18  
+**Decision:** En `profiles/views.py` (`add_review`), se impuso una validación triple para poder calificar al organizador de un evento: (1) `request.user != event.organizer` (prohibido autocalificarse), (2) `event.participants.filter(id=request.user.id).exists()` (asistencia obligatoria comprobada), y (3) `event.event_date <= timezone.now()` (el evento debe haber finalizado).
+
+**Why:**
+- Elimina la manipulación de reputación y las reseñas fraudulentas de usuarios que no participaron o sobre eventos futuros.
+
+**Implications:**
+- Las valoraciones reflejan con exactitud la experiencia real de asistentes verificados.
+
+## D-019: Robustez y Blindaje en WebSockets con Django Channels
+
+**Date:** 2026-11-18  
+**Decision:** En `chat/consumers.py`, se capturan excepciones de decodificación JSON en `receive()`, se impone un límite estricto de longitud de mensaje (`<= 4000` caracteres), y se re-verifica `is_participant` en cada mensaje enviado al canal en tiempo real.
+
+**Why:**
+- Protege los workers Daphne de caídas por payloads JSON corruptos o ataques de denegación de servicio por flooding de strings gigantes.
+- Asegura que si un usuario es expulsado del grupo mientras mantiene el WebSocket abierto, no pueda seguir inyectando mensajes.
+
+**Implications:**
+- Conexiones en tiempo real tolerantes a fallos y protegidas contra abusos.
+
+## D-020: Configuración de Entorno de Tests Optimizado en Memoria
+
+**Date:** 2026-11-18  
+**Decision:** Cuando `TESTING = 'test' in sys.argv` en `aficionados_network/settings.py`:
+- `CHANNEL_LAYERS` utiliza `InMemoryChannelLayer` en lugar de Redis.
+- `STORAGES["staticfiles"]` utiliza `CompressedStaticFilesStorage` en lugar de `ManifestStaticFilesStorage` estricto.
+- `PASSWORD_HASHERS` prioriza `MD5PasswordHasher` para acelerar la creación de usuarios en fixtures.
+- `CELERY_TASK_ALWAYS_EAGER = True` y `CELERY_TASK_EAGER_PROPAGATES = True`.
+
+**Why:**
+- Desacopla la suite de pruebas automatizadas de dependencias de servicios externos (Redis vivo, compilación de manifest de estáticos).
+- Reduce drásticamente el tiempo de ejecución de la suite (de ~45s con PBKDF2 a ~6.9s para 80 tests).
+
+**Implications:**
+- Los tests corren en cualquier entorno o CI sin servicios satélites y con velocidad extrema.
+
+## D-021: Despacho Asíncrono Resiliente de Correo con Celery, Redis y Backoff Exponencial
+
+**Date:** 2026-11-18  
+**Decision:** Sustituir el despacho de correos atado al hilo HTTP por una tarea encolada en Celery (`send_email_task`) con backend/broker Redis, política de reintentos exponenciales con jitter (`autoretry_for=(Exception,)`, `max_retries=5`), y un fallback defensivo en `mailer.py` mediante `ThreadPoolExecutor` si Celery o Redis no están disponibles.
+
+**Why:**
+- Las conexiones SMTP externas (como Gmail) introducen latencias variables y posibles reintentos que bloquean peticiones HTTP del usuario o se pierden si hay un microcorte.
+- El fallback en `mailer.py` asegura que, incluso si Redis cayera, el usuario no experimente caídas 500 y el correo intente enviarse en background.
+
+**Implications:**
+- Cero latencia en respuestas HTTP de formularios de contacto y eventos.
+- Máxima resiliencia y tolerancia a fallos transitorios de red.
+
 

@@ -62,3 +62,4 @@ def send_email_task(
     email.send(fail_silently=False)
     logger.info(f"[Celery] Correo enviado exitosamente a {recipient_email}")
     return f"Sent to {recipient_email}"
+

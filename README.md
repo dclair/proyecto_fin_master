@@ -37,7 +37,11 @@ Hubs&Clicks es una plataforma web de caracter privado, diseñada para conectar a
 4. Sistema de Mensajería en Tiempo Real (Chat) 💬
    Chats Privados y Grupales: Creación de conversaciones 1 a 1 y salas de grupo temáticas.
 
-   Intercambio Multimedia: Envío de imágenes, videos y documentos en tiempo real con vistas previas. Límite de carga validado y sincronización instantánea vía WebSockets.
+   Intercambio Multimedia & Validación Binaria: Envío de imágenes, videos y documentos en tiempo real. Validación de seguridad mediante firmas de bytes reales (*magic bytes* para JPG, PNG, GIF, WEBP y PDF) y re-procesamiento con Pillow para eliminar metadatos EXIF sensibles antes de persistir en disco.
+
+   Descarga Protegida (Anti-IDOR): Bloqueo de acceso directo en Nginx a `/media/chat_attachments/` y despacho seguro mediante `X-Accel-Redirect` a través del endpoint protegido `/api/chat/attachments/<id>/download/`, verificando que el usuario pertenezca a la conversación.
+
+   WebSockets Blindados: Conexiones ASGI resilientes a través de Django Channels con validación continua de participantes, captura defensiva de errores JSON y límite de 4000 caracteres por mensaje.
 
    Control Total de Mensajes:
    - "Eliminar para todos": Borrado físico de mensajes y destrucción automática de sus archivos adjuntos para todos los participantes.
@@ -91,6 +95,8 @@ Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección 
 10. Ecosistema de Comunicación & Branding 📧
    Emails HTML Corporativos: Notificaciones de sistema con diseño "Visión de Empresa", incluyendo logotipos incrustados (CID) y botones de acción.
 
+   Despacho Asíncrono Resiliente (Celery + Redis): Encolado desacoplado del ciclo HTTP para el envío de correos transaccionales con política de reintentos exponenciales con jitter (hasta 5 reintentos) y fallback in-process mediante `ThreadPoolExecutor` ante contingencias de red.
+
    Lógica de Notificación Dual: Cada interacción crítica genera un aviso interno (web) y, en casos de eventos o contacto, un correo electrónico profesional.
 
    Formulario de Contacto Pro: Integración de mensajes de usuario con guardado en base de datos y aviso automático por email al administrador.
@@ -103,9 +109,12 @@ Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección 
 - **Backend:** Django 6.0 + Python 3.12. Modelos, vistas, plantillas, autenticación y persistencia de datos.
 - **Frontend:** HTML5, CSS3, Bootstrap 5.3, integrando **React 18** (para la interfaz completa de mensajería en tiempo real que consume los datos del backend vía API REST y WebSockets).
 - **Interactividad y Tiempo Real:** HTMX & JavaScript Vanilla (AJAX) y Channels (ASGI).
-- **Comunicaciones:** Django Mail (EmailMultiAlternatives).
-- **Base de Datos:** SQLite (Desarrollo) / MySQL (Producción).
-- **Arquitectura y Seguridad:** Protección CSRF, autenticación robusta mediante **Email**, flujos de registro con aprobación 100% manual del administrador (sin enlaces de auto-activación), validación avanzada de formularios, secciones privadas blindadas y retención histórica de datos mediante **Soft Delete** en entidades core.
+- **Cola de Tareas Asíncronas:** Celery 5.3+ y Redis 5.0+ con reintentos exponenciales y contingencia `ThreadPoolExecutor`.
+- **Comunicaciones:** Django Mail (EmailMultiAlternatives) integrado con Gmail SMTP profesional.
+- **Proxy Inverso y Seguridad:** Nginx con limitación de tasa (`limit_req_zone`), HSTS y protección interna de media (`X-Accel-Redirect`).
+- **Base de Datos:** SQLite (Desarrollo y CI) / MySQL (Producción).
+- **Testing y Calidad:** Suite automatizada de 80 tests unitarios y de integración con ejecución optimizada en memoria (~6.9s).
+- **Arquitectura y Seguridad:** Protección CSRF, autenticación robusta mediante **Email**, flujos de registro con aprobación 100% manual del administrador (sin enlaces de auto-activación), validación binaria de adjuntos, secciones privadas blindadas y retención histórica de datos mediante **Soft Delete** en entidades core.
 
 🏗️ ESTRUCTURA DEL PROYECTO:
 

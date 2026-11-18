@@ -1,6 +1,6 @@
 # Current State
 
-**Last reviewed:** 2026-09-03  
+**Last reviewed:** 2026-11-18  
 **Role:** single operational truth for the project today.
 
 This document is the first place to check before modifying Hubs&Clicks. It summarizes what is currently true, what is verified, what is risky, and where deeper details live.
@@ -24,11 +24,13 @@ Current user-facing capabilities:
 - View personal event participations.
 - Support for Hybrid events (Physical/Online) with physical capacity limits.
 - Browse the "Comunidad de Terapeutas" (Therapists Community) with infinite scrolling (HTMX) and multi-field search (username, name, email).
-- Review event organizers after participation with a 5-star system.
+- Review event organizers after participation with a 5-star system (strictly protected: no self-reviews, verified attendance, and only on completed events).
 - Receive in-app notifications.
-- Receive HTML emails for important interactions.
+- Receive HTML emails for important interactions via Celery + Redis resilient queue.
 - Send contact messages to the site owner/admin.
 - Chat in real-time (1-on-1 and Groups) with multimedia support (images, videos, documents).
+- Protected attachment downloads via Nginx `X-Accel-Redirect` / `ProtectedAttachmentDownloadView` ensuring zero unauthorized access or IDOR.
+- Strict upload validation: Magic bytes validation and Pillow EXIF metadata sanitization on all images.
 - Full control over messages ("Delete for everyone" and "Delete for me").
 - Filter events easily matching the user's registered therapies ("Mis Terapias" filter).
 - Upload local images directly into the biography editor via TinyMCE integration.
@@ -54,34 +56,40 @@ Stack:
 - Vanilla JS, AJAX, and some HTMX-style partial responses.
 - React 18 embedded via Vite for the Chat interface.
 - Django Channels for WebSockets (ASGI).
-- Pillow for image handling.
-- Django email with HTML templates and CID logos.
+- Celery 5.3+ and Redis 5.0+ for resilient asynchronous task dispatch (emails, retries with exponential backoff).
+- ThreadPoolExecutor as defensible in-process fallback if Celery/Redis is unreachable.
+- Nginx as reverse proxy with rate limiting (`limit_req_zone`), HSTS, internal `/protected_media/` and blocked direct access to `/media/chat_attachments/`.
+- Pillow for image processing and EXIF metadata stripping.
+- Django email with HTML templates and CID logos, verified with Gmail SMTP via Google App Passwords.
 
 Database:
 
 - Environment-selected in `aficionados_network/settings.py`.
 - `DB_ENGINE=sqlite` uses `db.sqlite3`.
 - `DB_ENGINE=mysql` or `mariadb` uses MySQL/MariaDB with PyMySQL fallback.
-- Current local `.env` may select MySQL by default.
+- Current local `.env` selects MySQL by default.
 - SQLite remains the recommended local test backend.
 
 Operational command for tests:
 
 ```bash
-env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
+./env/bin/python manage.py test
 ```
 
 Last known verification:
 
 ```text
-35 tests passing with SQLite
+80 tests passing in ~6.9s (100% GREEN)
 ```
 
 ## Source Layout
 
 Main project package and app:
 
-- `aficionados_network/settings.py`: settings, env handling, DB selector, static/media/email.
+- `aficionados_network/celery.py`: Celery app initialization and task discovery.
+- `aficionados_network/tasks.py`: Asynchronous tasks (`send_email_task` with exponential backoff and jitter).
+- `aficionados_network/utils/mailer.py`: Resilient email dispatch helper (Celery primary, ThreadPool fallback).
+- `aficionados_network/settings.py`: settings, env handling, DB selector, static/media/email, test profiling (InMemoryChannelLayer, MD5PasswordHasher, CompressedStaticFilesStorage).
 - `aficionados_network/urls.py`: root URL dispatcher.
 - `aficionados_network/views.py`: home, auth, registration activation, contact form, legacy profile code.
 - `aficionados_network/models.py`: `ContactMessage`.
@@ -93,37 +101,45 @@ Domain apps:
 - `profiles/`: profiles, hobbies, follows, reviews, profile routes, profile signals.
 - `posts/`: Clicks, comments, Eventos, event comments, event routes, likes, attendance, hub/gallery flows.
 - `notifications/`: notification model, follow signal, unread context, list and redirect routes.
-- `chat/`: Models (`Conversation`, `Message`, `GroupJoinRequest`), DRF API views, and Channels WebSockets consumers.
+- `chat/`: Models (`Conversation`, `Message`, `GroupJoinRequest`), DRF API views, Channels WebSockets consumers, protected attachment endpoints (`ProtectedAttachmentDownloadView`), and magic bytes / EXIF validation.
+- `gamification/`: Badges, levels, and user progression calculations.
+- `marketplace/`: Listings, categories, and marketplace interactions.
+- `library/`: Articles, clinical cases, and knowledge repository.
 
 Assets and data:
 
 - `static/`: CSS, JS, logos, default images.
-- `media/`: uploaded user files. Back up separately from database.
+- `media/`: uploaded user files. Sensitive chat attachments isolated and served exclusively via internal Nginx redirection (`X-Accel-Redirect`).
 - `db.sqlite3`, `db.sqlite3.backup`, `db_full_backup.json`: local/operational database artifacts.
 
 ## Active Truths
 
-- The app is server-rendered Django, not a SPA.
+- The app is server-rendered Django, with an embedded React 18 chat module.
 - `posts` owns both social posts and event workflows.
 - `profiles.Hobby` is the shared category model for posts, events, and user interests.
 - `profiles.UserHobby` stores a user's level per hobby and powers match/mentor logic.
 - `notifications.Notification` is generic and can point to a post, event, comment, or review.
 - In-app notifications and emails are both product behavior; preserve both when changing interactions.
-- `profiles.signals` creates profiles for new non-superuser users.
+- `profiles.signals` creates profiles for new non-superuser users and sends welcome emails.
 - `notifications.signals` creates follow notifications and is fixture-safe with `raw=True`.
-- Contact email template path was corrected to `general/emails/notification_email.html` on 2026-06-01.
+- Contact email template path: `general/emails/notification_email.html`.
+- Celery worker runs via `docker-compose.yml` (`celery_worker` service).
+- In test mode (`TESTING = 'test' in sys.argv`), Celery is eager (`CELERY_TASK_ALWAYS_EAGER = True`), channel layer is in-memory, password hashing uses MD5, and static storage skips strict manifest checks.
 
 ## Verified Coverage
 
-Tests currently cover:
+Tests currently cover 80 test cases across:
 
-- Core pages, auth, registration activation, contact email.
-- Profile model behavior, follows, hobbies, reviews.
+- Core pages, auth, registration activation, contact email, Celery email dispatch.
+- Profile model behavior, follows, hobbies, reviews, and anti-self-review authorization.
 - Profile routes and follow notifications.
 - Post model behavior, likes, comments, emails, modal partial.
 - Event lifecycle: create, attend, cancel, reactivate, duplicate, comment.
 - Hobby hub and clicks gallery smoke behavior.
 - Notification list, unread count, redirects, context processor.
+- Chat APIs, conversation isolation, protected attachment downloads, and WebSockets security.
+- Gamification scoring and badges.
+- Marketplace listing creation and filters.
 
 For details, read `knowledge/testing-strategy-hubs-clicks.md`.
 

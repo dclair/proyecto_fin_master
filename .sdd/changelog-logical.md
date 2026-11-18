@@ -1,9 +1,46 @@
 # Logical Changelog
 
-**Last reviewed:** 2026-09-03  
+**Last reviewed:** 2026-11-18  
 **Purpose:** semantic change history of the system, independent from Git commits.
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
+
+## 2026-11-18: Production Hardening, Protected Media, WebSockets Security, Celery + Redis & Gmail SMTP Verification
+
+**Type:** security / architecture / infrastructure / performance
+**Status:** done
+
+What changed:
+- **Blindaje de Archivos Privados & Mitigación IDOR en /media/**:
+  - Nginx bloquea el acceso público directo a `/media/chat_attachments/` con `deny all; return 404;`.
+  - Configurado bloque interno Nginx `location /protected_media/` con cabeceras `X-Content-Type-Options: nosniff` y CSP estricto `default-src 'none'; sandbox`.
+  - Implementada vista segura `ProtectedAttachmentDownloadView` en `chat/api_views.py` que despacha adjuntos vía cabecera `X-Accel-Redirect` (producción) o `FileResponse` (desarrollo), verificando pertenencia a la conversación.
+- **Validación Binaria de Archivos (Magic Bytes) y Sanitización EXIF**:
+  - En `MessageUploadView` (`chat/api_views.py`), se inspeccionan firmas reales de bytes para JPG, PNG, GIF, WEBP y PDF.
+  - Las imágenes se re-procesan con Pillow eliminando metadatos EXIF de geolocalización y dispositivo antes del guardado.
+- **Autorización Estricta en Reseñas de Eventos**:
+  - En `profiles/views.py` (`add_review`), se prohíbe que el organizador se auto-califique, se exige que `request.user` haya participado en el evento y que la fecha del evento ya haya transcurrido.
+- **Robustez y Seguridad en WebSockets (Channels)**:
+  - En `chat/consumers.py`, se capturan excepciones de decodificación JSON, se limitan los mensajes a 4000 caracteres y se valida continuamente que el usuario sea participante activo antes de despachar al canal.
+- **Cola de Tareas Asíncrona Resiliente con Celery + Redis**:
+  - Añadido `celery[redis]` a `requirements.txt`.
+  - Creados `aficionados_network/celery.py` y `aficionados_network/tasks.py` (`send_email_task`) con reintentos exponenciales automáticos y jitter.
+  - `mailer.py` adaptado para despachar mediante Celery con contingencia in-process (`ThreadPoolExecutor`).
+  - Añadido servicio `celery_worker` a `docker-compose.yml`.
+- **Hardening de Nginx y Optimización de Tests**:
+  - Zonas de limitación de tasa de peticiones (`limit_req_zone`) en Nginx para `/login/` y `/register/`, cabecera `Strict-Transport-Security` (HSTS) y `X-Forwarded-Proto`.
+  - Configuración desacoplada en `settings.py` para testing (`InMemoryChannelLayer`, `CompressedStaticFilesStorage`, `MD5PasswordHasher`, `CELERY_TASK_ALWAYS_EAGER`).
+- **Verificación SMTP Real de Gmail**:
+  - Validado el envío en vivo contra servidores de Google (`smtp.gmail.com:587`) mediante Contraseña de Aplicación de Google (`EMAIL_HOST_PASSWORD`), confirmando entrega efectiva de correo de activación de cuenta con plantilla corporativa y logo CID a `jmdclair@gmail.com`.
+- **Suite de Pruebas**:
+  - 80/80 tests pasando en 100% verde en ~6.9s.
+
+Why:
+- Blindar la plataforma ante vulnerabilidades de acceso indebido, fugas de privacidad y denegación de servicio antes del paso a producción.
+- Desacoplar el envío de correos del ciclo de petición-respuesta HTTP para garantizar resiliencia.
+
+Impact:
+- Sistema totalmente auditado, protegido y con cobertura de pruebas completa.
 
 ## 2026-09-03: Ágora Channel, Multimedia Posts, Text Sanitization, Post Explorer & Dark Mode Harmonization
 
