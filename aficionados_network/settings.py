@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from importlib.util import find_spec
 
@@ -10,6 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+TESTING = "test" in sys.argv
 
 #servir sus archivos estáticos (CSS, JavaScript, imágenes, fuentes) de forma directa
 HAS_WHITENOISE = find_spec("whitenoise") is not None
@@ -113,17 +116,27 @@ TEMPLATES = [
 WSGI_APPLICATION = "aficionados_network.wsgi.application"
 ASGI_APPLICATION = "aficionados_network.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.pubsub.RedisPubSubChannelLayer",
-        "CONFIG": {
-            "hosts": [os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")],
+if TESTING:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
         },
-    },
-}
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.pubsub.RedisPubSubChannelLayer",
+            "CONFIG": {
+                "hosts": [os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")],
+            },
+        },
+    }
 
 
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").strip().lower()
+if TESTING and DB_ENGINE in {"mysql", "mariadb"} and os.getenv("USE_MYSQL_TEST") != "1":
+    DB_ENGINE = "sqlite"
+
 if DB_ENGINE in {"mysql", "mariadb"}:
     DATABASES = {
         "default": {
@@ -166,6 +179,11 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+if TESTING:
+    PASSWORD_HASHERS = [
+        "django.contrib.auth.hashers.MD5PasswordHasher",
+    ]
 
 # Autenticación personalizada (Email o Username)
 AUTHENTICATION_BACKENDS = [
@@ -216,14 +234,24 @@ REST_FRAMEWORK = {
 }
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+if TESTING or DEBUG:
+    STATICFILES_STORAGE_BACKEND = (
+        "whitenoise.storage.CompressedStaticFilesStorage"
+        if HAS_WHITENOISE
+        else "django.contrib.staticfiles.storage.StaticFilesStorage"
+    )
+else:
+    STATICFILES_STORAGE_BACKEND = (
+        "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        if HAS_WHITENOISE
+        else "django.contrib.staticfiles.storage.StaticFilesStorage"
+    )
+
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
-        "BACKEND": (
-            "whitenoise.storage.CompressedManifestStaticFilesStorage"
-            if HAS_WHITENOISE
-            else "django.contrib.staticfiles.storage.StaticFilesStorage"
-        )
+        "BACKEND": STATICFILES_STORAGE_BACKEND
     },
 }
 

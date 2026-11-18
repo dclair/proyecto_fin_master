@@ -42,46 +42,29 @@ class CoreViewAndEmailTests(TestCase):
         self.assertRedirects(logout_response, reverse("home"))
         self.assertNotIn("_auth_user_id", self.client.session)
 
-    # testea el registro de un usuario y el envio de email de activacion
-    def test_register_creates_inactive_user_and_activation_email(self):
+    # testea el registro de un usuario inactivo y el envio de email de aprobacion a administracion
+    def test_register_creates_inactive_user_and_admin_notification(self):
         response = self.client.post(
             reverse("register"),
             {
                 "first_name": "Ana",
                 "username": "ana",
                 "email": "ana@example.com",
+                "razon_social": "Empresa Salud SL",
+                "numero_socio": "SOC-12345",
                 "password1": "Complexpass123",
                 "password2": "Complexpass123",
             },
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "registration/registration_pending.html")
         user = User.objects.get(username="ana")
         self.assertFalse(user.is_active)
+        self.assertEqual(user.profile.razon_social, "Empresa Salud SL")
+        self.assertEqual(user.profile.numero_socio, "SOC-12345")
         self.assertEqual(len(mail.outbox), 1)
-        self.assertIn("Activa tu cuenta", mail.outbox[0].subject)
-
-    # testea la activacion del usuario y el envio de email de bienvenida
-    def test_activation_enables_user_and_sends_welcome_email(self):
-        user = User.objects.create_user(
-            username="ana",
-            email="ana@example.com",
-            password="Complexpass123",
-            is_active=False,
-        )
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-
-        response = self.client.get(
-            reverse("activate", kwargs={"uidb64": uid, "token": token})
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "registration/activation_success.html")
-        user.refresh_from_db()
-        self.assertTrue(user.is_active)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn("Bienvenido", mail.outbox[0].subject)
+        self.assertIn("aprobación", mail.outbox[0].subject)
 
     # testea el formulario de contacto y el envio de email de confirmacion
     def test_contact_form_persists_message_and_sends_email(self):
