@@ -243,3 +243,64 @@ class HomeViewRestructureTests(TestCase):
         self.assertEqual(response.context["last_posts"][0].id, agora_post.id)
 
 
+class CeleryEmailTaskTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="paciente_test",
+            email="paciente@example.com",
+            password="Password123!",
+        )
+
+    def test_send_email_task_delivers_email(self):
+        from aficionados_network.tasks import send_email_task
+
+        res = send_email_task.delay(
+            subject="Prueba Celery",
+            recipient_email="paciente@example.com",
+            recipient_username="paciente_test",
+            message_body="Mensaje de prueba enviado mediante Celery task",
+            action_url="http://localhost:8000/profile/",
+        )
+
+        self.assertEqual(res.status, "SUCCESS")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["paciente@example.com"])
+        self.assertEqual(mail.outbox[0].subject, "Prueba Celery")
+        self.assertIn("paciente_test", mail.outbox[0].body)
+
+    def test_send_hubs_email_async_dispatches_via_celery(self):
+        from aficionados_network.utils.mailer import send_hubs_email_async
+
+        send_hubs_email_async(
+            subject="Notificación Quedada",
+            recipient=self.user,
+            message_body="¡Te has apuntado al evento!",
+            action_url="http://localhost:8000/events/1/",
+        )
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["paciente@example.com"])
+        self.assertIn("Notificación Quedada", mail.outbox[0].subject)
+
+    def test_send_hubs_email_async_graceful_fallback(self):
+        from unittest.mock import patch
+        from aficionados_network.utils.mailer import send_hubs_email_async
+
+        with patch("aficionados_network.tasks.send_email_task.delay", side_effect=RuntimeError("Redis connection refused")):
+            send_hubs_email_async(
+                subject="Fallback Email",
+                recipient=self.user,
+                message_body="Mensaje vía fallback",
+                action_url="http://localhost:8000/",
+            )
+
+        # En fallback se despacha sincrónicamente o vía ThreadPoolExecutor
+        # Damos un instante de tiempo por si corre en hilo
+        import time
+        time.sleep(0.1)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["paciente@example.com"])
+        self.assertEqual(mail.outbox[0].subject, "Fallback Email")
+
+
+

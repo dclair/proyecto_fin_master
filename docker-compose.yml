@@ -27,6 +27,18 @@ services:
     image: redis:7-alpine
     restart: always
 
+  celery_worker:
+    build: .
+    command: celery -A aficionados_network worker -l info --concurrency=2
+    restart: always
+    env_file:
+      - .env.prod
+    volumes:
+      - media_volume:/app/media
+    depends_on:
+      - db
+      - redis
+
   nginx:
     image: nginx:1.25-alpine
     restart: always
