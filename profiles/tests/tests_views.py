@@ -130,3 +130,56 @@ class ProfileViewTests(TestCase):
                 review=review,
             ).exists()
         )
+
+    def test_organizer_cannot_review_own_event(self):
+        event = Event.objects.create(
+            title="Mi propio plan",
+            description="Organizado por mí",
+            location="Playa",
+            event_date=timezone.now() - timedelta(days=1),
+            organizer=self.user,
+            hobby=self.hobby,
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("profiles:add_review", kwargs={"event_id": event.pk}),
+            {"rating": 5, "comment": "Soy el mejor organizador"},
+        )
+        self.assertRedirects(response, reverse("posts:my_participations"))
+        self.assertFalse(Review.objects.filter(event=event, author=self.user).exists())
+
+    def test_non_participant_cannot_review_event(self):
+        event = Event.objects.create(
+            title="Plan ajeno",
+            description="No estoy invitado",
+            location="Montaña",
+            event_date=timezone.now() - timedelta(days=1),
+            organizer=self.other,
+            hobby=self.hobby,
+        )
+        # self.user NO es participante
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("profiles:add_review", kwargs={"event_id": event.pk}),
+            {"rating": 1, "comment": "Hate review"},
+        )
+        self.assertRedirects(response, reverse("posts:my_participations"))
+        self.assertFalse(Review.objects.filter(event=event, author=self.user).exists())
+
+    def test_cannot_review_future_event(self):
+        event = Event.objects.create(
+            title="Plan futuro",
+            description="Aún no ocurre",
+            location="Teatro",
+            event_date=timezone.now() + timedelta(days=5),
+            organizer=self.other,
+            hobby=self.hobby,
+        )
+        event.participants.add(self.user)
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("profiles:add_review", kwargs={"event_id": event.pk}),
+            {"rating": 5, "comment": "Pre-review"},
+        )
+        self.assertRedirects(response, reverse("posts:my_participations"))
+        self.assertFalse(Review.objects.filter(event=event, author=self.user).exists())
