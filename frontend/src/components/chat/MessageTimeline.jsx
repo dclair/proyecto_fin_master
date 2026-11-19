@@ -1,6 +1,17 @@
 import React from 'react';
 import { Trash2, FileText } from 'lucide-react';
 
+const isImage = (url, type) => type === 'image' || (!type && url && /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(url));
+const isVideo = (url, type) => type === 'video' || (!type && url && /\.(mp4|webm|mov)(\?.*)?$/i.test(url));
+const isAudio = (url, type) => type === 'audio' || (!type && url && /\.(mp3|wav|ogg|m4a)(\?.*)?$/i.test(url));
+
+const getAttachmentDisplayName = (url) => {
+  if (!url) return 'Archivo adjunto';
+  const clean = url.replace(/\/+$/, '');
+  const name = clean.split('/').pop();
+  return name && name !== 'attachment' ? name : 'Archivo adjunto';
+};
+
 const renderMessageWithLinks = (text) => {
   if (!text) return null;
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -60,7 +71,7 @@ export const MessageTimeline = ({
 
               {msg.attachment && (
                 <div className="message-attachment mb-1">
-                  {msg.attachment_type === 'image' && (
+                  {isImage(msg.attachment, msg.attachment_type) && (
                     <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
                       <img
                         src={msg.attachment}
@@ -70,11 +81,13 @@ export const MessageTimeline = ({
                           maxWidth: '100%',
                           borderRadius: '8px',
                           cursor: 'pointer',
+                          display: 'block',
+                          objectFit: 'contain',
                         }}
                       />
                     </a>
                   )}
-                  {msg.attachment_type === 'video' && (
+                  {isVideo(msg.attachment, msg.attachment_type) && (
                     <video
                       controls
                       style={{
@@ -87,7 +100,18 @@ export const MessageTimeline = ({
                       Tu navegador no soporta el video.
                     </video>
                   )}
-                  {msg.attachment_type === 'document' && (
+                  {isAudio(msg.attachment, msg.attachment_type) && (
+                    <audio
+                      controls
+                      src={msg.attachment}
+                      className="d-block mt-1"
+                      style={{ maxWidth: '100%', height: '40px' }}
+                      preload="metadata"
+                    />
+                  )}
+                  {!isImage(msg.attachment, msg.attachment_type) &&
+                   !isVideo(msg.attachment, msg.attachment_type) &&
+                   !isAudio(msg.attachment, msg.attachment_type) && (
                     <a
                       href={msg.attachment}
                       target="_blank"
@@ -97,18 +121,9 @@ export const MessageTimeline = ({
                     >
                       <FileText size={24} />
                       <span style={{ wordBreak: 'break-all', fontSize: '0.85rem' }}>
-                        {msg.attachment.split('/').pop()}
+                        {getAttachmentDisplayName(msg.attachment)}
                       </span>
                     </a>
-                  )}
-                  {msg.attachment_type === 'audio' && (
-                    <audio
-                      controls
-                      src={msg.attachment}
-                      className="d-block mt-1"
-                      style={{ maxWidth: '100%', height: '40px' }}
-                      preload="metadata"
-                    />
                   )}
                 </div>
               )}

@@ -34,14 +34,25 @@ export const useWebSocket = (conversationId) => {
         return;
       }
       
-      setMessages((prev) => [...prev, {
-        id: data.message_id || data.id,
-        content: data.message || data.content,
-        sender: data.sender?.username ? data.sender : { username: data.sender }, 
-        timestamp: data.timestamp,
-        attachment: data.attachment,
-        attachment_type: data.attachment_type
-      }]);
+      const msgId = data.message_id || data.id;
+      setMessages((prev) => {
+        if (msgId && prev.some((m) => m.id === msgId)) {
+          return prev.map((m) => m.id === msgId ? {
+            ...m,
+            content: data.message || data.content || m.content,
+            attachment: data.attachment || m.attachment,
+            attachment_type: data.attachment_type || m.attachment_type,
+          } : m);
+        }
+        return [...prev, {
+          id: msgId,
+          content: data.message || data.content,
+          sender: data.sender?.username ? data.sender : { username: data.sender }, 
+          timestamp: data.timestamp,
+          attachment: data.attachment,
+          attachment_type: data.attachment_type
+        }];
+      });
     };
 
     ws.current.onclose = () => {

@@ -27,11 +27,7 @@ class MessageSerializer(serializers.ModelSerializer):
         if not obj.attachment:
             return None
         from django.urls import reverse
-        url = reverse('api-message-attachment', kwargs={'message_id': obj.id})
-        request = self.context.get('request')
-        if request:
-            return request.build_absolute_uri(url)
-        return url
+        return reverse('api-message-attachment', kwargs={'message_id': obj.id})
 
 class ConversationSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()

@@ -265,6 +265,7 @@ class ConversationDeleteView(APIView):
 
 import io
 import mimetypes
+mimetypes.add_type('image/webp', '.webp')
 from django.conf import settings
 from django.http import HttpResponse, Http404, FileResponse
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -465,13 +466,6 @@ class MessageUploadView(APIView):
         # Broadcast via Channels
         channel_layer = get_channel_layer()
         room_group_name = f'chat_{conversation_id}'
-        
-        # Make absolute URL for the attachment if it exists
-        if msg.attachment:
-            from django.urls import reverse
-            message_data['attachment'] = request.build_absolute_uri(
-                reverse('api-message-attachment', kwargs={'message_id': msg.id})
-            )
 
         async_to_sync(channel_layer.group_send)(
             room_group_name,
@@ -547,7 +541,7 @@ class ProtectedAttachmentDownloadView(APIView):
         if not ConversationParticipant.objects.filter(conversation=msg.conversation, user=request.user).exists() and not request.user.is_superuser:
             return Response({'error': 'No tienes permiso para acceder a este archivo privado'}, status=status.HTTP_403_FORBIDDEN)
 
-        file_path = msg.attachment.name  # ej: 'chat_attachments/informe.pdf'
+        file_path = msg.attachment.name.lstrip('/')  # ej: 'chat_attachments/informe.pdf'
         filename = os.path.basename(file_path)
         content_type, _ = mimetypes.guess_type(filename)
         content_type = content_type or 'application/octet-stream'

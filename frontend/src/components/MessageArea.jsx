@@ -150,7 +150,13 @@ const MessageArea = ({
     if (selectedFile) {
       setUploading(true);
       try {
-        await chatService.uploadAttachment(conversationId, selectedFile, inputValue);
+        const uploadedMsg = await chatService.uploadAttachment(conversationId, selectedFile, inputValue);
+        if (uploadedMsg && uploadedMsg.id) {
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === uploadedMsg.id)) return prev;
+            return [...prev, uploadedMsg];
+          });
+        }
         setInputValue('');
         handleCancelAttachment();
       } catch (err) {
