@@ -1,9 +1,37 @@
 # Logical Changelog
 
-**Last reviewed:** 2026-11-18  
+**Last reviewed:** 2026-11-19  
 **Purpose:** semantic change history of the system, independent from Git commits.
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
+
+## 2026-11-19: Chat Document Presentation, Clean Filenames, Custom PDF Badges & Sanitizer Link Fix
+
+**Type:** feature / UI / bugfix / security
+**Status:** done
+
+What changed:
+- **Visualización Enriquecida de Adjuntos en el Chat**:
+  - Propiedad `@property attachment_name` en `Message` (`chat/models.py`) que extrae el nombre base y limpia sufijos aleatorios internos de colisión de Django manteniendo palabras y nombres legítimos.
+  - Exposición de `attachment_name` en `MessageSerializer` (`chat/api_serializers.py`) y en el payload del broadcast de Channels (`chat/api_views.py` y `chat/consumers.py`).
+  - Sincronización en frontend (`useWebSocket.js`, `chat.types.ts`) para retener `attachment_name` en tiempo real.
+  - Rediseño de adjuntos en `MessageTimeline.jsx`:
+    - Tarjetas diferenciadas con componentes SVG de `lucide-react`.
+    - PDFs destacados con badge rojo "PDF", icono `FileText`, nombre original en negrita y botón de descarga directa de 1 solo clic (`?download=1`).
+    - Detección e iconografía diferenciada para hojas de cálculo (`FileSpreadsheet`), documentos de texto (`FileText`), archivos comprimidos (`FileArchive`) y código/texto plano (`FileCode`).
+    - Previsualización en el compositor (`AttachmentPreview.jsx`) con badges e iconos temáticos.
+- **Descarga Operativa con 1 Clic**:
+  - Soporte de parámetro `?download=1` en `ProtectedAttachmentDownloadView` (`chat/api_views.py`), fijando `Content-Disposition: attachment; filename="{filename}"` y manteniendo `inline` para visualización directa en visor de navegador.
+- **Corrección de Sanitizador HTML (`nh3`)**:
+  - Resuelto conflicto en `aficionados_network/utils/sanitizer.py` donde `link_rel` colisionaba con atributos manuales en enlaces permitidos, previniendo errores 500 al guardar publicaciones y artículos.
+- **Infraestructura y Red**:
+  - Exposición de puerto 8000 en Nginx (`nginx/default.conf`) y configuración de orígenes confiables CSRF dinámicos por puerto.
+
+Why:
+- Mejorar la experiencia de usuario en el chat, permitiendo identificar instantáneamente el tipo y nombre real de los documentos compartidos (especialmente PDFs clínicos y terapéuticos) y descargarlos de manera inmediata.
+
+Impact:
+- Interfaz de chat profesional y accesible en modo claro y oscuro, con nombres de archivo legibles, previsualización exacta y descargas operativas seguras.
 
 ## 2026-11-18: Production Hardening, Protected Media, WebSockets Security, Celery + Redis & Gmail SMTP Verification
 

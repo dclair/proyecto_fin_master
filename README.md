@@ -41,6 +41,16 @@ Hubs&Clicks es una plataforma web de caracter privado, diseñada para conectar a
 
    Descarga Protegida (Anti-IDOR): Bloqueo de acceso directo en Nginx a `/media/chat_attachments/` y despacho seguro mediante `X-Accel-Redirect` a través del endpoint protegido `/api/chat/attachments/<id>/download/`, verificando que el usuario pertenezca a la conversación.
 
+   Presentación Enriquecida de Documentos y Descarga Operativa:
+   - Exposición del nombre de archivo real limpio (`attachment_name`) a través de la API REST de Django y eventos de WebSockets (Channels), eliminando sufijos aleatorios internos de almacenamiento.
+   - Tarjetas visuales de alto contraste diseñadas para modo claro y oscuro con iconos diferenciados de Lucide (`FileText`, `FileSpreadsheet`, `FileArchive`, `FileCode`, `Download`):
+     - **PDFs**: Badge rojo "PDF", icono `FileText`, nombre del documento en negrita, etiqueta descriptiva y botón de descarga directa con 1 clic (`?download=1`).
+     - **Hojas de cálculo** (.xls, .xlsx, .csv, .ods): Tematizadas en verde con icono `FileSpreadsheet`.
+     - **Documentos de texto** (.doc, .docx, .odt): Tematizados en azul con icono `FileText`.
+     - **Archivos comprimidos** (.zip, .rar, .tar, .gz, .7z): Tematizados en ámbar con icono `FileArchive`.
+     - **Archivos de código/texto** (.txt, .md, .json, .py, .js): Tematizados en violeta con icono `FileCode`.
+   - Previsualización en el compositor antes del envío (`AttachmentPreview`) sincronizada con los colores e insignias del tipo de archivo adjuntado.
+
    WebSockets Blindados: Conexiones ASGI resilientes a través de Django Channels con validación continua de participantes, captura defensiva de errores JSON y límite de 4000 caracteres por mensaje.
 
    Control Total de Mensajes:

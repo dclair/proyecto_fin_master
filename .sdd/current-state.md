@@ -1,6 +1,6 @@
 # Current State
 
-**Last reviewed:** 2026-11-18  
+**Last reviewed:** 2026-11-19  
 **Role:** single operational truth for the project today.
 
 This document is the first place to check before modifying Hubs&Clicks. It summarizes what is currently true, what is verified, what is risky, and where deeper details live.
@@ -29,6 +29,7 @@ Current user-facing capabilities:
 - Receive HTML emails for important interactions via Celery + Redis resilient queue.
 - Send contact messages to the site owner/admin.
 - Chat in real-time (1-on-1 and Groups) with multimedia support (images, videos, documents).
+- Enriched document presentation in chat: original filenames sanitized of Django collision suffixes, custom Lucide icons by file type (red PDF badge, green XLS, blue DOC, amber ZIP, purple code/text), and 1-click direct download (`?download=1`).
 - Protected attachment downloads via Nginx `X-Accel-Redirect` / `ProtectedAttachmentDownloadView` ensuring zero unauthorized access or IDOR.
 - Strict upload validation: Magic bytes validation and Pillow EXIF metadata sanitization on all images.
 - Full control over messages ("Delete for everyone" and "Delete for me").
