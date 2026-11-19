@@ -37,7 +37,10 @@ def env_list(name, default=""):
 DEBUG = env_bool("DEBUG", True)
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-this-secret-key")
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost" if DEBUG else "")
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = env_list(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://127.0.0.1:8000,http://localhost:8000,http://127.0.0.1:5173,http://localhost:5173" if DEBUG else "",
+)
 
 if not DEBUG and SECRET_KEY.startswith("django-insecure"):
     raise ValueError("Define a secure SECRET_KEY in .env for production.")
