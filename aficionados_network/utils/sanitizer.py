@@ -18,7 +18,7 @@ ALLOWED_TAGS = {
 }
 
 ALLOWED_ATTRIBUTES = {
-    'a': {'href', 'title', 'target', 'rel'},
+    'a': {'href', 'title', 'target'},
     'img': {'src', 'alt', 'title', 'width', 'height', 'style', 'class'},
     '*': {'class', 'style'}
 }
