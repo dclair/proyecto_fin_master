@@ -462,6 +462,8 @@ class MessageUploadView(APIView):
 
         serializer = MessageSerializer(msg)
         message_data = serializer.data
+        if 'attachment_name' not in message_data:
+            message_data['attachment_name'] = msg.attachment_name
 
         # Broadcast via Channels
         channel_layer = get_channel_layer()
@@ -471,7 +473,8 @@ class MessageUploadView(APIView):
             room_group_name,
             {
                 'type': 'chat_message',
-                'full_message': message_data
+                'full_message': message_data,
+                'attachment_name': msg.attachment_name
             }
         )
 
@@ -542,16 +545,19 @@ class ProtectedAttachmentDownloadView(APIView):
             return Response({'error': 'No tienes permiso para acceder a este archivo privado'}, status=status.HTTP_403_FORBIDDEN)
 
         file_path = msg.attachment.name.lstrip('/')  # ej: 'chat_attachments/informe.pdf'
-        filename = os.path.basename(file_path)
+        filename = msg.attachment_name or os.path.basename(file_path)
         content_type, _ = mimetypes.guess_type(filename)
         content_type = content_type or 'application/octet-stream'
+
+        is_download = request.GET.get('download') in ['1', 'true']
+        disposition_type = 'attachment' if is_download else 'inline'
 
         # En producción (Nginx con X-Accel-Redirect)
         if not settings.DEBUG:
             response = HttpResponse()
             response['X-Accel-Redirect'] = f'/protected_media/{file_path}'
             response['Content-Type'] = content_type
-            response['Content-Disposition'] = f'inline; filename="{filename}"'
+            response['Content-Disposition'] = f'{disposition_type}; filename="{filename}"'
             return response
 
         # En desarrollo o pruebas (servir con FileResponse de Django)
@@ -559,4 +565,4 @@ class ProtectedAttachmentDownloadView(APIView):
         if not os.path.exists(full_disk_path):
             raise Http404("El archivo no se encuentra en el servidor")
 
-        return FileResponse(open(full_disk_path, 'rb'), content_type=content_type)
+        return FileResponse(open(full_disk_path, 'rb'), content_type=content_type, as_attachment=is_download, filename=filename)

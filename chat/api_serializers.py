@@ -18,16 +18,22 @@ class UserBasicSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserBasicSerializer(read_only=True)
     attachment = serializers.SerializerMethodField()
+    attachment_name = serializers.SerializerMethodField()
     
     class Meta:
         model = Message
-        fields = ['id', 'conversation', 'sender', 'content', 'attachment', 'attachment_type', 'timestamp']
+        fields = ['id', 'conversation', 'sender', 'content', 'attachment', 'attachment_name', 'attachment_type', 'timestamp']
 
     def get_attachment(self, obj):
         if not obj.attachment:
             return None
         from django.urls import reverse
         return reverse('api-message-attachment', kwargs={'message_id': obj.id})
+
+    def get_attachment_name(self, obj):
+        if not obj.attachment:
+            return None
+        return obj.attachment_name
 
 class ConversationSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()

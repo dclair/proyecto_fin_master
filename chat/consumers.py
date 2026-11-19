@@ -94,12 +94,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if 'full_message' in event:
             await self.send(text_data=json.dumps(event['full_message']))
         else:
-            await self.send(text_data=json.dumps({
+            payload = {
                 'message': event['message'],
                 'sender': event['sender'],
                 'message_id': event['message_id'],
                 'timestamp': event['timestamp']
-            }))
+            }
+            if 'attachment' in event:
+                payload['attachment'] = event['attachment']
+            if 'attachment_name' in event:
+                payload['attachment_name'] = event['attachment_name']
+            if 'attachment_type' in event:
+                payload['attachment_type'] = event['attachment_type']
+            await self.send(text_data=json.dumps(payload))
 
     async def message_deleted(self, event):
         await self.send(text_data=json.dumps({

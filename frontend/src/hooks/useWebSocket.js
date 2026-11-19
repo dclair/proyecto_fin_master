@@ -41,6 +41,7 @@ export const useWebSocket = (conversationId) => {
             ...m,
             content: data.message || data.content || m.content,
             attachment: data.attachment || m.attachment,
+            attachment_name: data.attachment_name || m.attachment_name,
             attachment_type: data.attachment_type || m.attachment_type,
           } : m);
         }
@@ -50,6 +51,7 @@ export const useWebSocket = (conversationId) => {
           sender: data.sender?.username ? data.sender : { username: data.sender }, 
           timestamp: data.timestamp,
           attachment: data.attachment,
+          attachment_name: data.attachment_name,
           attachment_type: data.attachment_type
         }];
       });

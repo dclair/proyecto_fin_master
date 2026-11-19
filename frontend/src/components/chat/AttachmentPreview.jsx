@@ -1,10 +1,54 @@
 import React from 'react';
-import { Video, Mic, FileText, X } from 'lucide-react';
+import { Video, Mic, FileText, FileSpreadsheet, FileArchive, FileCode, X } from 'lucide-react';
 
 export const AttachmentPreview = ({ selectedFile, previewUrl, onCancel }) => {
   if (!selectedFile) return null;
 
   const isImage = previewUrl && !['video', 'document', 'audio'].includes(previewUrl);
+
+  const getDocPreview = () => {
+    const ext = (selectedFile.name.includes('.') ? selectedFile.name.split('.').pop() : '').toLowerCase();
+    if (ext === 'pdf' || selectedFile.type === 'application/pdf') {
+      return {
+        icon: FileText,
+        color: '#dc2626',
+        bgColor: '#fee2e2',
+        badge: 'PDF',
+      };
+    }
+    if (['xls', 'xlsx', 'csv', 'ods'].includes(ext)) {
+      return {
+        icon: FileSpreadsheet,
+        color: '#16a34a',
+        bgColor: '#dcfce7',
+        badge: ext.toUpperCase(),
+      };
+    }
+    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+      return {
+        icon: FileArchive,
+        color: '#d97706',
+        bgColor: '#fef3c7',
+        badge: ext.toUpperCase(),
+      };
+    }
+    if (['txt', 'md', 'json', 'xml', 'js', 'py', 'html', 'css'].includes(ext)) {
+      return {
+        icon: FileCode,
+        color: '#7c3aed',
+        bgColor: '#ede9fe',
+        badge: ext.toUpperCase(),
+      };
+    }
+    return {
+      icon: FileText,
+      color: '#475569',
+      bgColor: '#f1f5f9',
+      badge: ext ? ext.toUpperCase() : 'DOC',
+    };
+  };
+
+  const doc = !isImage && previewUrl !== 'video' && previewUrl !== 'audio' ? getDocPreview() : null;
 
   return (
     <div
@@ -31,6 +75,31 @@ export const AttachmentPreview = ({ selectedFile, previewUrl, onCancel }) => {
         >
           <Mic size={24} />
         </div>
+      ) : doc ? (
+        <div
+          className="d-flex align-items-center justify-content-center rounded position-relative flex-shrink-0"
+          style={{ height: '60px', width: '60px', backgroundColor: doc.bgColor, color: doc.color }}
+        >
+          <doc.icon size={26} strokeWidth={2} />
+          {doc.badge && (
+            <span
+              style={{
+                position: 'absolute',
+                bottom: '4px',
+                right: '4px',
+                backgroundColor: doc.color,
+                color: '#ffffff',
+                fontSize: '8px',
+                fontWeight: 'bold',
+                padding: '1px 3px',
+                borderRadius: '3px',
+                lineHeight: 1,
+              }}
+            >
+              {doc.badge}
+            </span>
+          )}
+        </div>
       ) : (
         <div
           className="d-flex align-items-center justify-content-center bg-secondary text-white rounded"
@@ -41,7 +110,7 @@ export const AttachmentPreview = ({ selectedFile, previewUrl, onCancel }) => {
       )}
 
       <div className="text-truncate flex-grow-1" style={{ fontSize: '0.8rem' }}>
-        <div className="fw-bold">{selectedFile.name}</div>
+        <div className="fw-bold text-dark">{selectedFile.name}</div>
         <div className="text-muted">
           {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
         </div>

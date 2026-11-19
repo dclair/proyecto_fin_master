@@ -36,6 +36,26 @@ class Message(models.Model):
     def __str__(self):
         return f"Msg {self.id} by {self.sender.username} in Conv {self.conversation.id}"
 
+    @property
+    def attachment_name(self):
+        if not self.attachment:
+            return None
+        import os
+        import re
+        name = os.path.basename(self.attachment.name)
+        root, ext = os.path.splitext(name)
+        match = re.search(r'_([a-zA-Z0-9]{7})$', root)
+        if match:
+            suffix = match.group(1)
+            has_upper = any(c.isupper() for c in suffix)
+            has_lower = any(c.islower() for c in suffix)
+            has_digit = any(c.isdigit() for c in suffix)
+            if (has_upper and has_lower) or (has_digit and (has_upper or has_lower)):
+                cleaned_root = root[:-8]
+                if cleaned_root:
+                    return f"{cleaned_root}{ext}"
+        return name
+
 class GroupJoinRequest(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),

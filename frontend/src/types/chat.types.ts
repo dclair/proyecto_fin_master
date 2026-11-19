@@ -20,6 +20,7 @@ export interface ChatMessage {
   sender: ChatUser;
   timestamp: string;
   attachment?: string | null;
+  attachment_name?: string | null;
   attachment_type?: AttachmentType | null;
 }
 

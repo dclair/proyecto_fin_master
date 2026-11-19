@@ -130,3 +130,40 @@ class ChatAPITests(TestCase):
         res = self.client.post(upload_url, {"file": valid_jpg, "content": "Foto segura"})
         self.assertEqual(res.status_code, 201)
         self.assertEqual(res.data["attachment_type"], "image")
+
+    def test_message_upload_pdf_includes_attachment_name(self):
+        conv = Conversation.objects.create(is_group=False)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user1)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user2)
+
+        upload_url = reverse("api-messages-upload", kwargs={"conversation_id": conv.id})
+        pdf_file = SimpleUploadedFile("documento_importante.pdf", b"%PDF-1.4 sample content", content_type="application/pdf")
+        res = self.client.post(upload_url, {"file": pdf_file, "content": "Mira este documento"})
+        
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res.data["attachment_type"], "document")
+        self.assertIn("attachment_name", res.data)
+        self.assertEqual(res.data["attachment_name"], "documento_importante.pdf")
+
+    def test_protected_attachment_download_disposition_options(self):
+        conv = Conversation.objects.create(is_group=False)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user1)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user2)
+
+        pdf_file = SimpleUploadedFile("guia_usuario.pdf", b"%PDF-1.4 sample content", content_type="application/pdf")
+        msg = Message.objects.create(conversation=conv, sender=self.user1, attachment=pdf_file, attachment_type="document")
+
+        download_url = reverse("api-message-attachment", kwargs={"message_id": msg.id})
+        self.client.force_login(self.user1)
+
+        # Inline view default
+        res_inline = self.client.get(download_url)
+        self.assertEqual(res_inline.status_code, 200)
+        self.assertIn('inline', res_inline.headers.get("Content-Disposition", ""))
+        self.assertIn('guia_usuario.pdf', res_inline.headers.get("Content-Disposition", ""))
+
+        # Force download
+        res_download = self.client.get(f"{download_url}?download=1")
+        self.assertEqual(res_download.status_code, 200)
+        self.assertIn('attachment', res_download.headers.get("Content-Disposition", ""))
+        self.assertIn('guia_usuario.pdf', res_download.headers.get("Content-Disposition", ""))

@@ -1,15 +1,216 @@
 import React from 'react';
-import { Trash2, FileText } from 'lucide-react';
+import {
+  Trash2,
+  FileText,
+  FileSpreadsheet,
+  FileArchive,
+  FileCode,
+  File,
+  Download,
+} from 'lucide-react';
 
-const isImage = (url, type) => type === 'image' || (!type && url && /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(url));
-const isVideo = (url, type) => type === 'video' || (!type && url && /\.(mp4|webm|mov)(\?.*)?$/i.test(url));
-const isAudio = (url, type) => type === 'audio' || (!type && url && /\.(mp3|wav|ogg|m4a)(\?.*)?$/i.test(url));
+const isImage = (url, type, name) => {
+  if (type === 'image') return true;
+  const target = (name || url || '').toLowerCase();
+  return /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(target);
+};
 
-const getAttachmentDisplayName = (url) => {
-  if (!url) return 'Archivo adjunto';
-  const clean = url.replace(/\/+$/, '');
-  const name = clean.split('/').pop();
-  return name && name !== 'attachment' ? name : 'Archivo adjunto';
+const isVideo = (url, type, name) => {
+  if (type === 'video') return true;
+  const target = (name || url || '').toLowerCase();
+  return /\.(mp4|webm|mov)(\?.*)?$/i.test(target);
+};
+
+const isAudio = (url, type, name) => {
+  if (type === 'audio') return true;
+  const target = (name || url || '').toLowerCase();
+  return /\.(mp3|wav|ogg|m4a)(\?.*)?$/i.test(target);
+};
+
+const getAttachmentDisplayName = (msg) => {
+  if (msg.attachment_name) return msg.attachment_name;
+  if (msg.attachment) {
+    const clean = msg.attachment.replace(/\/+$/, '');
+    const name = clean.split('/').pop();
+    if (name && name !== 'attachment') return decodeURIComponent(name);
+  }
+  return 'Archivo adjunto';
+};
+
+const getFileInfo = (msg) => {
+  const name = getAttachmentDisplayName(msg);
+  const ext = (name.includes('.') ? name.split('.').pop() : '').toLowerCase();
+
+  if (ext === 'pdf' || msg.attachment_type === 'pdf') {
+    return {
+      type: 'pdf',
+      badge: 'PDF',
+      label: 'Documento PDF',
+      color: '#dc2626',
+      bgColor: '#fee2e2',
+      borderColor: '#fca5a5',
+      icon: FileText,
+      name,
+    };
+  }
+
+  if (['xls', 'xlsx', 'csv', 'ods'].includes(ext)) {
+    return {
+      type: 'spreadsheet',
+      badge: ext.toUpperCase(),
+      label: 'Hoja de cálculo',
+      color: '#16a34a',
+      bgColor: '#dcfce7',
+      borderColor: '#86efac',
+      icon: FileSpreadsheet,
+      name,
+    };
+  }
+
+  if (['doc', 'docx', 'odt'].includes(ext)) {
+    return {
+      type: 'word',
+      badge: ext.toUpperCase(),
+      label: 'Documento de texto',
+      color: '#2563eb',
+      bgColor: '#dbeafe',
+      borderColor: '#93c5fd',
+      icon: FileText,
+      name,
+    };
+  }
+
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+    return {
+      type: 'archive',
+      badge: ext.toUpperCase(),
+      label: 'Archivo comprimido',
+      color: '#d97706',
+      bgColor: '#fef3c7',
+      borderColor: '#fde68a',
+      icon: FileArchive,
+      name,
+    };
+  }
+
+  if (['txt', 'md', 'json', 'xml', 'js', 'py', 'html', 'css'].includes(ext)) {
+    return {
+      type: 'code',
+      badge: ext.toUpperCase() || 'TXT',
+      label: 'Archivo de texto/código',
+      color: '#7c3aed',
+      bgColor: '#ede9fe',
+      borderColor: '#ddd6fe',
+      icon: FileCode,
+      name,
+    };
+  }
+
+  return {
+    type: 'generic',
+    badge: ext ? ext.toUpperCase() : 'DOC',
+    label: 'Documento adjunto',
+    color: '#475569',
+    bgColor: '#f1f5f9',
+    borderColor: '#cbd5e1',
+    icon: File,
+    name,
+  };
+};
+
+const DocumentAttachment = ({ msg }) => {
+  const fileInfo = getFileInfo(msg);
+  const IconComponent = fileInfo.icon;
+  const downloadUrl = msg.attachment.includes('?')
+    ? `${msg.attachment}&download=1`
+    : `${msg.attachment}?download=1`;
+
+  return (
+    <div
+      className="document-attachment-card d-flex align-items-center justify-content-between gap-3 p-2 rounded-3 my-1"
+      style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid rgba(0,0,0,0.12)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+        color: '#1e293b',
+        maxWidth: '340px',
+        minWidth: '240px',
+      }}
+    >
+      <a
+        href={msg.attachment}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="d-flex align-items-center gap-2 text-decoration-none flex-grow-1 overflow-hidden"
+        style={{ color: '#1e293b' }}
+        title={`Abrir ${fileInfo.name}`}
+      >
+        <div
+          className="d-flex align-items-center justify-content-center rounded-2 flex-shrink-0 position-relative"
+          style={{
+            width: '42px',
+            height: '42px',
+            backgroundColor: fileInfo.bgColor,
+            border: `1px solid ${fileInfo.borderColor}`,
+            color: fileInfo.color,
+          }}
+        >
+          <IconComponent size={22} strokeWidth={2} />
+          {fileInfo.badge && (
+            <span
+              style={{
+                position: 'absolute',
+                bottom: '-3px',
+                right: '-3px',
+                backgroundColor: fileInfo.color,
+                color: '#ffffff',
+                fontSize: '8px',
+                fontWeight: 'bold',
+                padding: '1px 3px',
+                borderRadius: '3px',
+                lineHeight: 1,
+                letterSpacing: '0.5px',
+              }}
+            >
+              {fileInfo.badge}
+            </span>
+          )}
+        </div>
+
+        <div className="d-flex flex-column overflow-hidden text-start">
+          <span
+            className="fw-bold text-truncate"
+            style={{ fontSize: '0.88rem', lineHeight: '1.25', color: '#0f172a' }}
+            title={fileInfo.name}
+          >
+            {fileInfo.name}
+          </span>
+          <span
+            className="text-muted text-truncate"
+            style={{ fontSize: '0.72rem', marginTop: '2px' }}
+          >
+            {fileInfo.label}
+          </span>
+        </div>
+      </a>
+
+      <a
+        href={downloadUrl}
+        download={fileInfo.name}
+        className="btn btn-sm p-1 rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center"
+        style={{
+          width: '32px',
+          height: '32px',
+          backgroundColor: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          color: fileInfo.color,
+        }}
+        title={`Descargar ${fileInfo.name}`}
+      >
+        <Download size={16} strokeWidth={2.2} />
+      </a>
+    </div>
+  );
 };
 
 const renderMessageWithLinks = (text) => {
@@ -56,6 +257,7 @@ export const MessageTimeline = ({
     <div className="messages-list">
       {messages.map((msg, idx) => {
         const isMe = msg.sender?.username === currentUsername;
+        const displayName = getAttachmentDisplayName(msg);
 
         return (
           <div
@@ -71,11 +273,11 @@ export const MessageTimeline = ({
 
               {msg.attachment && (
                 <div className="message-attachment mb-1">
-                  {isImage(msg.attachment, msg.attachment_type) && (
+                  {isImage(msg.attachment, msg.attachment_type, displayName) && (
                     <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
                       <img
                         src={msg.attachment}
-                        alt="Adjunto"
+                        alt={displayName || "Adjunto"}
                         style={{
                           maxHeight: '200px',
                           maxWidth: '100%',
@@ -87,7 +289,7 @@ export const MessageTimeline = ({
                       />
                     </a>
                   )}
-                  {isVideo(msg.attachment, msg.attachment_type) && (
+                  {isVideo(msg.attachment, msg.attachment_type, displayName) && (
                     <video
                       controls
                       style={{
@@ -100,7 +302,7 @@ export const MessageTimeline = ({
                       Tu navegador no soporta el video.
                     </video>
                   )}
-                  {isAudio(msg.attachment, msg.attachment_type) && (
+                  {isAudio(msg.attachment, msg.attachment_type, displayName) && (
                     <audio
                       controls
                       src={msg.attachment}
@@ -109,21 +311,10 @@ export const MessageTimeline = ({
                       preload="metadata"
                     />
                   )}
-                  {!isImage(msg.attachment, msg.attachment_type) &&
-                   !isVideo(msg.attachment, msg.attachment_type) &&
-                   !isAudio(msg.attachment, msg.attachment_type) && (
-                    <a
-                      href={msg.attachment}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="d-flex align-items-center gap-2 p-2 rounded text-decoration-none text-reset"
-                      style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
-                    >
-                      <FileText size={24} />
-                      <span style={{ wordBreak: 'break-all', fontSize: '0.85rem' }}>
-                        {getAttachmentDisplayName(msg.attachment)}
-                      </span>
-                    </a>
+                  {!isImage(msg.attachment, msg.attachment_type, displayName) &&
+                   !isVideo(msg.attachment, msg.attachment_type, displayName) &&
+                   !isAudio(msg.attachment, msg.attachment_type, displayName) && (
+                    <DocumentAttachment msg={msg} />
                   )}
                 </div>
               )}
