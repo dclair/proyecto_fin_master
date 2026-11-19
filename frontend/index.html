@@ -1,13 +1,110 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>Hubs & Clicks - Servidor de Desarrollo Vite (Chat HMR)</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #0d1719;
+        color: #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+      .card {
+        background: #142427;
+        border: 1.5px solid #2ba1ab;
+        border-radius: 12px;
+        padding: 36px;
+        max-width: 620px;
+        text-align: center;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+      }
+      .badge {
+        display: inline-block;
+        background: #2ba1ab;
+        color: #0b1517;
+        font-weight: bold;
+        font-size: 0.8rem;
+        padding: 4px 10px;
+        border-radius: 999px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 16px;
+      }
+      h1 {
+        margin: 0 0 12px 0;
+        color: #2ba1ab;
+        font-size: 1.75rem;
+      }
+      p {
+        line-height: 1.6;
+        color: #94a3b8;
+        font-size: 1rem;
+        margin: 12px 0;
+      }
+      .highlight {
+        color: #38bdf8;
+        font-family: monospace;
+        background: #091315;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .btn {
+        display: inline-block;
+        margin-top: 24px;
+        background-color: #2ba1ab;
+        color: #ffffff;
+        text-decoration: none;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1rem;
+        box-shadow: 0 4px 14px rgba(43, 161, 171, 0.4);
+        transition: background-color 0.2s, transform 0.1s;
+      }
+      .btn:hover {
+        background-color: #23858d;
+        transform: translateY(-1px);
+      }
+      .info-box {
+        margin-top: 24px;
+        padding: 12px 16px;
+        background: #091315;
+        border-left: 3px solid #2ba1ab;
+        text-align: left;
+        font-size: 0.88rem;
+        color: #cbd5e1;
+        border-radius: 0 6px 6px 0;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div class="card">
+      <span class="badge">Vite HMR Dev Server (Port 5173)</span>
+      <h1>Hubs &amp; Clicks — Microfrontend Chat</h1>
+      <p>
+        Estás conectado al servidor de desarrollo de <strong>Vite</strong>. Este servicio solo compila y sirve en caliente los componentes de React para el módulo de chat.
+      </p>
+      <p>
+        La plataforma completa (autenticación, eventos, publicaciones, biblioteca, mercadillo y perfil) corre en el servidor de <strong>Django</strong>:
+      </p>
+      <a class="btn" href="http://localhost:8000/">👉 Ir a la aplicación en localhost:8000</a>
+      
+      <div class="info-box">
+        💡 <strong>Nota de Arquitectura:</strong> En producción y en modo integrado, los assets de Vite son inyectados automáticamente por Django en las plantillas mediante las etiquetas <span class="highlight">{% vite_asset 'src/main.jsx' %}</span> cuando el usuario inicia sesión.
+      </div>
+    </div>
+
+    <!-- Contenedor donde se monta el microfrontend del chat si se prueba standalone -->
+    <div id="react-chat-root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
