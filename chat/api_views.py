@@ -204,6 +204,31 @@ class RequestJoinGroupView(APIView):
             join_req.status = 'pending'
             join_req.save()
             
+        # Notificar al administrador del grupo (campanita y email)
+        if conv.admin and conv.admin != request.user:
+            from notifications.models import Notification
+            from aficionados_network.utils.mailer import send_hubs_email_async
+            from django.urls import reverse
+
+            event_obj = getattr(conv, 'event_linked', None)
+            Notification.objects.create(
+                recipient=conv.admin,
+                sender=request.user,
+                notification_type="chat_request",
+                event=event_obj,
+                message=f"ha solicitado unirse a tu grupo de chat '{conv.name}'.",
+            )
+
+            action_url = request.build_absolute_uri(
+                reverse('posts:event_detail', args=[event_obj.id]) if event_obj else reverse('home')
+            )
+            send_hubs_email_async(
+                subject=f"💬 Solicitud de acceso a grupo de chat: {conv.name}",
+                recipient=conv.admin,
+                message_body=f"¡Hola! @{request.user.username} ha solicitado incorporarse al grupo de chat '{conv.name}'. Puedes revisar y gestionar la solicitud desde la sección de chat.",
+                action_url=action_url,
+            )
+
         return Response({'status': 'ok'})
 
 class GroupJoinRequestsListView(generics.ListAPIView):
@@ -237,6 +262,46 @@ class ManageJoinRequestView(APIView):
             join_req.status = 'rejected'
             
         join_req.save()
+
+        # Notificar al usuario solicitante sobre el resultado (campanita y email)
+        from notifications.models import Notification
+        from aficionados_network.utils.mailer import send_hubs_email_async
+        from django.urls import reverse
+
+        event_obj = getattr(join_req.conversation, 'event_linked', None)
+        action_url = request.build_absolute_uri(
+            reverse('posts:event_detail', args=[event_obj.id]) if event_obj else reverse('home')
+        )
+
+        if action == 'accept':
+            Notification.objects.create(
+                recipient=join_req.user,
+                sender=request.user,
+                notification_type="chat_accepted",
+                event=event_obj,
+                message=f"ha aceptado tu solicitud para unirte al grupo '{join_req.conversation.name}'.",
+            )
+            send_hubs_email_async(
+                subject=f"🎉 ¡Aceptado en el grupo!: {join_req.conversation.name}",
+                recipient=join_req.user,
+                message_body=f"¡Buenas noticias! @{request.user.username} ha aceptado tu solicitud de acceso a '{join_req.conversation.name}'. Ya eres participante del grupo de chat.",
+                action_url=action_url,
+            )
+        else:
+            Notification.objects.create(
+                recipient=join_req.user,
+                sender=request.user,
+                notification_type="chat_rejected",
+                event=event_obj,
+                message=f"ha rechazado tu solicitud para unirte al grupo '{join_req.conversation.name}'.",
+            )
+            send_hubs_email_async(
+                subject=f"ℹ️ Solicitud al grupo: {join_req.conversation.name}",
+                recipient=join_req.user,
+                message_body=f"Tu solicitud para unirte a '{join_req.conversation.name}' no ha sido aceptada por el administrador.",
+                action_url=action_url,
+            )
+
         return Response({'status': 'ok'})
 
 class ConversationDeleteView(APIView):

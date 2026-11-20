@@ -14,6 +14,9 @@ class Notification(models.Model):
         ("badge", "Logro Obtenido"),
         ("article_comment", "Comentario en Artículo"),
         ("article_rating", "Valoración de Artículo"),
+        ("chat_request", "Solicitud de Chat"),
+        ("chat_accepted", "Acceso al Chat Aceptado"),
+        ("chat_rejected", "Acceso al Chat Rechazado"),
     )
 
     # Añadimos verbose_name a cada campo
@@ -76,3 +79,27 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.sender} -> {self.recipient} ({self.get_notification_type_display()})"
+
+    @property
+    def text(self):
+        if self.message:
+            return self.message
+        if self.notification_type == "event":
+            if self.event:
+                if self.event.is_canceled:
+                    return f"ha cancelado el evento: {self.event.title}"
+                return f"se ha apuntado a tu quedada: {self.event.title}"
+            return "actualización de evento"
+        if self.notification_type == "chat_request":
+            return "ha solicitado unirse a tu grupo de chat"
+        if self.notification_type == "chat_accepted":
+            return "ha aceptado tu solicitud de acceso al grupo de chat"
+        if self.notification_type == "chat_rejected":
+            return "ha rechazado tu solicitud de acceso al grupo de chat"
+        if self.notification_type == "follow":
+            return "ha empezado a seguirte"
+        if self.notification_type == "like":
+            return "le ha dado 'me gusta' a tu publicación"
+        if self.notification_type == "comment":
+            return "ha comentado en tu publicación/evento"
+        return self.get_notification_type_display()

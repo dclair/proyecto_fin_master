@@ -33,11 +33,10 @@ def create_event_chat_group(sender, instance, created, **kwargs):
 @receiver(post_save, sender=EventAttendance)
 def add_user_to_event_chat(sender, instance, created, **kwargs):
     """
-    Cuando un usuario se apunta a un evento de forma online,
-    lo añadimos al grupo de chat del evento (si existe).
+    Cuando un usuario se apunta a un evento (online o presencial),
+    lo añadimos automáticamente al grupo de chat del evento (si existe).
     """
-    # Solo añadimos si la asistencia es online y el evento tiene chat_group
-    if instance.attendance_type == 'online' and instance.event.chat_group:
+    if instance.event.chat_group:
         ConversationParticipant.objects.get_or_create(
             conversation=instance.event.chat_group,
             user=instance.user

@@ -46,6 +46,12 @@ def notification_redirect(request, pk):
     elif n.notification_type == "like" and n.post:
         return redirect("posts:post_detail", pk=n.post.pk)
 
+    # --- CATEGORÍA: CHAT / SOLICITUDES DE GRUPO ---
+    elif n.notification_type in ["chat_request", "chat_accepted", "chat_rejected"]:
+        if n.event:
+            return redirect("posts:event_detail", pk=n.event.pk)
+        return redirect("home")
+
     # Si por alguna razón el objeto (post/evento) fue borrado, volvemos a la lista
     return redirect("notifications:list")
 
@@ -104,6 +110,12 @@ def read_and_redirect(request, notification_id):
     # Redirección para Seguimientos (Follows)
     elif notification.notification_type == "follow":
         return redirect("profiles:profile", pk=notification.sender.profile.pk)
+
+    # Redirección para Chat / Solicitudes
+    elif notification.notification_type in ["chat_request", "chat_accepted", "chat_rejected"]:
+        if notification.event:
+            return redirect("posts:event_detail", pk=notification.event.pk)
+        return redirect("home")
 
     # Por si acaso no coincide con nada, volvemos al historial
     return redirect("notifications:list")

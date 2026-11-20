@@ -377,6 +377,14 @@ def toggle_attendance(request, event_id):
         if attendance:
             attendance.delete()
         messages.info(request, "Ya no estás apuntado.")
+        if request.user != event.organizer:
+            Notification.objects.create(
+                recipient=event.organizer,
+                sender=request.user,
+                notification_type="event",
+                event=event,
+                message=f"se ha desapuntado de tu quedada: {event.title}",
+            )
         # USAMOS LA FUNCIÓN MAESTRA
         send_hubs_email(
             f"🏃 Baja en tu evento: {event.title}",
@@ -398,6 +406,14 @@ def toggle_attendance(request, event_id):
             )
             tipo_msg = "presencial" if attendance_type == 'physical' else "online"
             messages.success(request, f"¡Te has apuntado de forma {tipo_msg}!")
+            if request.user != event.organizer:
+                Notification.objects.create(
+                    recipient=event.organizer,
+                    sender=request.user,
+                    notification_type="event",
+                    event=event,
+                    message=f"se ha apuntado a tu quedada: {event.title} ({tipo_msg})",
+                )
             # USAMOS LA FUNCIÓN MAESTRA
             send_hubs_email(
                 f"✅ ¡Alguien se ha unido ({tipo_msg})!: {event.title}",

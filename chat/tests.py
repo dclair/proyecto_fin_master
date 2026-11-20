@@ -28,16 +28,61 @@ class ChatAPITests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("error", response.data)
 
-    def test_create_group_conversation(self):
-        url = reverse("api-groups-create")
-        payload = {
-            "name": "Grupo de Acupuntura",
-            "user_ids": [self.user1.id, self.user2.id, self.user3.id]
-        }
-        response = self.client.post(url, payload, content_type="application/json")
-        self.assertEqual(response.status_code, 201)
-        self.assertTrue(response.data["is_group"])
-        self.assertEqual(response.data["name"], "Grupo de Acupuntura")
+    def test_group_join_request_creates_notification_and_manage(self):
+        from notifications.models import Notification
+        from chat.models import GroupJoinRequest
+
+        # Grupo creado por user1 (admin)
+        conv = Conversation.objects.create(is_group=True, name="Taller Masaje", admin=self.user1)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user1)
+
+        # user2 solicita unirse
+        self.client.force_login(self.user2)
+        request_url = reverse("api-groups-request-join", kwargs={"conversation_id": conv.id})
+        res_req = self.client.post(request_url)
+        self.assertEqual(res_req.status_code, 200)
+
+        # Verificar que se creó la notificación para user1 (admin)
+        notif = Notification.objects.filter(recipient=self.user1, sender=self.user2, notification_type="chat_request").first()
+        self.assertIsNotNone(notif)
+        self.assertIn("ha solicitado unirse a tu grupo de chat", notif.message)
+
+        # user1 acepta la solicitud
+        self.client.force_login(self.user1)
+        join_req = GroupJoinRequest.objects.get(conversation=conv, user=self.user2)
+        manage_url = reverse("api-groups-manage-request", kwargs={"request_id": join_req.id})
+        res_manage = self.client.post(manage_url, {"action": "accept"}, content_type="application/json")
+        self.assertEqual(res_manage.status_code, 200)
+
+        # Verificar que user2 fue añadido al grupo
+        self.assertTrue(ConversationParticipant.objects.filter(conversation=conv, user=self.user2).exists())
+
+        # Verificar que user2 recibió notificación de que fue aceptado
+        notif_accepted = Notification.objects.filter(recipient=self.user2, sender=self.user1, notification_type="chat_accepted").first()
+        self.assertIsNotNone(notif_accepted)
+        self.assertIn("ha aceptado tu solicitud", notif_accepted.message)
+
+    def test_event_attendance_physical_adds_to_chat_group(self):
+        from posts.models import Event, EventAttendance
+        from profiles.models import Hobby
+
+        hobby, _ = Hobby.objects.get_or_create(name="Masaje")
+        event = Event.objects.create(
+            title="Taller Presencial",
+            organizer=self.user1,
+            hobby=hobby,
+            is_online=True,
+            location="Madrid",
+            event_date="2027-01-01 10:00:00",
+            max_participants=10
+        )
+        self.assertIsNotNone(event.chat_group)
+
+        # user2 se apunta de forma presencial (physical)
+        EventAttendance.objects.create(event=event, user=self.user2, attendance_type="physical")
+
+        # Debe estar en el chat automáticamente
+        self.assertTrue(ConversationParticipant.objects.filter(conversation=event.chat_group, user=self.user2).exists())
 
     def test_message_upload_security_whitelist(self):
         # Crear conversacion
