@@ -8,7 +8,7 @@ from django.db.models import Avg
 from .models import Article, ArticleComment, ArticleRating
 from .forms import ArticleForm, ArticleCommentForm
 from profiles.models import Hobby
-from notifications.models import Notification
+from notifications.services import NotificationDispatcher
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
@@ -120,11 +120,19 @@ def add_comment(request, slug):
         comment.save()
         
         if article.author != request.user:
-            Notification.objects.create(
-                recipient=article.author,
-                sender=request.user,
+            action_url = request.build_absolute_uri(
+                reverse('library:article_detail', kwargs={'slug': slug})
+            )
+            NotificationDispatcher.dispatch(
                 notification_type='article_comment',
-                message=f'Ha comentado en tu artículo "{article.title}"'
+                sender=request.user,
+                recipient=article.author,
+                article=article,
+                message=f'ha comentado en tu artículo "{article.title}"',
+                send_email=True,
+                email_subject=f'💬 Nuevo comentario en tu artículo: {article.title}',
+                email_body=f'¡Hola {article.author.username}!\n\n@{request.user.username} ha dejado un comentario en tu artículo "{article.title}".',
+                action_url=action_url,
             )
         messages.success(request, "Comentario añadido.")
     return redirect('library:article_detail', slug=slug)
@@ -141,11 +149,19 @@ def rate_article(request, slug):
             defaults={'rating': int(rating_val)}
         )
         if created and article.author != request.user:
-            Notification.objects.create(
-                recipient=article.author,
-                sender=request.user,
+            action_url = request.build_absolute_uri(
+                reverse('library:article_detail', kwargs={'slug': slug})
+            )
+            NotificationDispatcher.dispatch(
                 notification_type='article_rating',
-                message=f'Ha valorado tu artículo "{article.title}" con {rating_val} estrellas'
+                sender=request.user,
+                recipient=article.author,
+                article=article,
+                message=f'ha valorado tu artículo "{article.title}" con {rating_val} estrellas',
+                send_email=True,
+                email_subject=f'⭐ Nueva valoración en tu artículo: {article.title}',
+                email_body=f'¡Hola {article.author.username}!\n\n@{request.user.username} ha valorado tu artículo "{article.title}" con {rating_val} estrellas.',
+                action_url=action_url,
             )
         messages.success(request, "Valoración guardada.")
     return redirect('library:article_detail', slug=slug)
