@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.contrib.auth.models import User
+from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -130,6 +131,8 @@ class ProfileViewTests(TestCase):
                 review=review,
             ).exists()
         )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Nueva valoración", mail.outbox[0].subject)
 
     def test_organizer_cannot_review_own_event(self):
         event = Event.objects.create(

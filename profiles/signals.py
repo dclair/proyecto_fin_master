@@ -83,6 +83,7 @@ def send_welcome_email_on_activation(sender, instance, created, **kwargs):
         if not instance._old_is_active and instance.is_active:
             # ¡El usuario fue activado por un admin!
             from django.contrib.sites.models import Site
+            from aficionados_network.utils.mailer import send_hubs_email_async
             try:
                 current_site = Site.objects.get_current()
                 domain = current_site.domain
@@ -90,26 +91,21 @@ def send_welcome_email_on_activation(sender, instance, created, **kwargs):
                 domain = "localhost:8000"
 
             mail_subject = "¡Bienvenido a Hubs & Clicks! Tu cuenta ha sido activada"
-            html_content = render_to_string(
-                "registration/welcome_email.html",
-                {
-                    "user": instance,
-                    "domain": domain,
-                },
+            message_body = (
+                f"¡Hola {instance.username}!\n\n"
+                f"Tu cuenta ha sido revisada y activada con éxito por el equipo de administración.\n\n"
+                f"Ya puedes iniciar sesión en la plataforma para descubrir y conectar con la comunidad, "
+                f"participar en quedadas, compartir tus clicks y disfrutar de todos los recursos."
             )
-
-            email = EmailMultiAlternatives(mail_subject, "", settings.DEFAULT_FROM_EMAIL, to=[instance.email])
-            email.attach_alternative(html_content, "text/html")
-
-            img_path = os.path.join(settings.BASE_DIR, "static", "img", "logo_hubs.png")
-            if os.path.exists(img_path):
-                with open(img_path, "rb") as f:
-                    logo = MIMEImage(f.read())
-                    logo.add_header("Content-ID", "<logo_id>")
-                    email.attach(logo)
+            action_url = f"http://{domain}/login/"
 
             try:
-                email.send()
-                logger.info(f"Email de bienvenida enviado a {instance.email}")
+                send_hubs_email_async(
+                    subject=mail_subject,
+                    recipient=instance,
+                    message_body=message_body,
+                    action_url=action_url,
+                )
+                logger.info(f"Email de bienvenida encolado en Celery para {instance.email}")
             except Exception as e:
-                logger.error(f"Error enviando email de bienvenida a {instance.email}: {str(e)}")
+                logger.error(f"Error encolando email de bienvenida para {instance.email}: {str(e)}")

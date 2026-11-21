@@ -66,6 +66,20 @@ class CoreViewAndEmailTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("aprobación", mail.outbox[0].subject)
 
+    def test_admin_activation_enqueues_welcome_email_via_celery(self):
+        user = User.objects.create_user(
+            username="paciente_nuevo",
+            email="paciente_nuevo@example.com",
+            password="testpass123",
+            is_active=False,
+        )
+        mail.outbox.clear()
+        user.is_active = True
+        user.save()
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("activada", mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, ["paciente_nuevo@example.com"])
+
     # testea el formulario de contacto y el envio de email de confirmacion
     def test_contact_form_persists_message_and_sends_email(self):
         response = self.client.post(

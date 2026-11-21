@@ -1,7 +1,7 @@
 from .models import Badge, UserBadge
 from posts.models import Posts, Event
 from notifications.models import Notification
-from django.core.mail import send_mail
+from notifications.services import NotificationDispatcher
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Count, Q, Avg
@@ -105,42 +105,52 @@ def award_badge(user, code_name, name_fallback, icon_fallback):
 
     if awarded:
         admin_user = User.objects.filter(is_superuser=True).first() or user
-        Notification.objects.create(
-            recipient=user,
-            sender=admin_user,
-            notification_type='badge',
-            message=f'¡Felicidades! Has desbloqueado la medalla: {badge.name}'
-        )
+        action_url = "/"
+        if hasattr(user, "profile") and getattr(user.profile, "pk", None):
+            try:
+                from django.urls import reverse
+                action_url = reverse("profiles:profile", args=[user.profile.pk])
+            except Exception:
+                action_url = "/"
 
-        try:
-            send_mail(
-                f'¡Logro Desbloqueado: {badge.name}!',
-                f'Hola {user.username},\n\nHas desbloqueado una nueva medalla en tu perfil: {badge.name}.\n\n¡Gracias por iluminar la red y compartir tu sabiduría!\n\nEl equipo de Aficionados Network.',
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=True
-            )
-        except Exception:
-            pass
+        NotificationDispatcher.dispatch(
+            notification_type="badge",
+            sender=admin_user,
+            recipient=user,
+            message=f"¡Felicidades! Has desbloqueado la medalla: {badge.name}",
+            send_email=True,
+            email_subject=f"🏆 ¡Logro Desbloqueado: {badge.name}!",
+            email_body=(
+                f"¡Hola {user.username}!\n\n"
+                f"Has desbloqueado una nueva medalla en tu perfil: {badge.name}.\n\n"
+                f"¡Gracias por iluminar la red y compartir tu sabiduría con la comunidad!\n\n"
+                f"El equipo de Aficionados Network."
+            ),
+            action_url=action_url,
+        )
 
 
 def send_motivation_warning(user):
     admin_user = User.objects.filter(is_superuser=True).first() or user
-    Notification.objects.create(
-        recipient=user,
-        sender=admin_user,
-        notification_type='badge',
-        message='¡Estás a un solo evento exitoso de alcanzar la medalla "Maestro Facilitador"!'
-    )
-
     try:
-        send_mail(
-            '¡Estás muy cerca de tu próxima medalla!',
-            f'Hola {user.username},\n\nYa has organizado 2 eventos súper exitosos (con al menos 10 asistentes presenciales o 20 online). '
-            f'¡Estás a un solo evento de alcanzar la medalla honorífica de "Maestro Facilitador"!\n\nAnímate a organizar el próximo encuentro y seguir guiando a la comunidad.\n\nEl equipo de Aficionados Network.',
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=True
-        )
+        from django.urls import reverse
+        action_url = reverse("posts:event_create")
     except Exception:
-        pass
+        action_url = "/"
+
+    NotificationDispatcher.dispatch(
+        notification_type="badge",
+        sender=admin_user,
+        recipient=user,
+        message='¡Estás a un solo evento exitoso de alcanzar la medalla "Maestro Facilitador"!',
+        send_email=True,
+        email_subject="✨ ¡Estás muy cerca de tu próxima medalla!",
+        email_body=(
+            f"¡Hola {user.username}!\n\n"
+            f"Ya has organizado 2 eventos súper exitosos (con al menos 10 asistentes presenciales o 20 online). "
+            f'¡Estás a un solo evento de alcanzar la medalla honorífica de "Maestro Facilitador"!\n\n'
+            f"Anímate a organizar el próximo encuentro y seguir guiando a la comunidad.\n\n"
+            f"El equipo de Aficionados Network."
+        ),
+        action_url=action_url,
+    )

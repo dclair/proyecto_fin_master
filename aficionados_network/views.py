@@ -257,7 +257,7 @@ class RegisterView(CreateView):
         profile.numero_socio = numero_socio
         profile.save()
 
-        # 2. Enviamos el correo a la administración
+        # 2. Enviamos el correo a la administración vía Celery
         admin_email = getattr(settings, "CONTACT_EMAIL", "jmdclair@gmail.com")
         mail_subject = "Nuevo registro pendiente de aprobación"
         
@@ -268,14 +268,15 @@ class RegisterView(CreateView):
             f"Razón Social: {razon_social}\n"
             f"Número de Socio: {numero_socio}\n"
         )
+        action_url = self.request.build_absolute_uri("/admin/")
 
-        email = EmailMultiAlternatives(
-            mail_subject,
-            text_content,
-            settings.DEFAULT_FROM_EMAIL,
-            [admin_email]
+        from aficionados_network.utils.mailer import send_hubs_email_async
+        send_hubs_email_async(
+            subject=mail_subject,
+            recipient=admin_email,
+            message_body=text_content,
+            action_url=action_url,
         )
-        email.send()
 
         # 4. Mostramos la pantalla indicando que la solicitud está en revisión
         return render(

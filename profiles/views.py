@@ -15,10 +15,10 @@ import os
 # Importaciones de tu proyecto
 from aficionados_network.forms import UserUpdateForm, ProfileUpdateForm, AddHobbyForm
 from notifications.models import Notification
+from notifications.services import NotificationDispatcher
 from .models import UserProfile, UserHobby, Hobby, Review
 from posts.models import Event
 from .forms import ReviewForm
-from notifications.models import Notification
 
 
 # --- LISTADO DE PERFILES ---
@@ -161,11 +161,10 @@ class ProfileView(LoginRequiredMixin, DetailView):
         else:
             current_user_profile.following.add(target_profile)
             if target_profile.user != request.user:
-                Notification.objects.get_or_create(
+                NotificationDispatcher.dispatch(
+                    notification_type="follow",
                     recipient=target_profile.user,
                     sender=request.user,
-                    notification_type="follow",
-                    is_read=False,
                 )
             messages.success(request, f"Ahora sigues a {target_profile.user.username}")
         return redirect("profiles:profile", pk=target_profile.pk)
@@ -289,12 +288,26 @@ def add_review(request, event_id):
             review.recipient = event.organizer
             review.save()
 
-            Notification.objects.create(
-                recipient=event.organizer,
-                sender=request.user,
+            from django.urls import reverse
+            action_url = request.build_absolute_uri(
+                reverse("profiles:profile", args=[event.organizer.profile.pk])
+            )
+            NotificationDispatcher.dispatch(
                 notification_type="review",
+                sender=request.user,
+                recipient=event.organizer,
                 event=event,
                 review=review,
+                message=f"ha valorado tu labor en el evento: {event.title} ({review.rating}★)",
+                send_email=True,
+                email_subject=f"⭐ Nueva valoración recibida en {event.title}",
+                email_body=(
+                    f"¡Enhorabuena @{event.organizer.username}!\n\n"
+                    f"@{request.user.username} ha valorado tu quedada '{event.title}' con {review.rating} estrellas:\n\n"
+                    f'"{review.comment}"\n\n'
+                    f"Puedes consultar todas tus valoraciones en tu perfil público."
+                ),
+                action_url=action_url,
             )
 
             messages.success(request, "¡Valoración enviada y notificada con éxito!")

@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.core import mail
 from django.contrib.auth.models import User
 from profiles.models import Hobby, Review
 from posts.models import Posts, Event, EventAttendance
@@ -35,6 +36,8 @@ class GamificationServiceTests(TestCase):
 
         self.assertTrue(has_badge(self.user, 'voz-holistica'))
         self.assertTrue(Notification.objects.filter(recipient=self.user, notification_type='badge').exists())
+        self.assertTrue(len(mail.outbox) > 0)
+        self.assertIn("Logro Desbloqueado", mail.outbox[-1].subject)
 
     def test_event_badge_and_motivation_warning(self):
         from django.utils import timezone

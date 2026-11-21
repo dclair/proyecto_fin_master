@@ -24,6 +24,7 @@ from operator import attrgetter
 from .models import Posts, Event, EventAttendance
 from .forms import PostCreateForm, CommentForm, EventForm, EventCommentForm
 from notifications.models import Notification
+from notifications.services import NotificationDispatcher
 from profiles.models import Review, UserHobby, Hobby
 from aficionados_network.utils.mailer import send_hubs_email_async
 
@@ -174,13 +175,13 @@ def toggle_like(request, post_id):
         post.likes.add(user)
         liked = True
 
-        # 3. Solo notificamos si el dueño del post no es quien da el like
-        if post.user != user:  # <--- Corregido
-            Notification.objects.create(
-                sender=user,
-                recipient=post.user,  # <--- Corregido
-                post=post,
+        # 3. Despacho centralizado de notificación in-app (Likes nunca envían email)
+        if post.user != user:
+            NotificationDispatcher.dispatch(
                 notification_type="like",
+                sender=user,
+                recipient=post.user,
+                post=post,
             )
 
     # 4. Devolvemos la respuesta que el JS espera
@@ -205,18 +206,17 @@ def add_comment(request, post_id):
                 reverse("posts:post_detail", args=[post.pk])
             )
 
-            # --- LÓGICA DE NOTIFICACIONES (Mantener exactamente igual) ---
+            # --- LÓGICA DE NOTIFICACIONES UNIFICADA ---
             if post.user != request.user:
-                Notification.objects.create(
+                NotificationDispatcher.dispatch(
+                    notification_type="comment",
                     sender=request.user,
                     recipient=post.user,
-                    notification_type="comment",
                     post=post,
-                )
-                send_hubs_email(
-                    subject=f"💬 Nuevo comentario de @{request.user.username}",
-                    recipient=post.user,
-                    message_body=f'¡Hola! @{request.user.username} ha comentado en tu publicación: "{post.caption[:50]}..."',
+                    comment=comment,
+                    send_email=True,
+                    email_subject=f"💬 Nuevo comentario de @{request.user.username}",
+                    email_body=f'¡Hola! @{request.user.username} ha comentado en tu publicación: "{post.caption[:50]}..."',
                     action_url=action_url,
                 )
             else:
@@ -228,16 +228,15 @@ def add_comment(request, post_id):
                 usuarios_a_notificar = User.objects.filter(id__in=participantes_ids)
 
                 for usuario in usuarios_a_notificar:
-                    Notification.objects.create(
+                    NotificationDispatcher.dispatch(
+                        notification_type="comment",
                         sender=request.user,
                         recipient=usuario,
-                        notification_type="comment",
                         post=post,
-                    )
-                    send_hubs_email(
-                        subject=f"📢 @{request.user.username} respondió en un post",
-                        recipient=usuario,
-                        message_body=f"El autor del post ha respondido en una conversación donde participaste.",
+                        comment=comment,
+                        send_email=True,
+                        email_subject=f"📢 @{request.user.username} respondió en un post",
+                        email_body="El autor del post ha respondido en una conversación donde participaste.",
                         action_url=action_url,
                     )
 
@@ -378,20 +377,17 @@ def toggle_attendance(request, event_id):
             attendance.delete()
         messages.info(request, "Ya no estás apuntado.")
         if request.user != event.organizer:
-            Notification.objects.create(
-                recipient=event.organizer,
-                sender=request.user,
+            NotificationDispatcher.dispatch(
                 notification_type="event",
+                sender=request.user,
+                recipient=event.organizer,
                 event=event,
                 message=f"se ha desapuntado de tu quedada: {event.title}",
+                send_email=True,
+                email_subject=f"🏃 Baja en tu evento: {event.title}",
+                email_body=f"@{request.user.username} se ha desapuntado de tu evento '{event.title}'.",
+                action_url=action_url,
             )
-        # USAMOS LA FUNCIÓN MAESTRA
-        send_hubs_email(
-            f"🏃 Baja en tu evento: {event.title}",
-            event.organizer,
-            f"@{request.user.username} se ha desapuntado de tu evento '{event.title}'.",
-            action_url,
-        )
     else:
         # Validar aforo SÓLO para asistentes presenciales
         physical_count = event.attendances.filter(attendance_type='physical').count()
@@ -407,20 +403,17 @@ def toggle_attendance(request, event_id):
             tipo_msg = "presencial" if attendance_type == 'physical' else "online"
             messages.success(request, f"¡Te has apuntado de forma {tipo_msg}!")
             if request.user != event.organizer:
-                Notification.objects.create(
-                    recipient=event.organizer,
-                    sender=request.user,
+                NotificationDispatcher.dispatch(
                     notification_type="event",
+                    sender=request.user,
+                    recipient=event.organizer,
                     event=event,
                     message=f"se ha apuntado a tu quedada: {event.title} ({tipo_msg})",
+                    send_email=True,
+                    email_subject=f"✅ ¡Alguien se ha unido ({tipo_msg})!: {event.title}",
+                    email_body=f"¡Buenas noticias! @{request.user.username} se ha unido a '{event.title}' de forma {tipo_msg}.",
+                    action_url=action_url,
                 )
-            # USAMOS LA FUNCIÓN MAESTRA
-            send_hubs_email(
-                f"✅ ¡Alguien se ha unido ({tipo_msg})!: {event.title}",
-                event.organizer,
-                f"¡Buenas noticias! @{request.user.username} se ha unido a '{event.title}' de forma {tipo_msg}.",
-                action_url,
-            )
 
     return redirect("posts:event_detail", pk=event.id)
 
@@ -588,17 +581,16 @@ class EventCancelView(LoginRequiredMixin, UserPassesTestMixin, View):
         participants = event.participants.all()
         for p in participants:
             if p != request.user:
-                # Notificación visual (campanita roja)
-                Notification.objects.create(
-                    recipient=p,
-                    sender=request.user,
+                NotificationDispatcher.dispatch(
                     notification_type="event",
+                    sender=request.user,
+                    recipient=p,
                     event=event,
+                    send_email=True,
+                    email_subject=subject,
+                    email_body=message_body,
+                    action_url=action_url,
                 )
-
-                # --- ¡AQUÍ ESTÁ EL CAMBIO! ---
-                # Usamos la función maestra que ya gestiona el LOGO y el HTML por dentro
-                send_hubs_email(subject, p, message_body, action_url)
 
         messages.success(
             request,
@@ -630,21 +622,15 @@ def add_event_comment(request, event_id):
             if event.organizer != request.user:
                 # CASO 1: Un usuario comenta -> El organizador recibe el aviso
                 recipient = event.organizer
-
-                # 1. Notificación web
-                Notification.objects.create(
-                    recipient=recipient,
-                    sender=request.user,
+                NotificationDispatcher.dispatch(
                     notification_type="comment",
+                    sender=request.user,
+                    recipient=recipient,
                     event=event,
-                )
-
-                # 2. EMAIL (USANDO LA FUNCIÓN MAESTRA)
-                send_hubs_email(
-                    f"💬 Nuevo comentario de {request.user.username}",
-                    recipient,
-                    f"{request.user.username} ha comentado en tu plan '{event.title}'.",
-                    action_url,
+                    send_email=True,
+                    email_subject=f"💬 Nuevo comentario de {request.user.username}",
+                    email_body=f"{request.user.username} ha comentado en tu plan '{event.title}'.",
+                    action_url=action_url,
                 )
 
             else:
@@ -652,20 +638,15 @@ def add_event_comment(request, event_id):
                 participantes = event.participants.exclude(id=request.user.id)
 
                 for pepe in participantes:
-                    # 1. Notificación web para cada uno
-                    Notification.objects.create(
-                        recipient=pepe,
-                        sender=request.user,
+                    NotificationDispatcher.dispatch(
                         notification_type="comment",
+                        sender=request.user,
+                        recipient=pepe,
                         event=event,
-                    )
-
-                    # 2. EMAIL (USANDO LA FUNCIÓN MAESTRA)
-                    send_hubs_email(
-                        f"📢 {request.user.username} ha respondido en: {event.title}",
-                        pepe,
-                        f"{request.user.username} (el organizador) ha puesto un comentario en el evento '{event.title}'.",
-                        action_url,
+                        send_email=True,
+                        email_subject=f"📢 {request.user.username} ha respondido en: {event.title}",
+                        email_body=f"{request.user.username} (el organizador) ha puesto un comentario en el evento '{event.title}'.",
+                        action_url=action_url,
                     )
 
             messages.success(request, "Comentario publicado y avisos enviados.")
@@ -746,16 +727,16 @@ class EventReactivateView(LoginRequiredMixin, UserPassesTestMixin, View):
             participants = event.participants.all()
             for p in participants:
                 if p != request.user:
-                    # A. Notificación en la web (campanita)
-                    Notification.objects.create(
-                        recipient=p,
-                        sender=request.user,
+                    NotificationDispatcher.dispatch(
                         notification_type="event",
+                        sender=request.user,
+                        recipient=p,
                         event=event,
+                        send_email=True,
+                        email_subject=subject,
+                        email_body=message_body,
+                        action_url=action_url,
                     )
-
-                    # B. Email Corporativo (Usando tu FUNCIÓN MAESTRA)
-                    send_hubs_email(subject, p, message_body, action_url)
 
             messages.success(
                 request, f"¡El evento '{event.title}' ha sido reactivado con éxito!"
