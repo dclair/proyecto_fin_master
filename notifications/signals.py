@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 # Importa tu modelo de Seguidores (ajusta la ruta según tu app)
 from profiles.models import Follow
-from .models import Notification
+from .services import NotificationDispatcher
 
 
 @receiver(post_save, sender=Follow)
@@ -12,8 +12,8 @@ def create_follow_notification(sender, instance, created, **kwargs):
     if kwargs.get("raw"):
         return
     if created:
-        Notification.objects.create(
+        NotificationDispatcher.dispatch(
+            notification_type="follow",
             recipient=instance.following.user,  # El que recibe el seguidor
             sender=instance.follower.user,  # El que dio clic en seguir
-            notification_type="follow",
         )

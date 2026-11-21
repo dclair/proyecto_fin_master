@@ -1,14 +1,18 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
+from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from library.models import Article
 from notifications.context_processors import unread_notifications
 from notifications.models import Notification
+from notifications.services import NotificationDispatcher
 from posts.models import Event, Posts
-from profiles.models import Follow, Hobby
+from profiles.models import Follow, Hobby, Review
 
 
 @override_settings(DEBUG=True, SECURE_SSL_REDIRECT=False)
@@ -184,3 +188,92 @@ class NotificationRouteTests(TestCase):
         self.assertEqual(response["HX-Trigger"], "updateNotificationCount")
         self.assertIn("No tienes notificaciones en este momento", response.content.decode())
         self.assertEqual(Notification.objects.filter(recipient=self.recipient).count(), 0)
+
+
+@override_settings(DEBUG=True, SECURE_SSL_REDIRECT=False)
+class NotificationDispatcherAndArticleTests(TestCase):
+    def setUp(self):
+        self.sender = User.objects.create_user(
+            username="lucia", email="lucia@example.com", password="testpass123"
+        )
+        self.recipient = User.objects.create_user(
+            username="carlos", email="carlos@example.com", password="testpass123"
+        )
+        self.hobby = Hobby.objects.create(name="Fitoterapia", slug="fitoterapia")
+        self.article = Article.objects.create(
+            title="Beneficios de la Lavanda",
+            slug="beneficios-de-la-lavanda",
+            content="Contenido médico",
+            author=self.recipient,
+            hobby=self.hobby,
+        )
+
+    def test_dispatcher_prevents_self_notification_on_social_actions(self):
+        result = NotificationDispatcher.dispatch(
+            notification_type="like",
+            sender=self.recipient,
+            recipient=self.recipient,
+        )
+        self.assertIsNone(result)
+        self.assertEqual(Notification.objects.count(), 0)
+
+    def test_dispatcher_enforces_anti_spam_rule_for_likes(self):
+        mail.outbox.clear()
+        notif = NotificationDispatcher.dispatch(
+            notification_type="like",
+            sender=self.sender,
+            recipient=self.recipient,
+            send_email=True,  # Intento de enviar email en un like
+        )
+        self.assertIsNotNone(notif)
+        self.assertEqual(notif.notification_type, "like")
+        self.assertEqual(len(mail.outbox), 0)  # Cero correos enviados por like
+
+    def test_dispatcher_creates_notification_and_dispatches_email(self):
+        mail.outbox.clear()
+        notif = NotificationDispatcher.dispatch(
+            notification_type="comment",
+            sender=self.sender,
+            recipient=self.recipient,
+            message="ha comentado en tu publicación",
+            send_email=True,
+            email_subject="Nuevo comentario",
+            email_body="Hola, tienes un nuevo comentario",
+            action_url="/posts/1/",
+        )
+        self.assertIsNotNone(notif)
+        self.assertEqual(Notification.objects.count(), 1)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Nuevo comentario", mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, ["carlos@example.com"])
+
+    def test_article_comment_and_rating_redirection(self):
+        self.client.force_login(self.recipient)
+        comment_notif = NotificationDispatcher.dispatch(
+            notification_type="article_comment",
+            sender=self.sender,
+            recipient=self.recipient,
+            article=self.article,
+        )
+        rating_notif = NotificationDispatcher.dispatch(
+            notification_type="article_rating",
+            sender=self.sender,
+            recipient=self.recipient,
+            article=self.article,
+        )
+
+        response_comment = self.client.get(
+            reverse("notifications:notification_redirect", kwargs={"pk": comment_notif.pk})
+        )
+        self.assertRedirects(
+            response_comment,
+            reverse("library:article_detail", kwargs={"slug": self.article.slug}),
+        )
+
+        response_rating = self.client.get(
+            reverse("notifications:read_and_redirect", kwargs={"notification_id": rating_notif.pk})
+        )
+        self.assertRedirects(
+            response_rating,
+            reverse("library:article_detail", kwargs={"slug": self.article.slug}),
+        )

@@ -56,11 +56,14 @@ def send_hubs_email_async(subject, recipient, message_body, action_url):
     Prioriza el encolamiento en Celery para reintentos y persistencia;
     si Celery no está disponible, utiliza ThreadPoolExecutor local como fallback.
     """
-    if not recipient or not getattr(recipient, "email", None):
+    if isinstance(recipient, str):
+        recipient_email = recipient
+        recipient_username = recipient.split("@")[0]
+    elif recipient and getattr(recipient, "email", None):
+        recipient_email = recipient.email
+        recipient_username = getattr(recipient, "username", "Usuario")
+    else:
         return
-
-    recipient_email = recipient.email
-    recipient_username = getattr(recipient, "username", "Usuario")
 
     try:
         from aficionados_network.tasks import send_email_task

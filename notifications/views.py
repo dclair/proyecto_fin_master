@@ -52,6 +52,21 @@ def notification_redirect(request, pk):
             return redirect("posts:event_detail", pk=n.event.pk)
         return redirect("home")
 
+    # --- CATEGORÍA: VALORACIONES (RESEÑAS) ---
+    elif n.notification_type == "review":
+        if hasattr(n.recipient, "profile"):
+            return redirect("profiles:profile", pk=n.recipient.profile.pk)
+
+    # --- CATEGORÍA: ARTÍCULOS DE BIBLIOTECA ---
+    elif n.notification_type in ["article_comment", "article_rating"]:
+        if n.article:
+            return redirect("library:article_detail", slug=n.article.slug)
+
+    # --- CATEGORÍA: LOGROS / MEDALLAS ---
+    elif n.notification_type == "badge":
+        if hasattr(n.recipient, "profile"):
+            return redirect("profiles:profile", pk=n.recipient.profile.pk)
+
     # Si por alguna razón el objeto (post/evento) fue borrado, volvemos a la lista
     return redirect("notifications:list")
 
@@ -116,6 +131,16 @@ def read_and_redirect(request, notification_id):
         if notification.event:
             return redirect("posts:event_detail", pk=notification.event.pk)
         return redirect("home")
+
+    # Redirección para Artículos de Biblioteca
+    elif notification.notification_type in ["article_comment", "article_rating"]:
+        if notification.article:
+            return redirect("library:article_detail", slug=notification.article.slug)
+
+    # Redirección para Medallas/Logros
+    elif notification.notification_type == "badge":
+        if hasattr(notification.recipient, "profile"):
+            return redirect("profiles:profile", pk=notification.recipient.profile.pk)
 
     # Por si acaso no coincide con nada, volvemos al historial
     return redirect("notifications:list")

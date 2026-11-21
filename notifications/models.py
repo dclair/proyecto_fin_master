@@ -58,6 +58,13 @@ class Notification(models.Model):
         blank=True,
         verbose_name="Valoración",
     )
+    article = models.ForeignKey(
+        "library.Article",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Artículo",
+    )
 
     is_read = models.BooleanField(default=False, verbose_name="¿Leída?")
     created_at = models.DateTimeField(
@@ -101,5 +108,21 @@ class Notification(models.Model):
         if self.notification_type == "like":
             return "le ha dado 'me gusta' a tu publicación"
         if self.notification_type == "comment":
+            if self.event:
+                return f"ha comentado en tu quedada: {self.event.title}"
+            if self.post:
+                return f"ha comentado en tu publicación: {self.post.title or 'Publicación'}"
             return "ha comentado en tu publicación/evento"
+        if self.notification_type == "article_comment":
+            if self.article:
+                return f'ha comentado en tu artículo: "{self.article.title}"'
+            return "ha comentado en tu artículo"
+        if self.notification_type == "article_rating":
+            if self.article:
+                return f'ha valorado tu artículo: "{self.article.title}"'
+            return "ha valorado tu artículo"
+        if self.notification_type == "review":
+            if self.event:
+                return f"ha valorado tu evento: {self.event.title}"
+            return "ha enviado una valoración sobre tu labor"
         return self.get_notification_type_display()
