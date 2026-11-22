@@ -54,8 +54,8 @@ class NotificationDispatcher:
         ]:
             return None
 
-        # 2. Regla anti-spam estricta: los likes nunca envían email
-        if notification_type == "like":
+        # 2. Regla anti-spam estricta: los likes y follows nunca envían email
+        if notification_type in ["like", "follow"]:
             send_email = False
 
         # 2.1 Validación defensiva: Notification.comment apunta a posts.Comment, no a EventComment
