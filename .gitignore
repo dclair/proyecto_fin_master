@@ -54,5 +54,7 @@ package-analysis.md
 
 # Documentación interna y temporales
 Proyecto_Final_Docs_varios/
+*.odt
+*.docx
 .DS_Store
 Thumbs.db
