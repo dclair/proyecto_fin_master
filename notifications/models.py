@@ -17,6 +17,7 @@ class Notification(models.Model):
         ("chat_request", "Solicitud de Chat"),
         ("chat_accepted", "Acceso al Chat Aceptado"),
         ("chat_rejected", "Acceso al Chat Rechazado"),
+        ("event_reminder", "Recordatorio de quedada"),
     )
 
     # Añadimos verbose_name a cada campo
@@ -91,6 +92,10 @@ class Notification(models.Model):
     def text(self):
         if self.message:
             return self.message
+        if self.notification_type == "event_reminder":
+            if self.event:
+                return f"Recordatorio: tu quedada '{self.event.title}' comienza en menos de 24 horas."
+            return "Recordatorio de quedada"
         if self.notification_type == "event":
             if self.event:
                 if self.event.is_canceled:

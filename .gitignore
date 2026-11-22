@@ -23,6 +23,7 @@ db_full_backup.json
 cookies.txt
 chat_debug.log
 *.log
+celerybeat-schedule*
 
 # Scripts temporales / scratch de desarrollo
 test_hide.py

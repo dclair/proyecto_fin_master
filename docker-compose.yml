@@ -41,6 +41,18 @@ services:
       - db
       - redis
 
+  celery_beat:
+    build: .
+    command: celery -A aficionados_network beat -l info
+    restart: always
+    env_file:
+      - .env.prod
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+
   nginx:
     image: nginx:1.25-alpine
     restart: always

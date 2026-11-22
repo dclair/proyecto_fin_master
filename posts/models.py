@@ -273,9 +273,22 @@ class EventAttendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='event_attendances')
     attendance_type = models.CharField(max_length=10, choices=ATTENDANCE_TYPE_CHOICES, default='physical', verbose_name="Tipo de asistencia")
     joined_at = models.DateTimeField(auto_now_add=True)
+    reminder_sent = models.BooleanField(
+        default=False,
+        verbose_name="¿Recordatorio enviado?",
+        help_text="Indica si se envió el recordatorio de 24hs antes del evento."
+    )
+    reminder_sent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de envío del recordatorio"
+    )
 
     class Meta:
         unique_together = ('event', 'user')
+        indexes = [
+            models.Index(fields=['event', 'reminder_sent']),
+        ]
         verbose_name = "asistencia a evento"
         verbose_name_plural = "asistencias a eventos"
 

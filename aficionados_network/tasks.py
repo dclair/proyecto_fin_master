@@ -27,6 +27,7 @@ def send_email_task(
     message_body,
     action_url,
     template_name="general/emails/notification_email.html",
+    extra_context=None,
 ):
     """
     Tarea asíncrona de Celery para enviar correos transaccionales con
@@ -40,8 +41,16 @@ def send_email_task(
         "message_body": message_body,
         "action_url": action_url,
     }
+    if extra_context and isinstance(extra_context, dict):
+        context.update(extra_context)
+
     html_content = render_to_string(template_name, context)
-    text_content = strip_tags(html_content)
+
+    txt_template_name = template_name.rsplit(".", 1)[0] + ".txt"
+    try:
+        text_content = render_to_string(txt_template_name, context)
+    except Exception:
+        text_content = strip_tags(html_content)
 
     email = EmailMultiAlternatives(
         subject,
@@ -62,4 +71,8 @@ def send_email_task(
     email.send(fail_silently=False)
     logger.info(f"[Celery] Correo enviado exitosamente a {recipient_email}")
     return f"Sent to {recipient_email}"
+
+
+# Exponer la tarea de recordatorio de eventos para conveniencia e interoperabilidad
+from posts.tasks import send_event_reminders_task  # noqa: E402, F401
 

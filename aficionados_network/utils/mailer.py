@@ -20,15 +20,31 @@ logger = logging.getLogger(__name__)
 _email_executor = ThreadPoolExecutor(max_workers=3, thread_name_prefix="mail_fallback")
 
 
-def _send_hubs_email_sync(subject, recipient_email, recipient_username, message_body, action_url):
+def _send_hubs_email_sync(
+    subject,
+    recipient_email,
+    recipient_username,
+    message_body,
+    action_url,
+    template_name="general/emails/notification_email.html",
+    extra_context=None,
+):
     try:
         context = {
             "recipient_name": recipient_username,
             "message_body": message_body,
             "action_url": action_url,
         }
-        html_content = render_to_string("general/emails/notification_email.html", context)
-        text_content = strip_tags(html_content)
+        if extra_context and isinstance(extra_context, dict):
+            context.update(extra_context)
+
+        html_content = render_to_string(template_name, context)
+
+        txt_template_name = template_name.rsplit(".", 1)[0] + ".txt"
+        try:
+            text_content = render_to_string(txt_template_name, context)
+        except Exception:
+            text_content = strip_tags(html_content)
 
         email = EmailMultiAlternatives(
             subject,
@@ -50,7 +66,14 @@ def _send_hubs_email_sync(subject, recipient_email, recipient_username, message_
         logger.error(f"Error enviando correo en worker fallback a {recipient_email}: {e}", exc_info=True)
 
 
-def send_hubs_email_async(subject, recipient, message_body, action_url):
+def send_hubs_email_async(
+    subject,
+    recipient,
+    message_body,
+    action_url,
+    template_name="general/emails/notification_email.html",
+    extra_context=None,
+):
     """
     Envía un correo con la plantilla corporativa de Hubs&Clicks de forma no bloqueante.
     Prioriza el encolamiento en Celery para reintentos y persistencia;
@@ -73,6 +96,8 @@ def send_hubs_email_async(subject, recipient, message_body, action_url):
             recipient_username=recipient_username,
             message_body=message_body,
             action_url=action_url,
+            template_name=template_name,
+            extra_context=extra_context,
         )
     except Exception as e:
         logger.warning(
@@ -86,4 +111,6 @@ def send_hubs_email_async(subject, recipient, message_body, action_url):
             recipient_username=recipient_username,
             message_body=message_body,
             action_url=action_url,
+            template_name=template_name,
+            extra_context=extra_context,
         )

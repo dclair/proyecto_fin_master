@@ -313,4 +313,33 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 - Cero latencia en respuestas HTTP de formularios de contacto y eventos.
 - Máxima resiliencia y tolerancia a fallos transitorios de red.
 
+## D-022: Programación Periódica con Celery Beat e Idempotencia Multinivel para Recordatorios de Eventos
+
+**Date:** 2026-11-22  
+**Decision:** Implementar el envío automatizado de recordatorios para quedadas que inician en las siguientes 24 horas mediante Celery Beat programado a las 08:00 AM (`crontab(hour=8, minute=0)`), ejecutando la tarea `posts.tasks.send_event_reminders_task`.
+
+**Why:**
+
+- Los usuarios necesitan recordar con 24 horas de antelación sus quedadas programadas para planificar su asistencia presencial u online.
+- Se debe impedir categóricamente el envío repetido de correos ante caídas del worker, reintentos de red o reinicios de Celery Beat.
+- El despachador debe integrarse de forma desacoplada con el `NotificationDispatcher` y el modelo `Notification`.
+
+**Architecture & Implementation Details:**
+
+1. **Idempotencia Multinivel:**
+   - **Nivel Persistencia:** Se agregaron `reminder_sent` (booleano) y `reminder_sent_at` (timestamp) al modelo `EventAttendance`, con índice `(event, reminder_sent)` para consultas optimizadas.
+   - **Nivel Dominio / Defensivo:** Antes de despachar, se verifica si ya existe un registro `Notification.objects.filter(recipient=user, event=event, notification_type='event_reminder')`. Si existe, se sincroniza el flag en la asistencia sin reenviar el correo.
+   - **Transaccionalidad Atómica:** Cada asistente se procesa bajo `transaction.atomic()` asegurando aislamiento individual frente a caídas imprevistas.
+2. **Desacoplamiento Celery Beat en Docker Compose:**
+   - Servicio independiente `celery_beat` en `docker-compose.yml` ejecutando `celery -A aficionados_network beat -l info`. Evita la duplicación de eventos de cron que ocurriría si beat estuviese acoplado a los workers al escalar réplicas horizontales en producción.
+3. **Plantillas Dedicadas y NotificationDispatcher:**
+   - Se añadió el tipo `event_reminder` a las opciones de `Notification`.
+   - Se crearon plantillas personalizadas `aficionados_network/templates/emails/event_reminder.html` y `event_reminder.txt` con la identidad visual de Hubs & Clicks y soporte para sesiones presenciales y online.
+   - Propagación de `template_name` y `extra_context` serializable por Celery a través de `NotificationDispatcher` y `mailer.py`.
+
+**Implications:**
+
+- Zero duplicate emails garantizado por diseño en cualquier escenario de fallo.
+- Asistentes desapuntados, usuarios inactivos o eventos cancelados/eliminados quedan automáticamente excluidos del envío.
+
 

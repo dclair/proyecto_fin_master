@@ -29,6 +29,8 @@ class NotificationDispatcher:
         email_subject: str = None,
         email_body: str = None,
         action_url: str = None,
+        template_name: str = None,
+        extra_context: dict = None,
     ):
         """
         Despacha una notificación in-app y opcionalmente un correo electrónico por Celery.
@@ -109,12 +111,20 @@ class NotificationDispatcher:
                     else "Tienes una nueva actualización en Aficionados Network."
                 )
 
+            if not template_name:
+                if notification_type == "event_reminder":
+                    template_name = "emails/event_reminder.html"
+                else:
+                    template_name = "general/emails/notification_email.html"
+
             try:
                 send_hubs_email_async(
                     subject=email_subject,
                     recipient=recipient,
                     message_body=email_body,
                     action_url=action_url,
+                    template_name=template_name,
+                    extra_context=extra_context,
                 )
             except Exception as e:
                 logger.error(

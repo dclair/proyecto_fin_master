@@ -1,0 +1,17 @@
+¡Hola, {{ recipient_name }}!
+
+Te recordamos que tu próxima quedada está por comenzar en menos de 24 horas.
+
+DETALLES DE LA QUEDADA:
+------------------------------------------------------------
+- Quedada: {{ event_title }}
+- Fecha y hora: {{ event_date }}
+- Lugar: {{ event_location }}
+{% if is_online and stream_url %}- Enlace de transmisión: {{ stream_url }}
+{% endif %}------------------------------------------------------------
+
+Para ver el chat del evento, los asistentes y las últimas novedades, ingresa al siguiente enlace:
+{{ action_url }}
+
+¡Nos vemos en la quedada!
+El equipo de Hubs & Clicks

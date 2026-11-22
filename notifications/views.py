@@ -31,8 +31,8 @@ def notification_redirect(request, pk):
                 return redirect(f"{url}#comment-{n.comment.id}")
             return redirect("posts:post_detail", pk=n.post.pk)
 
-    # --- CATEGORÍA: QUEDADAS (EVENTOS) ---
-    elif n.notification_type == "event":
+    # --- CATEGORÍA: QUEDADAS (EVENTOS) Y RECORDATORIOS ---
+    elif n.notification_type in ["event", "event_reminder"]:
         if n.event:
             return redirect("posts:event_detail", pk=n.event.pk)
 
