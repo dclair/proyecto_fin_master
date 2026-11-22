@@ -1327,10 +1327,10 @@ option {
 
 [data-bs-theme="dark"] select,
 [data-bs-theme="dark"] .form-select {
-    color: var(--bs-body-color);
-    background-color: var(--bs-body-bg);
-    border-color: var(--bs-border-color);
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a3b5aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    color: var(--bs-body-color) !important;
+    background-color: var(--bs-body-bg) !important;
+    border-color: var(--bs-border-color) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a3b5aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
 }
 
 [data-bs-theme="dark"] select option,
@@ -1379,15 +1379,33 @@ input::placeholder {
 
 /* ============================================================
    TOMSELECT (SOPORTE SEMÁNTICO LIGHT & DARK)
+   Compatible con select nativo, .form-select y TomSelect CDN
    ============================================================ */
+.ts-wrapper,
+.ts-wrapper.form-select,
+.ts-wrapper.form-control,
 .ts-control,
 .ts-wrapper.single.input-active .ts-control,
 .full .ts-control {
     background-color: var(--bs-body-bg) !important;
     color: var(--bs-body-color) !important;
+    border-color: var(--bs-border-color) !important;
+}
+
+.ts-wrapper.form-select {
+    background-image: none !important; /* Evita doble flecha con .ts-control */
+    border: none !important;
+    padding: 0 !important;
+}
+
+.ts-control {
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
     border: 1px solid var(--bs-border-color) !important;
     border-radius: var(--bs-border-radius-sm);
     box-shadow: none;
+    display: flex;
+    align-items: center;
 }
 
 .ts-control .item,
@@ -1417,6 +1435,7 @@ input::placeholder {
 .ts-dropdown,
 .ts-dropdown.form-control,
 .ts-dropdown.form-select {
+    background: var(--bs-card-bg) !important;
     background-color: var(--bs-card-bg) !important;
     color: var(--bs-body-color) !important;
     border: 1px solid var(--bs-border-color) !important;
@@ -1426,12 +1445,14 @@ input::placeholder {
 }
 
 .ts-dropdown-content {
+    background: transparent !important;
     background-color: transparent !important;
 }
 
 .ts-dropdown .option {
     color: var(--bs-body-color) !important;
-    background-color: transparent;
+    background: transparent !important;
+    background-color: transparent !important;
     padding: 0.5rem 0.75rem;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -1439,17 +1460,20 @@ input::placeholder {
 .ts-dropdown .option:hover,
 .ts-dropdown .option.active,
 .ts-dropdown .active {
+    background: var(--bs-tertiary-bg) !important;
     background-color: var(--bs-tertiary-bg) !important;
     color: var(--bs-heading-color) !important;
 }
 
 .ts-dropdown .option.selected {
+    background: var(--bs-secondary-bg) !important;
     background-color: var(--bs-secondary-bg) !important;
     color: var(--bs-heading-color) !important;
 }
 
 .ts-dropdown .optgroup-header {
     color: var(--bs-secondary-color) !important;
+    background: var(--bs-card-bg) !important;
     background-color: var(--bs-card-bg) !important;
     font-weight: 700;
 }
@@ -1466,10 +1490,97 @@ input::placeholder {
     border-radius: 4px;
 }
 
-/* Caret indicator & Dark mode specific refinements */
+/* ============================================================
+   TOMSELECT ESPECÍFICO DARK MODE [data-bs-theme="dark"]
+   Blindaje absoluto contra cualquier CSS CDN de terceros
+   ============================================================ */
+[data-bs-theme="dark"] .ts-wrapper,
+[data-bs-theme="dark"] .ts-wrapper.form-select,
+[data-bs-theme="dark"] .ts-wrapper.form-control {
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+    border-color: var(--bs-border-color) !important;
+}
+
+[data-bs-theme="dark"] .ts-control,
 [data-bs-theme="dark"] .ts-wrapper.single .ts-control,
-[data-bs-theme="dark"] .ts-wrapper:not(.form-control):not(.form-select).single .ts-control {
+[data-bs-theme="dark"] .ts-wrapper.form-select .ts-control,
+[data-bs-theme="dark"] .ts-wrapper.form-control .ts-control,
+[data-bs-theme="dark"] .ts-wrapper.single.input-active .ts-control,
+[data-bs-theme="dark"] .full .ts-control {
+    background: var(--bs-body-bg) !important;
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+    border: 1px solid var(--bs-border-color) !important;
+}
+
+[data-bs-theme="dark"] .ts-control .item,
+[data-bs-theme="dark"] .ts-control input,
+[data-bs-theme="dark"] .ts-wrapper .ts-control input {
+    color: var(--bs-body-color) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+[data-bs-theme="dark"] .ts-control input::placeholder {
+    color: var(--bs-secondary-color) !important;
+    opacity: 0.7;
+}
+
+[data-bs-theme="dark"] .ts-dropdown,
+[data-bs-theme="dark"] .ts-dropdown.form-control,
+[data-bs-theme="dark"] .ts-dropdown.form-select {
+    background: var(--bs-card-bg) !important;
+    background-color: var(--bs-card-bg) !important;
+    color: var(--bs-body-color) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-bs-theme="dark"] .ts-dropdown-content {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+[data-bs-theme="dark"] .ts-dropdown .option {
+    color: var(--bs-body-color) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+[data-bs-theme="dark"] .ts-dropdown .option:hover,
+[data-bs-theme="dark"] .ts-dropdown .option.active,
+[data-bs-theme="dark"] .ts-dropdown .active {
+    background: var(--bs-tertiary-bg) !important;
+    background-color: var(--bs-tertiary-bg) !important;
+    color: var(--bs-heading-color) !important;
+}
+
+[data-bs-theme="dark"] .ts-dropdown .option.selected {
+    background: var(--bs-secondary-bg) !important;
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-heading-color) !important;
+}
+
+[data-bs-theme="dark"] .ts-dropdown .optgroup-header {
+    color: var(--bs-secondary-color) !important;
+    background: var(--bs-card-bg) !important;
+    background-color: var(--bs-card-bg) !important;
+}
+
+[data-bs-theme="dark"] .ts-dropdown .no-results {
+    color: var(--bs-secondary-color) !important;
+}
+
+/* Caret indicator SVG para dark mode */
+[data-bs-theme="dark"] .ts-wrapper.single .ts-control,
+[data-bs-theme="dark"] .ts-wrapper:not(.form-control):not(.form-select).single .ts-control,
+[data-bs-theme="dark"] .ts-wrapper.form-select.single .ts-control {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a3b5aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-position: right 0.75rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 12px !important;
+    padding-right: 2.25rem !important;
 }
 
 [data-bs-theme="dark"] .plugin-clear_button .clear-button {

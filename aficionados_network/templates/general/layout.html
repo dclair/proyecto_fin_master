@@ -13,7 +13,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=3.1">
+    <!-- CSS de librerías externas / extensiones por página (se cargan antes de style.css para permitir overrides) -->
+    {% block extra_css %}{% endblock extra_css %}
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=3.2">
     
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script>
@@ -36,7 +39,6 @@
     </script>
 
     <title>{% block head_title %}Hubs & Clicks{% endblock head_title %}</title>
-    {% block extra_css %}{% endblock extra_css %}
     
     {% if request.user.is_authenticated %}
         {% vite_hmr_client %}
