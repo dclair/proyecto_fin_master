@@ -1,0 +1,130 @@
+upstream django {
+    server web:8000;
+}
+
+# Zonas de Limitación de Tasa (Rate Limiting)
+limit_req_zone $binary_remote_addr zone=auth_limit:10m rate=5r/m;
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=60r/m;
+
+# Servidor HTTP (Puerto 80): Desafío ACME y Redirección Permanente a HTTPS
+server {
+    listen 80;
+    server_name ${DOMAIN} www.${DOMAIN};
+
+    # Desafío ACME para expedición y renovación de certificados SSL Let's Encrypt (Zero-Downtime)
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Redirección permanente a HTTPS para todo el tráfico web
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# Servidor HTTPS (Puerto 443): Tráfico Seguro de Producción
+server {
+    listen 443 ssl;
+    server_name ${DOMAIN} www.${DOMAIN};
+
+    # Certificados SSL/TLS gestionados por Let's Encrypt / Certbot
+    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+
+    # Protocolos y Ciphers Modernos (Recomendación Mozilla Intermediate)
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+
+    # Optimización de Sesión SSL/TLS
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off;
+
+    client_max_body_size 20M; # Permitir subida de imágenes pesadas en el chat
+
+    # Cabeceras de Seguridad Globales
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Sirve los archivos estáticos desde el volumen compartido
+    location /static/ {
+        alias /app/staticfiles/;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+        add_header X-Content-Type-Options "nosniff" always;
+    }
+
+    # Sirve los archivos multimedia públicos subidos por usuarios (Aislados contra ejecución XSS)
+    location /media/ {
+        alias /app/media/;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox" always;
+
+        # Bloquear acceso público directo a adjuntos privados de chat
+        location /media/chat_attachments/ {
+            deny all;
+            return 404;
+        }
+    }
+
+    # Ubicación interna protegida para entrega segura de adjuntos privados (X-Accel-Redirect)
+    location /protected_media/ {
+        internal;
+        alias /app/media/;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Content-Security-Policy "default-src 'none'; sandbox" always;
+    }
+
+    # Protección de fuerza bruta en endpoints de autenticación sensible
+    location /login/ {
+        limit_req zone=auth_limit burst=5 nodelay;
+        proxy_pass http://django;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    location /register/ {
+        limit_req zone=auth_limit burst=3 nodelay;
+        proxy_pass http://django;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    # Pasa el tráfico de WebSockets a Daphne
+    location /ws/ {
+        proxy_pass http://django;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+
+    # Pasa todo el resto del tráfico HTTP normal a Django
+    location / {
+        proxy_pass http://django;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+}

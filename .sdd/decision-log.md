@@ -1,6 +1,6 @@
 # Decision Log
 
-**Last reviewed:** 2026-11-18  
+**Last reviewed:** 2026-11-22  
 **Purpose:** record important technical/product decisions and why they were made.
 
 This is not a commit log. It captures decisions that future developers and AI agents should understand before changing direction.
@@ -341,5 +341,40 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 
 - Zero duplicate emails garantizado por diseño en cualquier escenario de fallo.
 - Asistentes desapuntados, usuarios inactivos o eventos cancelados/eliminados quedan automáticamente excluidos del envío.
+
+## D-023: Arquitectura Zero-Downtime SSL/TLS Readiness con Certbot Webroot y Nginx
+
+**Date:** 2026-11-22  
+**Decision:** Implementar la infraestructura perimetral de "Zero-Downtime SSL Readiness" mediante el enfoque ACME Webroot compartido entre Nginx y Certbot en Docker Compose, plantilla declarativa de producción (`nginx/production-ssl.conf.template`) y runbook operativo exhaustivo (`docs/runbook-ssl.md` y `.sdd/runbook-ssl.md`).
+
+**Why:**
+
+- El entorno de producción corre actualmente sobre HTTP (`http://141.148.227.48`) a la espera de la asignación y compra del dominio oficial.
+- El enfoque ingenuo de Certbot en modo "Standalone" requiere apagar Nginx para escuchar en el puerto 80, provocando caída de servicio total e interrupción de conexiones WebSocket durante la expedición inicial y renovaciones.
+- Se debe garantizar que el paso a HTTPS en el momento en que se apunte el dominio sea instantáneo, seguro y 100% libre de downtime, sin romper la operación actual en HTTP.
+
+**Architecture & Implementation Details:**
+
+1. **Enrutamiento ACME Webroot en Nginx (`nginx/default.conf`):**
+   - Se añadió `location /.well-known/acme-challenge/ { root /var/www/certbot; }` al servidor actual en puertos 80/8000.
+   - Permite que Let's Encrypt verifique el dominio directamente a través del Nginx en ejecución, sin apagar ningún servicio ni modificar las reglas de proxy reverso a Daphne/Django ni la protección de adjuntos (`X-Accel-Redirect`).
+2. **Volúmenes Compartidos y Servicio Certbot (`docker-compose.yml`):**
+   - Volúmenes dedicados `certbot_www` (para los tokens de desafío ACME) y `certbot_conf` (para las claves privadas y certificados en `/etc/letsencrypt`).
+   - Servicio `certbot` basado en `certbot/certbot:latest` preparado tanto para ejecución bajo demanda (`docker compose run --rm certbot ...`) como para ejecución continua como daemon (`while :; do certbot renew; sleep 12h ...`).
+   - Mapeo preventivo del puerto `443:443` en Nginx.
+3. **Plantilla de Producción SSL Declarativa (`nginx/production-ssl.conf.template`):**
+   - Servidor HTTP (80) exclusivo para resolución de desafíos ACME y redirección permanente `301 https://$host$request_uri`.
+   - Servidor HTTPS (443) con TLS 1.2/1.3, ciphers modernos (ECDHE-ECDSA/RSA-AES-GCM), session cache de 10m y tickets deshabilitados, HSTS estricto (`max-age=31536000`), cabeceras anti-sniff y clickjacking, y soporte completo para WebSockets Daphne (`/ws/`) y media protegida.
+   - Diseñado para inyección parametrizada segura vía `envsubst '${DOMAIN}'`.
+4. **Runbook y Gestión de Cookies Seguras:**
+   - Procedimiento de 5 pasos documentado y reproducible con validación previa de DNS y simulación de contingencia/rollback.
+   - Parametrización en `.env.prod` lista para activar `SECURE_SSL_REDIRECT=True`, `SESSION_COOKIE_SECURE=True`, `CSRF_COOKIE_SECURE=True` y `SECURE_HSTS_SECONDS=31536000`.
+
+**Implications:**
+
+- Cero riesgo de interrupción operativa en el entorno HTTP actual.
+- Transición a HTTPS en menos de 2 minutos una vez delegado el DNS.
+- Renovaciones automáticas transparentes sin caída de servicio.
+
 
 
