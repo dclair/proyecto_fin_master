@@ -1,292 +1,232 @@
-🚀 Hubs&Clicks - Red social privada para terapeutas naturales
-Hubs&Clicks es una plataforma web de caracter privado, diseñada para conectar a terapeutas a través de sus terapias, permitiéndoles organizar eventos, unirse a ellos, compartir experiencias y conocimientos a través de una base de conocimientos creados por ellos mismos como Biblioteca de Casos y estidios clínicos. Dispone de un Mercadillo para la compra, venta, alquiler e intercambio de material o espacios terapéuticos, así como gestionar su comunidad de forma ágil, moderna y con una identidad visual corporativa única.
-
-🛠️ Características Principales (Features)
-
-1. Gestión de Eventos 360º
-   Creación y Edición: Los usuarios pueden proponer planes detallando lugar, fecha, terapia, nivel deseado de experiencia y límite de asistentes. Se contempla la posibilidad de que sea un evento presencial u online.
-
-   Sistema de Duplicado: Función inteligente para clonar eventos pasados y ahorrar tiempo al organizador.
-
-   Control de Asistencia Híbrida: Sistema de participación que distingue entre asistentes presenciales y online, con validación de aforo exclusivo para plazas físicas.
-
-   Gestión de Estados: Soporte para eventos activos y finalizados.
-
-   Protocolo de Cancelación: Sistema seguro de cancelación que bloquea interacciones y notifica automáticamente a todos los asistentes.
-
-   Sincronización Automática con Chat (Eventos Online): Los eventos configurados como "Online" generan automáticamente un Grupo de Chat privado. Los participantes que se unen de forma online son agregados e integrados al grupo en tiempo real (vía Django Signals) para conversar antes, durante y después del evento.
-
-2. Dashboard y Comunidad de Terapeutas
-   Directorio de Profesionales: Exploración fluida mediante scroll infinito (HTMX) para navegar por la comunidad de terapeutas.
-
-   Identidad Social: Perfiles con biografía, ubicación, sitio web y selección de terapias con niveles de especialización.
-
-   Privacidad de Contacto: Campos sensibles (teléfono, móvil, dirección y email) protegidos y visibles únicamente para usuarios registrados de la comunidad.
-
-   Estadísticas en Tiempo Real: Contadores dinámicos de publicaciones, seguidores, siguiendo, eventos y participaciones.
-
-   Agenda Personal: Mis citas + Mis planes. Visualización de las próximas citas confirmadas directamente en el perfil.
-
-3. Sistema de Interacción y Feedback
-   Likes Dinámicos: Sistema de "Me gusta" con actualización asíncrona (AJAX/JS) y persistencia en base de datos.
-
-   Conversaciones Inteligentes: Hilos de comentarios tanto en publicaciones como en eventos, con lógica de detección de autor para evitar spam.
-
-   Notificaciones en Tiempo Real y Gestión (HTMX): Sistema de "campana" con contadores dinámicos para avisos de likes, comentarios, seguidores y alertas de eventos. Incluye funcionalidad avanzada de borrado individual y masivo (Limpiar historial) de notificaciones directamente desde el menú o pantalla completa, actualizando la interfaz asíncronamente vía `HX-Trigger`.
-
-4. Sistema de Mensajería en Tiempo Real (Chat) 💬
-   Chats Privados y Grupales: Creación de conversaciones 1 a 1 y salas de grupo temáticas.
-
-   Intercambio Multimedia & Validación Binaria: Envío de imágenes, videos y documentos en tiempo real. Validación de seguridad mediante firmas de bytes reales (*magic bytes* para JPG, PNG, GIF, WEBP y PDF) y re-procesamiento con Pillow para eliminar metadatos EXIF sensibles antes de persistir en disco.
-
-   Descarga Protegida (Anti-IDOR): Bloqueo de acceso directo en Nginx a `/media/chat_attachments/` y despacho seguro mediante `X-Accel-Redirect` a través del endpoint protegido `/api/chat/attachments/<id>/download/`, verificando que el usuario pertenezca a la conversación.
-
-   Presentación Enriquecida de Documentos y Descarga Operativa:
-   - Exposición del nombre de archivo real limpio (`attachment_name`) a través de la API REST de Django y eventos de WebSockets (Channels), eliminando sufijos aleatorios internos de almacenamiento.
-   - Tarjetas visuales de alto contraste diseñadas para modo claro y oscuro con iconos diferenciados de Lucide (`FileText`, `FileSpreadsheet`, `FileArchive`, `FileCode`, `Download`):
-     - **PDFs**: Badge rojo "PDF", icono `FileText`, nombre del documento en negrita, etiqueta descriptiva y botón de descarga directa con 1 clic (`?download=1`).
-     - **Hojas de cálculo** (.xls, .xlsx, .csv, .ods): Tematizadas en verde con icono `FileSpreadsheet`.
-     - **Documentos de texto** (.doc, .docx, .odt): Tematizados en azul con icono `FileText`.
-     - **Archivos comprimidos** (.zip, .rar, .tar, .gz, .7z): Tematizados en ámbar con icono `FileArchive`.
-     - **Archivos de código/texto** (.txt, .md, .json, .py, .js): Tematizados en violeta con icono `FileCode`.
-   - Previsualización en el compositor antes del envío (`AttachmentPreview`) sincronizada con los colores e insignias del tipo de archivo adjuntado.
-
-   WebSockets Blindados: Conexiones ASGI resilientes a través de Django Channels con validación continua de participantes, captura defensiva de errores JSON y límite de 4000 caracteres por mensaje.
-
-   Control Total de Mensajes:
-   - "Eliminar para todos": Borrado físico de mensajes y destrucción automática de sus archivos adjuntos para todos los participantes.
-   - "Eliminar para mí": Borrado lógico (ocultación) de cualquier mensaje indeseado (propio o ajeno) solo en tu pantalla.
-
-   Gestión Avanzada de Grupos: Roles de administrador, control de invitaciones, buscador de usuarios y solicitudes de acceso (join requests).
-
-Notificaciones Visuales: Sistema de badges y reordenación inteligente de la lista de chats para destacar mensajes no leídos.
-
-Seguridad y Privacidad: Eliminación en cascada de conversaciones y protección de rutas.
-
-5. Mercadillo de Profesionales 🛒
-   Directorio de Anuncios: Espacio para compra, venta, alquiler e intercambio de material o espacios terapéuticos.
-
-   Integración Nativa con Chat: La comunicación entre compradores y vendedores se realiza a través de la mensajería en tiempo real ya existente, manteniendo la privacidad absoluta de los tratos.
-
-   Sistema de Confianza: Valoraciones (reviews de 1 a 5 estrellas) para medir la reputación y fiabilidad de los profesionales en la plataforma.
-
-   Gestión Autónoma: Cada usuario puede administrar (editar/eliminar) sus propios anuncios y aplicar filtros por terapias o tipos de artículos.
-
-6. Biblioteca de Artículos y Casos Clínicos 📚
-   Directorio de Conocimiento: Espacio dedicado para la publicación de artículos, guías y casos clínicos por parte de los miembros de la comunidad.
-
-   Editor Enriquecido: Integración nativa de TinyMCE para la redacción de contenido enriquecido (negritas, listas, enlaces a imágenes externas) tanto en Artículos como en la creación de Eventos.
-
-   Categorización Inteligente: Organización de artículos por terapias utilizando selectores de búsqueda avanzada (Tom Select).
-
-7. Canal Oficial Institucional "Ágora" 🏛️
-   Canal de Dirección y Administración: Categoría institucional exclusiva destinada a los comunicados oficiales, artículos corporativos y eventos impulsados por la dirección y junta de la asociación.
-
-   Asignación Automática Universal: Cada nuevo usuario que se registra en la plataforma recibe la suscripción a "Ágora" automáticamente como su primera terapia (vía Django Signals), garantizando que las comunicaciones institucionales lleguen a todos los miembros sin requerir acción manual.
-
-   Restricción de Publicación por Rol (`is_staff`): La selección de la categoría Ágora en formularios de creación o edición de publicaciones, eventos o artículos está restringida exclusivamente a usuarios con perfil de administración o staff (`user.is_staff=True`).
-
-   Identidad Visual de Alto Impacto: Insignia visual destacada (`.badge-agora` y `.badge-agora-solid`) en naranja fuerte vibrante (`#ea580c`) con icono de escudo oficial (`<i class="bi bi-shield-fill-check"></i>`), adaptada con alto contraste para modo oscuro.
-
-   Priorización Fija en la Home: Mediante anotaciones condicionales `Case/When` en el ORM de Django, los contenidos de Ágora aparecen siempre fijados en la primera posición (índice 0) de las secciones de Últimas Publicaciones, Próximos Eventos y Biblioteca.
-
-8. Publicaciones Multimedia y Explorador Global 📰
-   Publicaciones Enriquecidas No Excluyentes: Los posts permiten combinar libremente imagen de portada, video corto adjunto, enlace externo genérico (a cualquier web, video o recurso) y documento PDF adjunto descargable (hasta 10MB) con previsualización de insignias.
-
-   Buscador Predictivo de Terapias (TomSelect): Integración de selectores ordenados estrictamente por orden alfabético con filtrado predictivo asíncrono en tiempo real mientras el usuario escribe en los formularios de creación de publicaciones y eventos.
-
-   Explorador de Publicaciones (`/events/posts/`): Nueva vista dedicada con búsqueda multi-campo (título, descripción, autor, ubicación), filtrado dinámico por terapia y paginación modular de 12 elementos por página.
-
-   Simetría de Acciones en la Home: Botón de acceso directo *"Ver todas las publicaciones"* integrado con forma de píldora redondeada en el encabezado de Últimas Publicaciones, equiparándose a los exploradores de Eventos y Biblioteca.
-
-9. Motor de Extracción y Sanitización de Texto Plano 🛡️
-   Decodificación Universal de Entidades: Implementación de propiedades en modelos (`Article.plain_text_summary`, `Posts.plain_text_caption` y `Event.plain_text_description`) que eliminan etiquetas residuales, decodifican entidades HTML generadas por TinyMCE (`&eacute;` -> `é`, `&nbsp;` -> espacio) y reemplazan saltos `<br>` y `</p>` por espacios reales para evitar que las palabras se aglutinen.
-
-10. Ecosistema de Comunicación & Branding 📧
-   Emails HTML Corporativos: Notificaciones de sistema con diseño "Visión de Empresa", incluyendo logotipos incrustados (CID) y botones de acción.
-
-   Despacho Asíncrono Resiliente (Celery + Redis): Encolado desacoplado del ciclo HTTP para el envío de correos transaccionales con política de reintentos exponenciales con jitter (hasta 5 reintentos) y fallback in-process mediante `ThreadPoolExecutor` ante contingencias de red.
-
-   Lógica de Notificación Dual: Cada interacción crítica genera un aviso interno (web) y, en casos de eventos o contacto, un correo electrónico profesional.
-
-   Formulario de Contacto Pro: Integración de mensajes de usuario con guardado en base de datos y aviso automático por email al administrador.
-
-11. Experiencia de Usuario y Modo Oscuro (Dark Mode) 🌓
-   Armonización de Contraste: Rediseño del bloque horizontal de Eventos Recomendados y de la barra interactiva de pestañas en modo oscuro con fondos oscuros integrados (`var(--bs-body-bg)`), bordes verde turquesa corporativo (`1.5px solid var(--hubs-primary)`), subtítulos y textos no seleccionados en blanco puro (`#ffffff`) y contadores numéricos en badges blancos de alto contraste.
-
-💻 STACK TECNOLÓGICO:
-
-- **Backend:** Django 6.0 + Python 3.12. Modelos, vistas, plantillas, autenticación y persistencia de datos.
-- **Frontend:** HTML5, CSS3, Bootstrap 5.3, integrando **React 18** (para la interfaz completa de mensajería en tiempo real que consume los datos del backend vía API REST y WebSockets).
-- **Interactividad y Tiempo Real:** HTMX & JavaScript Vanilla (AJAX) y Channels (ASGI).
-- **Cola de Tareas Asíncronas:** Celery 5.3+ y Redis 5.0+ con reintentos exponenciales y contingencia `ThreadPoolExecutor`.
-- **Comunicaciones:** Django Mail (EmailMultiAlternatives) integrado con Gmail SMTP profesional.
-- **Proxy Inverso y Seguridad:** Nginx con limitación de tasa (`limit_req_zone`), HSTS y protección interna de media (`X-Accel-Redirect`).
-- **Base de Datos:** SQLite (Desarrollo y CI) / MySQL (Producción).
-- **Testing y Calidad:** Suite automatizada de 80 tests unitarios y de integración con ejecución optimizada en memoria (~6.9s).
-- **Arquitectura y Seguridad:** Protección CSRF, autenticación robusta mediante **Email**, flujos de registro con aprobación 100% manual del administrador (sin enlaces de auto-activación), validación binaria de adjuntos, secciones privadas blindadas y retención histórica de datos mediante **Soft Delete** en entidades core.
-
-🏗️ ESTRUCTURA DEL PROYECTO:
-
-proyecto_root/
-├── aficionados_network/ # Configuración principal
-├── chat/ # Sistema de Mensajería (Channels, WebSockets)
-├── frontend/ # Interfaz de Chat en React (Vite)
-├── notifications/ # Motor de avisos internos y lógica de alertas
-├── posts/ # Gestión de Eventos, Publicaciones y Likes
-├── profiles/ # Usuarios, Terapias, Seguidores y Estadísticas
-└── templates/ # UI Global y plantillas de emails
-
-⚙️ INSTALACIÓN Y CONFIGURACIÓN:
-Sigue estos pasos para desplegar Hubs&Clicks en tu entorno local:
-
-1. Clonar el repositorio
-   Bash
-   git clone https://github.com/tu-usuario/aficionados_network.git
-   cd aficionados_network
-
-2. Entorno de Desarrollo Simplificado (Tmux + Vite + Redis)
-   El proyecto cuenta con el script automatizado `start_dev.sh` que levanta todo el entorno simultáneamente usando Tmux:
-   - Panel 1: Servidor Django (`manage.py runserver`)
-   - Panel 2: Servidor de Vite para React (`npm run dev`)
-   - Panel 3: Servidor Redis para WebSockets (`redis-server`)
-   - Ventana adicional para ejecutar comandos de consola.
-   
-   Simplemente ejecuta:
-   Bash
-   ./start_dev.sh
-
-3. Configurar el entorno virtual
-   Se recomienda el uso de Python 3.12 para garantizar la compatibilidad con Django 6.0:
-
-   Bash
-
-   # Crear el entorno
-
-   python3 -m venv env
-
-   # Activar el entorno (Linux/macOS)
-
-   source env/bin/activate
-
-   # Activar el entorno (Windows)
-
-   env\Scripts\activate
-
-3. Instalar dependencias
-   Asegúrate de tener el archivo requirements.txt actualizado:
-
-   Bash
-   pip install -r requirements.txt
-
-4. Preparar la Base de Datos
-   Realiza las migraciones para crear la estructura de tablas (Eventos, Perfiles, Notificaciones, etc.):
-
-   Bash
-   python manage.py makemigrations
-   python manage.py migrate
-
-   ### Configuración MySQL/MariaDB
-
-   Para usar MySQL o MariaDB en lugar de SQLite, crea tu `.env` a partir de `.env.example` y cambia la configuración de base de datos:
-
-   Bash
-   cp .env.example .env
-
-   Variables mínimas:
-
-   ```env
-   DEBUG=True
-   SECRET_KEY=django-insecure-cambia-esto-en-local
-   DB_ENGINE=mysql
-   DB_NAME=aficionados_network_db
-   DB_USER=django_user
-   DB_PASSWORD=tu_password_seguro
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
+# 🚀 Hubs&Clicks - Red social privada para terapeutas naturales
+
+Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar a terapeutas y profesionales del bienestar a través de sus terapias, permitiéndoles organizar eventos presenciales y online, compartir conocimientos en una Biblioteca de Casos y estudios clínicos, intercambiar y comercializar recursos en un Mercadillo especializado, y comunicarse en tiempo real mediante un sistema de mensajería seguro, moderno y con una identidad corporativa unificada.
+
+---
+
+## 🛠️ Arquitectura y Capacidades de Producción
+
+### 1. Gestión de Eventos 360º y Recordatorios Automáticos (Celery Beat)
+- **Creación y Edición Integral:** Planes detallando ubicación física o streaming online, fecha, terapia, nivel de experiencia y límite de aforo físico.
+- **Sincronización Automática con Chat (Eventos Online):** Los eventos online generan automáticamente una sala de chat grupal privada. Los asistentes se unen en tiempo real vía Django Signals para coordinar la sesión.
+- **Recordatorios Automáticos 24h con Idempotencia Multinivel:**
+  - Servicio programado independiente **Celery Beat** ejecutándose a diario a las 08:00 AM (`crontab(hour=8, minute=0)`), despachando `posts.tasks.send_event_reminders_task`.
+  - **Garantía Zero-Duplicates:** Control de idempotencia a nivel base de datos (`reminder_sent`, `reminder_sent_at` e índice compuesto en `EventAttendance`), deduplicación en el modelo `Notification` y transaccionalidad atómica (`transaction.atomic()`).
+  - Despacho de emails HTML corporativos con detalles específicos según la modalidad (enlace de streaming para eventos online o mapa y dirección para eventos presenciales).
+- **Sistema de Duplicado y Cancelación:** Clonación de eventos pasados con un clic y protocolo seguro de cancelación con alertas automáticas a todos los participantes.
+
+### 2. Notificaciones Centralizadas (`NotificationDispatcher`)
+- **Arquitectura de Despacho Desacoplado:** Motor centralizado en `notifications/services.py` que coordina notificaciones en-app (campana con badges y recarga asíncrona HTMX) y correos HTML corporativos.
+- **Encolado Asíncrono Resiliente (Celery + Redis):** Tarea `send_email_task` desacoplada del ciclo de vida HTTP con reintentos exponenciales con jitter (hasta 5 reintentos) y contingencia defensiva in-process mediante `ThreadPoolExecutor` ante microcortes.
+- **Cobertura Completa del Negocio:** Alertas instantáneas para likes, comentarios en posts, nuevos seguidores, confirmación de asistencia a eventos, recordatorios 24h, solicitudes de acceso a grupos de chat, reviews entre terapeutas, medallas de gamificación y comentarios/valoraciones en la biblioteca clínica.
+
+### 3. Mensajería en Tiempo Real y Frontend React 100% Strict TypeScript 💬
+- **Salas Privadas y Grupales:** Chats 1 a 1 y grupos temáticos sobre WebSockets ASGI blindados con `AllowedHostsOriginValidator` para mitigar ataques CSWSH.
+- **Frontend Moderno con Strict TypeScript:**
+  - Aplicación React 19 embebida vía Vite 8, migrada íntegramente a **TypeScript estricto** (`.tsx`/`.ts`).
+  - Verificación formal de tipos mediante script `npm run type-check` (`tsc --noEmit`) con 0 advertencias y 0 errores.
+  - Arquitectura **Container - Presentational (Smart vs. Dumb)**: Contenedor `MessageArea.tsx` coordinando subcomponentes especializados (`MessageTimeline`, `MessageInput`, `AttachmentPreview`, `GroupParticipants`, `GroupPendingRequests`, `GroupAddMember`).
+  - **Capa Anti-Corrupción (ACL):** Cliente HTTP centralizado (`httpClient.ts`) con intercepción y sanitización automática del token CSRF, desacoplando los componentes de llamadas de red crudas mediante `chat.service.ts` y contratos formales en `chat.types.ts`.
+- **Privacidad de Archivos Adjuntos (Anti-IDOR & Magic Bytes):**
+  - **Validación Binaria Estricta:** Comprobación de firmas reales (*magic bytes*) para JPG, PNG, GIF, WEBP y PDF, y sanitización de metadatos EXIF sensibles mediante Pillow.
+  - **Despacho Protegido (`X-Accel-Redirect`):** Acceso directo a `/media/chat_attachments/` bloqueado perimetralmente en Nginx. La descarga se gestiona exclusivamente a través de `ProtectedAttachmentDownloadView` tras verificar que el usuario pertenece activamente a la conversación.
+  - **Presentación Enriquecida de Documentos:** Nombres de archivo reales limpios de sufijos aleatorios internos (`attachment_name`), previsualizaciones tematizadas con iconos de Lucide (badges rojos para PDF, verde para hojas de cálculo, azul para documentos, ámbar para comprimidos, violeta para código) y descarga directa con 1 clic (`?download=1`).
+- **Control Total:** Opciones de "Eliminar para todos" (borrado físico del mensaje y destrucción del archivo adjunto en disco) y "Eliminar para mí" (borrado lógico local).
+
+### 4. Seguridad Perimetral y OWASP Hardening 🛡️
+- **Saneamiento Anti-XSS (Doble Barrera):** Motor de sanitización con `nh3` en métodos `save()` de modelos (`Article`, `Event`, `Profile`) con listas blancas rigurosas de etiquetas HTML seguras, y filtro de plantilla personalizado `|sanitize_html`.
+- **Rate Limiting Perimetral:** Reglas de limitación de tasa en Nginx (`limit_req_zone`) sobre endpoints sensibles (`/login/`, `/contact/`) para prevenir ataques de fuerza bruta y DoS.
+- **Zero-Downtime SSL/TLS Readiness:**
+  - Infraestructura preparada para aprovisionar certificados Let's Encrypt mediante el protocolo **ACME Webroot** (`/.well-known/acme-challenge/`), compartiendo volúmenes entre Nginx y Certbot en Docker Compose.
+  - Cero tiempo de inactividad: Nginx se mantiene en ejecución atendiendo tráfico web y sockets, y se recarga en caliente (`nginx -s reload`) en milisegundos tras la emisión o renovación.
+  - Plantilla declarativa `nginx/production-ssl.conf.template` lista para despliegue inmediato con `envsubst '${DOMAIN}'`.
+  - Guía operativa paso a paso disponible en el [Runbook de Producción SSL](file:///home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/PROYECTO_FIN_MASTER_V2/docs/runbook-ssl.md).
+- **Control de Secretos:** `.gitignore` y `.dockerignore` exhaustivos para garantizar que ningún archivo `.env*`, volcado de base de datos ni credencial sensible se incluya en el repositorio ni en las imágenes Docker.
+
+### 5. Directorio de Terapeutas, Mercadillo y Biblioteca Clínica
+- **Comunidad de Profesionales:** Exploración fluida mediante scroll infinito (HTMX) y búsqueda multi-campo. Privacidad de contacto (teléfono, email, dirección) reservada a miembros registrados.
+- **Canal Oficial "Ágora" (`slug="agora"`):** Categoría institucional reservada exclusivamente para directiva (`is_staff`), asignada automáticamente a todos los usuarios registrados y fijada prioritariamente al inicio de los feeds de la plataforma.
+- **Biblioteca de Casos Clínicos y Artículos:** Publicaciones de divulgación técnica con editor enriquecido TinyMCE, extracción y decodificación universal de entidades HTML (`plain_text_summary`), y sistema de comentarios y valoraciones integrado con el `NotificationDispatcher`.
+- **Mercadillo de Profesionales:** Directorio de compra, venta, alquiler e intercambio de material y espacios terapéuticos, con enlaces directos a salas de chat privadas y sistema de valoraciones (reviews de 1 a 5 estrellas).
+
+---
+
+## 💻 Stack Tecnológico
+
+| Capa | Tecnologías | Propósito |
+| :--- | :--- | :--- |
+| **Backend Core** | Django 6.0, Python 3.12 | Arquitectura MVC, ORM, autenticación por email, administración y API REST. |
+| **Tiempo Real (ASGI)** | Django Channels 4.2+, Daphne | Servidor ASGI para WebSockets de mensajería con validación de origen. |
+| **Base de Datos** | MariaDB 10.11 / SQLite 3 | MariaDB en producción con charset `utf8mb4`; SQLite para desarrollo local y tests rápidos en memoria. |
+| **Broker & Caché** | Redis 7 Alpine | Canal de transporte para Django Channels y broker/backend de Celery. |
+| **Tareas Asíncronas** | Celery 5.7+ Worker | Encolado de emails corporativos y notificaciones pesadas con reintentos exponenciales. |
+| **Programador Periódico** | Celery Beat | Ejecución programada de recordatorios de eventos 24h a las 08:00 AM. |
+| **Proxy & Servidor Web** | Nginx 1.25 Alpine | Reverse proxy, terminación SSL/TLS, Rate Limiting, CSP Sandbox y `X-Accel-Redirect`. |
+| **Certificados SSL** | Certbot (Let's Encrypt) | Emisión y renovación automática de certificados SSL/TLS con Zero-Downtime Webroot. |
+| **Frontend Chat** | React 19, TypeScript 5+, Vite 8 | Módulo de chat en tiempo real 100% tipado, empaquetado como bundle optimizado. |
+| **Frontend Web** | Bootstrap 5.3, HTMX, Vanilla JS | Renderizado server-side accesible, scroll infinito y modo oscuro armonizado. |
+| **Seguridad & Media** | `nh3`, Pillow 10+ | Sanitización estricta de HTML y validación binaria de metadatos EXIF. |
+| **Calidad & Testing** | Django Test Runner, TypeScript Compiler | 126 tests unitarios/integración en ~6.1s (100% GREEN) + `tsc --noEmit`. |
+
+---
+
+## 🐳 Servicios en Docker Compose
+
+La infraestructura de producción está completamente modularizada en [docker-compose.yml](file:///home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/PROYECTO_FIN_MASTER_V2/docker-compose.yml):
+
+```yaml
+services:
+  web:           # Django 6.0 + Channels Daphne ASGI (puerto interno 8000)
+  db:            # MariaDB 10.11 con almacenamiento persistente en 'db_data'
+  redis:         # Redis 7 Alpine para Channels y Celery
+  celery_worker: # Worker Celery para tareas de email y notificaciones
+  celery_beat:   # Programador Celery Beat para recordatorios de eventos 24h
+  nginx:         # Proxy inverso Nginx 1.25 (puertos 80, 8000, 443) con X-Accel-Redirect
+  certbot:       # Cliente ACME para emisión y renovación automática cada 12h
+```
+
+---
+
+## ⚙️ Instalación y Entorno Local de Desarrollo
+
+### Requisitos Previos
+- Python 3.12+
+- Node.js 20+ y npm
+- Redis Server (local o vía Docker)
+- Tmux (opcional, para ejecución automatizada en paneles)
+
+### Paso 1: Clonar el Repositorio y Configurar Entorno Virtual
+```bash
+git clone https://github.com/tu-usuario/aficionados_network.git
+cd aficionados_network
+
+python3 -m venv env
+source env/bin/activate  # En Windows: env\Scripts\activate
+pip install -r requirements.txt
+```
+
+### Paso 2: Configurar Variables de Entorno
+Copia la plantilla de variables de entorno y ajusta tus credenciales locales:
+```bash
+cp .env.example .env
+```
+
+Para desarrollo local rápido con SQLite, asegúrate de tener:
+```env
+DEBUG=True
+SECRET_KEY=django-insecure-entorno-de-desarrollo-local
+DB_ENGINE=sqlite
+```
+
+### Paso 3: Migraciones y Superusuario
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+### Paso 4: Levantar el Entorno de Desarrollo
+
+#### Opción A: Entorno Automatizado con Tmux (Recomendado)
+El proyecto incluye el script [start_dev.sh](file:///home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/PROYECTO_FIN_MASTER_V2/start_dev.sh) que levanta en paneles sincronizados:
+1. Panel 1: Servidor Django ASGI (`python manage.py runserver`)
+2. Panel 2: Vite Dev Server para el Chat React (`cd frontend && npm run dev`)
+3. Panel 3: Servidor Redis (`redis-server`)
+4. Panel 4: Consola interactiva para comandos
+
+```bash
+chmod +x start_dev.sh
+./start_dev.sh
+```
+
+#### Opción B: Ejecución Manual
+En terminales separadas:
+```bash
+# Terminal 1: Redis
+redis-server
+
+# Terminal 2: Vite (Frontend Chat)
+cd frontend && npm install && npm run dev
+
+# Terminal 3: Celery Worker (Opcional en desarrollo)
+celery -A aficionados_network worker -l info
+
+# Terminal 4: Django Backend
+python manage.py runserver
+```
+La aplicación estará disponible en `http://127.0.0.1:8000`.
+
+---
+
+## 🧪 Testing y Calidad de Código
+
+El proyecto cuenta con una batería de pruebas rigurosa que cubre modelos, servicios de notificaciones, APIs REST, Channels WebSockets, transacciones de base de datos y tipado estático:
+
+### 1. Tests Unitarios y de Integración (Backend)
+Configurados con aceleración en memoria (`MD5PasswordHasher`, `InMemoryChannelLayer`, `CELERY_TASK_ALWAYS_EAGER`):
+```bash
+# Ejecución con el entorno virtual activo (126 tests)
+./env/bin/python manage.py test
+```
+*Salida esperada:*
+```text
+Ran 126 tests in ~6.1s
+OK
+```
+
+### 2. Verificación de Tipos TypeScript (Frontend)
+```bash
+cd frontend
+npm run type-check
+```
+*Salida esperada:*
+```text
+> tsc --noEmit
+(0 errores, compilación estricta aprobada)
+```
+
+### 3. Compilación de Producción Frontend (Vite)
+```bash
+cd frontend
+npm run build
+```
+
+---
+
+## 🚢 Despliegue en Producción y SSL Zero-Downtime
+
+Para desplegar en servidores de producción (ej. Oracle Cloud, Ubuntu Server):
+
+1. **Configurar `.env.prod`:**
+   Asegurar las credenciales de MariaDB, clave secreta de producción, credenciales de Gmail SMTP (`EMAIL_HOST_PASSWORD`) y hosts permitidos.
+
+2. **Construir y Levantar Contenedores:**
+   ```bash
+   docker compose up -d --build
    ```
 
-   Crea la base de datos y el usuario:
-
-   ```sql
-   CREATE DATABASE aficionados_network_db
-   CHARACTER SET utf8mb4
-   COLLATE utf8mb4_unicode_ci;
-
-   CREATE USER 'django_user'@'127.0.0.1' IDENTIFIED BY 'tu_password_seguro';
-   GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, INDEX
-   ON aficionados_network_db.*
-   TO 'django_user'@'127.0.0.1';
-   FLUSH PRIVILEGES;
+3. **Ejecutar Migraciones y Recolección de Estáticos:**
+   ```bash
+   docker compose exec web python manage.py migrate
+   docker compose exec web python manage.py collectstatic --noinput
    ```
 
-   Después instala dependencias y aplica migraciones:
+4. **Aprovisionamiento SSL/TLS (Zero-Downtime):**
+   Para asociar un dominio oficial y obtener certificados HTTPS gratuitos de Let's Encrypt sin detener la aplicación ni cerrar sockets activos, consulta el:
+   📖 **[Runbook de Producción SSL/TLS (docs/runbook-ssl.md)](file:///home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/PROYECTO_FIN_MASTER_V2/docs/runbook-ssl.md)**.
 
-   Bash
-   python -m pip install -r requirements.txt
-   python manage.py migrate
+---
 
-   Para migrar datos desde SQLite:
+## 🏆 Roadmap de Madurez Técnica (100% Completado)
 
-   Bash
-   DB_ENGINE=sqlite python manage.py dumpdata --natural-foreign --natural-primary --indent 2 -e sessions -e sites > db_full_backup.json
-   DB_ENGINE=mysql python manage.py flush --noinput
-   DB_ENGINE=mysql python manage.py loaddata db_full_backup.json
+- [x] **Arquitectura Asíncrona Resiliente:** Celery 5.7+ con Redis y reintentos exponenciales para emails transaccionales.
+- [x] **Celery Beat Scheduler:** Recordatorios automáticos de eventos 24h a las 08:00 AM con estricta idempotencia multinivel.
+- [x] **Despachador Centralizado (`NotificationDispatcher`):** Servicio orquestador para avisos in-app y alertas por correo en todas las interacciones de negocio.
+- [x] **Frontend 100% Strict TypeScript:** React 19 + TypeScript con tipado riguroso, contratos formales y Capa Anti-Corrupción (`httpClient.ts`).
+- [x] **Seguridad de Archivos y Anti-IDOR:** Bloqueo de acceso directo en Nginx y descarga validada con `X-Accel-Redirect`, comprobación binaria de magic bytes y eliminación de metadatos EXIF con Pillow.
+- [x] **Hardening OWASP:** Saneamiento Stored XSS con `nh3`, mitigación de CSWSH en ASGI, Rate Limiting en Nginx y purga de secretos.
+- [x] **Zero-Downtime SSL Readiness:** Nginx configurado con ACME challenge webroot, servicio Certbot en Docker Compose y plantilla de producción lista.
+- [x] **Suite de Tests Exhaustiva:** 126 tests automatizados ejecutados en ~6.1s con 100% de éxito.
 
-   La migración ejecutada en este proyecto está registrada en `.sdd/changes/sqlite-to-mysql-migration/`.
-   La guía reutilizable para futuros proyectos está en `.sdd/knowledge/django-sqlite-to-mysql-mariadb.md`.
+---
 
-5. Crear superusuario (Admin)
-   Para gestionar las terapias y los mensajes de contacto desde el panel:
-
-   Bash
-   python manage.py createsuperuser
-
-6. Ejecutar el servidor
-   Bash
-   python manage.py runserver
-   La plataforma estará disponible en http://127.0.0.1:8000.
-
-📧 CONFIGURACIÓN EMAIL(Desarrollo)
-Para probar el sistema de notificaciones por correo sin configurar un servidor SMTP real, el proyecto está configurado para mostrar los emails en la consola.
-
-Si deseas cambiar a un entorno de producción, ajusta las siguientes variables en settings.py:
-
-EMAIL_BACKEND: Define el motor de envío.
-
-CONTACT_EMAIL: Dirección donde recibirás los mensajes del formulario de contacto.
-
-🏆 Roadmap Completado (MVP 100% Funcional y Listo para Producción)
-
-[x] Sistema de Notificaciones: Implementado (Likes, Comentarios, Eventos).
-
-[x] Identidad Corporativa: Emails y diseño unificado.
-
-[x] Sistema de Valoraciones (Reviews): Puntuación por estrellas tras finalizar un evento implementada.
-
-[x] Filtro de "Mis Terapias": Acceso rápido a eventos que coinciden con las terapias del perfil.
-
-[x] Compartir Archivos Multimedia: Subida de imágenes y documentos en el chat implementada.
-
-[x] Mercadillo de Profesionales: Implementado (Directorio de anuncios, CRUD completo, sistema de valoraciones).
-
-[x] Biblioteca de Artículos y Casos Clínicos: CRUD de artículos de divulgación, integración con TinyMCE, recuentos globales y extractos con decodificación de entidades HTML.
-
-[x] Canal Oficial Institucional "Ágora": Auto-asignación en registro y migración histórica universal, restricción estricta de publicación para `is_staff`, distintivo naranja fuerte con escudo (`.badge-agora`) y fijación en primera posición en todos los feeds principales.
-
-[x] Publicaciones Multimedia Híbridas: Formato no excluyente para combinar imagen, video, enlaces externos genéricos y documento PDF adjunto con descarga.
-
-[x] Exploración de Publicaciones (`/events/posts/`): Vista completa de posts con buscador multi-campo, filtro por terapia, paginación limpia (12/página) y botón simétrico en la Home.
-
-[x] Motor de Sanitización de Texto Plano: Extracción y limpieza en modelos (`plain_text_summary`, `plain_text_caption`, `plain_text_description`) para evitar entidades residuales (`&eacute;`, `&nbsp;`) y separación de párrafos.
-
-[x] UI/UX y Modo Oscuro Refinado: Tema oscuro armonizado con fondos nativos (`var(--bs-body-bg)`), bordes verde corporativo (`1.5px solid var(--hubs-primary)`), subtítulos blancos de alto contraste y badges con contadores numéricos en color.
-
-[x] UI/UX y Accesibilidad: Selectores predictivos alfabéticos con TomSelect en formularios, estandarización de spinners de carga, y navbar totalmente unificado con badges de notificaciones de contenido (+999).
-
-[x] Seguridad y Perfil: `.env.prod` fuera del control de versiones, manejo de excepciones de SMTP, límite de biografía expandido (1500 caracteres) y subida de imágenes locales mediante TinyMCE al servidor.
-
-[x] Backups Automatizados: Configuración de script de volcado de base de datos (MariaDB) y compresión de archivos multimedia con retención rotativa (7 días) mediante cron.
-
-Hubs&Clicks - "Descubre, Comparte, Disfruta"
-
+**Hubs&Clicks** - *"Conectando personas y bienestar a través de la experiencia compartida."*
