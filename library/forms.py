@@ -8,7 +8,8 @@ class ArticleForm(forms.ModelForm):
         max_length=100, 
         required=False, 
         label="O añade una nueva terapia",
-        help_text="Si tu terapia no está en la lista, escríbela aquí."
+        help_text="Si tu terapia no está en la lista, escríbela aquí.",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de la nueva terapia...'})
     )
     
     class Meta:
@@ -19,7 +20,14 @@ class ArticleForm(forms.ModelForm):
             'external_video_url', 'external_document_url'
         ]
         widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título del artículo'}),
+            'hobby': forms.Select(attrs={'class': 'form-select'}),
             'content': forms.Textarea(attrs={'id': 'tinymce-editor'}),
+            'cover_image': forms.FileInput(attrs={'class': 'form-control'}),
+            'attached_video': forms.FileInput(attrs={'class': 'form-control'}),
+            'attached_document': forms.FileInput(attrs={'class': 'form-control'}),
+            'external_video_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://...'}),
+            'external_document_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://...'}),
         }
         
     def __init__(self, *args, **kwargs):

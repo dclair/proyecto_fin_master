@@ -1281,21 +1281,74 @@ footer a:active {
 }
 
 /* ============================================================
-   FORMULARIOS Y CRISPY FORMS (SEMANTIC TOKENS BOOTSTRAP 5.3)
+   FORMULARIOS Y CONTROLES (SEMANTIC TOKENS BOOTSTRAP 5.3)
    ============================================================ */
+select,
+.form-select,
 .form-control,
-.form-select {
+input[type="text"],
+input[type="url"],
+input[type="email"],
+input[type="password"],
+input[type="file"],
+input[type="number"],
+input[type="search"],
+textarea {
     color: var(--bs-body-color);
     background-color: var(--bs-body-bg);
-    border-color: var(--bs-border-color);
+    border: 1px solid var(--bs-border-color);
 }
 
+select:focus,
+.form-select:focus,
 .form-control:focus,
-.form-select:focus {
+input[type="text"]:focus,
+input[type="url"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="file"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+textarea:focus {
     color: var(--bs-body-color);
     background-color: var(--bs-body-bg);
     border-color: var(--bs-primary);
     box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+    outline: none;
+}
+
+/* Opciones nativas (<option>) heredan variables semánticas en todos los navegadores */
+select option,
+.form-select option,
+option {
+    background-color: var(--bs-card-bg);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] select,
+[data-bs-theme="dark"] .form-select {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a3b5aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+[data-bs-theme="dark"] select option,
+[data-bs-theme="dark"] .form-select option,
+[data-bs-theme="dark"] option {
+    background-color: var(--bs-card-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+[data-bs-theme="dark"] select option:checked,
+[data-bs-theme="dark"] .form-select option:checked {
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-heading-color) !important;
+}
+
+[data-bs-theme="dark"] select option:disabled,
+[data-bs-theme="dark"] .form-select option:disabled {
+    color: var(--bs-secondary-color) !important;
 }
 
 .form-label,
@@ -1312,7 +1365,8 @@ span.helptext,
 }
 
 .form-control::placeholder,
-textarea.form-control::placeholder {
+textarea.form-control::placeholder,
+input::placeholder {
     color: var(--bs-secondary-color);
     opacity: 0.7;
 }
@@ -1326,7 +1380,9 @@ textarea.form-control::placeholder {
 /* ============================================================
    TOMSELECT (SOPORTE SEMÁNTICO LIGHT & DARK)
    ============================================================ */
-.ts-control {
+.ts-control,
+.ts-wrapper.single.input-active .ts-control,
+.full .ts-control {
     background-color: var(--bs-body-bg) !important;
     color: var(--bs-body-color) !important;
     border: 1px solid var(--bs-border-color) !important;
@@ -1334,21 +1390,43 @@ textarea.form-control::placeholder {
     box-shadow: none;
 }
 
+.ts-control .item,
 .ts-control input {
     color: var(--bs-body-color) !important;
+    background-color: transparent !important;
 }
 
 .ts-control input::placeholder {
     color: var(--bs-secondary-color) !important;
+    opacity: 0.7;
 }
 
-.ts-dropdown {
+.ts-wrapper.focus .ts-control,
+.ts-control.focus {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25) !important;
+}
+
+.ts-wrapper.disabled .ts-control,
+.disabled .ts-control {
+    background-color: var(--bs-tertiary-bg) !important;
+    color: var(--bs-secondary-color) !important;
+    opacity: 0.6;
+}
+
+.ts-dropdown,
+.ts-dropdown.form-control,
+.ts-dropdown.form-select {
     background-color: var(--bs-card-bg) !important;
     color: var(--bs-body-color) !important;
     border: 1px solid var(--bs-border-color) !important;
     border-radius: var(--bs-border-radius-sm);
     box-shadow: var(--hubs-shadow);
     z-index: 1055;
+}
+
+.ts-dropdown-content {
+    background-color: transparent !important;
 }
 
 .ts-dropdown .option {
@@ -1373,10 +1451,12 @@ textarea.form-control::placeholder {
 .ts-dropdown .optgroup-header {
     color: var(--bs-secondary-color) !important;
     background-color: var(--bs-card-bg) !important;
+    font-weight: 700;
 }
 
 .ts-dropdown .no-results {
     color: var(--bs-secondary-color) !important;
+    padding: 0.5rem 0.75rem;
 }
 
 .ts-wrapper.multi .ts-control > div {
@@ -1384,6 +1464,22 @@ textarea.form-control::placeholder {
     color: var(--bs-body-color) !important;
     border: 1px solid var(--bs-border-color) !important;
     border-radius: 4px;
+}
+
+/* Caret indicator & Dark mode specific refinements */
+[data-bs-theme="dark"] .ts-wrapper.single .ts-control,
+[data-bs-theme="dark"] .ts-wrapper:not(.form-control):not(.form-select).single .ts-control {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a3b5aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+[data-bs-theme="dark"] .plugin-clear_button .clear-button {
+    color: var(--bs-secondary-color) !important;
+}
+
+[data-bs-theme="dark"] .plugin-dropdown_input .dropdown-input {
+    color: var(--bs-body-color) !important;
+    background-color: var(--bs-card-bg) !important;
+    border-bottom: 1px solid var(--bs-border-color) !important;
 }
 
 /* ============================================================

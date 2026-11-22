@@ -2,6 +2,10 @@
 {% load static %}
 {% block head_title %}Publicar Artículo | Aficionados{% endblock %}
 
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+{% endblock extra_css %}
+
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -108,10 +112,35 @@
         </div>
     </div>
 </div>
+{% endblock content %}
 
+{% block extra_js %}
 <!-- TinyMCE CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+<!-- TomSelect JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
 <script>
+  function initHobbyTomSelect() {
+      const selectEl = document.getElementById("id_hobby");
+      if (selectEl && window.TomSelect && !selectEl.tomselect) {
+          new TomSelect(selectEl, {
+              create: false,
+              sortField: {
+                  field: "text",
+                  direction: "asc"
+              },
+              placeholder: "Busca una terapia..."
+          });
+      }
+  }
+
+  if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initHobbyTomSelect);
+  } else {
+      initHobbyTomSelect();
+  }
+
   function initArticleTinyMCE() {
     const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
     tinymce.init({
@@ -132,9 +161,8 @@
       content_style: isDark
         ? 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px; background-color: #212529; color: #dee2e6; }'
         : 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px; background-color: #ffffff; color: #212529; }',
-      // Bloqueamos que la gente pegue imágenes directo para evitar el colapso de Base64
       paste_data_images: false,
-      image_advtab: false, // Desactiva pestañas avanzadas de imagen para mantenerlo simple
+      image_advtab: false,
     });
   }
 
@@ -147,58 +175,10 @@
       initArticleTinyMCE();
     }
   });
-</script>
-
-<style>
-    /* Styling for standard Django forms if we didn't use crispy forms */
-    input[type=text], input[type=url], select, textarea {
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: var(--bs-body-color);
-        background-color: var(--bs-body-bg);
-        background-clip: padding-box;
-        border: 1px solid var(--bs-border-color);
-        border-radius: 0.375rem;
-        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-    }
-    input[type=file] {
-        display: block;
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: var(--bs-body-color);
-        background-color: var(--bs-body-bg);
-        background-clip: padding-box;
-        border: 1px solid var(--bs-border-color);
-        border-radius: 0.375rem;
-        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-    }
-</style>
-
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-      new TomSelect("#id_hobby", {
-          create: false,
-          sortField: {
-              field: "text",
-              direction: "asc"
-          },
-          placeholder: "Busca una terapia..."
-      });
-  });
 
   const articleForm = document.getElementById('articleForm');
   if (articleForm) {
       articleForm.addEventListener('submit', function() {
-          // Sync TinyMCE before submission to ensure validation goes through smoothly
           if (typeof tinymce !== 'undefined') {
               tinymce.triggerSave();
           }
@@ -216,4 +196,4 @@
       });
   }
 </script>
-{% endblock %}
+{% endblock extra_js %}
