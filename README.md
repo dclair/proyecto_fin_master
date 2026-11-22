@@ -49,6 +49,13 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
 - **Biblioteca de Casos Clínicos y Artículos:** Publicaciones de divulgación técnica con editor enriquecido TinyMCE, extracción y decodificación universal de entidades HTML (`plain_text_summary`), y sistema de comentarios y valoraciones integrado con el `NotificationDispatcher`.
 - **Mercadillo de Profesionales:** Directorio de compra, venta, alquiler e intercambio de material y espacios terapéuticos, con enlaces directos a salas de chat privadas y sistema de valoraciones (reviews de 1 a 5 estrellas).
 
+### 6. Sistema de Temas Unificado (Light & Dark) y Contraste Semántico (WCAG AA) 🎨
+- **Jerarquía Tonal Semántica Bootstrap 5.3:** Tokens semánticos estandarizados (`--bs-body-bg`, `--bs-card-bg`, `--bs-tertiary-bg`, `--bs-body-color`, `--bs-border-color`) eliminando clases rígidas como `bg-white`, `bg-light` y `text-dark` en más de 35 templates Django.
+- **Sincronización Reactiva Multi-Capa en Microfrontend:** Hook `useHostTheme` en React sincronizado en tiempo real con el selector del host Django mediante CustomEvent (`themeChanged`) y `MutationObserver` defensivo.
+- **Arquitectura de Cascada CSS Invertida y Blindaje de Terceros:**
+  - Carga prioritaria de librerías CDN en `{% block extra_css %}` antes de `style.css` en `layout.html`, asegurando la precedencia de diseño de la aplicación.
+  - Blindaje con selector calificado `[data-bs-theme="dark"]` y variables semánticas para componentes complejos como TomSelect (`.ts-control`, `.ts-dropdown`) y editores WYSIWYG TinyMCE (`oxide-dark`), garantizando contraste perfecto y legibilidad sin fondos blancos residuales.
+
 ---
 
 ## 💻 Stack Tecnológico

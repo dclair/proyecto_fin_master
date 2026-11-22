@@ -410,6 +410,37 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 - Código limpio sin duplicación de CSS ni especificidades forzadas.
 - Sincronización instantánea en tiempo real entre Django y el microfrontend de React sin recargar la página.
 
+## D-025: Inversión del Orden de Cascada CSS y Blindaje de Especificidad para Componentes de Terceros (TomSelect)
+
+**Date:** 2026-11-22  
+**Decision:** Reubicar el bloque `{% block extra_css %}` en `layout.html` ANTES de la hoja de estilos principal `style.css` y blindar los estilos de TomSelect y controles de formulario con `[data-bs-theme="dark"]` y `!important` para evitar que estilos CDN aplasten la tematización semántica.
+
+**Why:**
+
+- En `/biblioteca/crear/`, el desplegable de "Terapia (existente)" renderizado con TomSelect continuaba apareciendo con fondo blanco y texto en negro en Tema Oscuro.
+- La causa raíz fue doble:
+  1. `tom-select.bootstrap5.min.css` se cargaba en `{% block extra_css %}`, ubicado después de `style.css` en `layout.html`, ganando la precedencia de la cascada ante igual especificidad.
+  2. El CDN de TomSelect contiene estilos rígidos (`color: #343a40; background: #fff`) para `.ts-dropdown` y `.ts-control` que no estaban cualificados con el selector de tema de Bootstrap 5.3.
+  3. En producción, Daphne mantiene en memoria el manifest de `ManifestStaticFilesStorage`, requiriendo reinicio del contenedor `web` tras `collectstatic` para emitir las URLs con el hash actualizado.
+
+**Architecture & Implementation Details:**
+
+1. **Orden de Cascada en `layout.html`:**
+   - CDN y librerías externas en `{% block extra_css %}` se evalúan primero.
+   - `style.css` se evalúa después, garantizando la última palabra para estilos de marca y tema.
+2. **Blindaje de Selectores en `style.css`:**
+   - Se añadieron selectores calificados `[data-bs-theme="dark"] .ts-wrapper`, `[data-bs-theme="dark"] .ts-dropdown`, `[data-bs-theme="dark"] .ts-control input`, etc., asignando variables semánticas (`--bs-body-bg`, `--bs-card-bg`, `--bs-body-color`).
+   - Se anuló el `background-image` en `.ts-wrapper.form-select` para prevenir flechas duplicadas con TomSelect.
+3. **Ciclo de Vida de Estáticos en Docker:**
+   - Sincronización vía `collectstatic` dentro del contenedor web y en local.
+   - Incremento del cache buster a `?v=3.2`.
+   - Reinicio del contenedor `web` (`docker restart proyecto_fin_master_v2-web-1`).
+
+**Implications:**
+
+- Cualquier componente de terceros inyectado en plantillas hijas respetará obligatoriamente la jerarquía visual de Hubs&Clicks.
+- 100% de consistencia de Tema Oscuro en todos los desplegables TomSelect y nativos de la plataforma.
+
 
 
 

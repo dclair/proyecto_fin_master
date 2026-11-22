@@ -1,9 +1,32 @@
 # Logical Changelog
 
-**Last reviewed:** 2026-11-19  
+**Last reviewed:** 2026-11-22  
 **Purpose:** semantic change history of the system, independent from Git commits.
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
+
+## 2026-11-22: Fix CSS Cascade Order and Specificity for TomSelect and Form Controls in Dark Mode
+
+**Type:** bug fix / UI / architecture  
+**Status:** done
+
+What changed:
+- **Inversión de Precedencia en `<head>` (`layout.html`)**:
+  - Reubicado el bloque `{% block extra_css %}` para que se inserte antes de `style.css`.
+  - Con esto, cualquier CDN de terceros (como TomSelect o TinyMCE) se carga primero, permitiendo que las reglas de `style.css` de Hubs&Clicks sobreescriban estilos sin colisión de cascada.
+- **Blindaje Semántico Dark Mode en `style.css`**:
+  - Implementados selectores calificados `[data-bs-theme="dark"]` con `!important` para `.ts-wrapper`, `.ts-control`, `.ts-dropdown`, `.ts-dropdown .option`, headers y campos de texto (`.ts-control input`), erradicando fondos blancos `#fff` y textos oscuros `#343a40` del CDN de TomSelect.
+  - Anulado `background-image` en `.ts-wrapper.form-select` para evitar duplicidad de caret indicator de Bootstrap y TomSelect.
+  - Blindaje con `!important` para elementos nativos `<select>`, `.form-select` y sus `<option>` en modo oscuro.
+- **Sincronización de Caché Estática en Producción Docker**:
+  - Ejecutado `collectstatic` en contenedor `web` y local (generando `style.f57013f5c2b3.css` con cache buster `?v=3.2`).
+  - Reiniciado el contenedor `web` para invalidar el manifest de `ManifestStaticFilesStorage` en la memoria del proceso Daphne.
+
+Why:
+- Resolver el defecto visual donde en `/biblioteca/crear/` el desplegable de "Terapia (existente)" aparecía con fondo blanco y texto en negro en Tema Oscuro tras reiniciar Hubs&Clicks.
+
+Impact:
+- Contraste semántico perfecto (WCAG AA) en todos los desplegables de la biblioteca y plataforma en tema oscuro, garantizando consistencia visual y robustez en la precedencia de estilos.
 
 ## 2026-11-19: Chat Document Presentation, Clean Filenames, Custom PDF Badges & Sanitizer Link Fix
 
