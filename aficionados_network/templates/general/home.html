@@ -3,74 +3,7 @@
 {% load event_tags %}
 
 {% block extra_css %}
-<style>
-.nav-pills-hubs {
-    background-color: var(--hubs-light);
-    border: 1px solid var(--hubs-border);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-.nav-pills-hubs .nav-link {
-    color: var(--hubs-dark);
-    background: transparent;
-    transition: all 0.2s ease-in-out;
-    border: 1px solid transparent;
-}
-.nav-pills-hubs .nav-link:hover {
-    background-color: var(--hubs-primary-subtle);
-    color: var(--hubs-primary);
-}
-.nav-pills-hubs .nav-link.active {
-    background: linear-gradient(135deg, var(--hubs-primary) 0%, var(--hubs-primary-hover) 100%) !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(11, 89, 97, 0.25);
-}
-.nav-pills-hubs .nav-link.active .tab-counter-badge {
-    background-color: rgba(255, 255, 255, 0.3) !important;
-    color: #ffffff !important;
-}
-.nav-pills-hubs .nav-link.active i {
-    color: #ffffff !important;
-}
-
-.tab-counter-badge {
-    background-color: rgba(11, 89, 97, 0.12);
-    color: var(--hubs-primary);
-    font-weight: 700;
-    transition: all 0.2s ease;
-}
-
-/* Modo oscuro */
-[data-bs-theme="dark"] .nav-pills-hubs {
-    background-color: var(--bs-body-bg) !important;
-    border: 1.5px solid var(--hubs-primary) !important;
-    box-shadow: 0 4px 20px rgba(43, 161, 171, 0.12) !important;
-}
-
-[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) {
-    color: #ffffff !important;
-}
-
-[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) i {
-    color: #ffffff !important;
-}
-
-[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active):hover {
-    background-color: rgba(43, 161, 171, 0.15) !important;
-    color: var(--hubs-primary) !important;
-}
-
-[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active):hover i {
-    color: var(--hubs-primary) !important;
-}
-
-/* Badge no seleccionado en modo oscuro: fondo blanco y número en color */
-[data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) .tab-counter-badge {
-    background-color: #ffffff !important;
-    color: var(--hubs-primary) !important;
-    font-weight: 800 !important;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
-}
-</style>
+{# Las variables y estilos de .nav-pills-hubs se gestionan centralizadamente en style.css #}
 {% endblock extra_css %}
 
 {% block content %}
@@ -120,7 +53,7 @@
                         </h6>
                         
                         {# NIVEL DEL EVENTO #}
-                        <p class="extra-small mb-2 fs-xs fw-semibold {% if event.level == 'beginner' %}text-success{% elif event.level == 'intermediate' %}text-warning{% elif event.level == 'advanced' %}text-danger{% elif event.level == 'expert' %}text-dark{% else %}text-info{% endif %}">
+                        <p class="extra-small mb-2 fs-xs fw-semibold {% if event.level == 'beginner' %}text-success{% elif event.level == 'intermediate' %}text-warning{% elif event.level == 'advanced' %}text-danger{% elif event.level == 'expert' %}text-body-emphasis{% else %}text-info{% endif %}">
                             <i class="bi bi-reception-{% if event.level == 'beginner' %}1{% elif event.level == 'intermediate' %}2{% elif event.level == 'advanced' %}3{% elif event.level == 'expert' %}4{% else %}4{% endif %} me-1"></i>
                             {{ event.get_level_display }}
                         </p>

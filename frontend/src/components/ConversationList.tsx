@@ -44,7 +44,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         </button>
         <button 
           type="button"
-          className="btn btn-sm btn-outline-info flex-grow-1 d-flex flex-column align-items-center justify-content-center py-1 fw-bold text-dark"
+          className="btn btn-sm btn-outline-info flex-grow-1 d-flex flex-column align-items-center justify-content-center py-1 fw-bold"
           onClick={onExploreGroups}
           title="Explorar Grupos"
           style={{ fontSize: '0.75rem' }}
@@ -85,7 +85,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                     )}
                   </div>
                   {conv.last_message && (
-                    <div className={`conv-last-msg ${conv.unread_count && conv.unread_count > 0 ? 'fw-bold text-dark' : ''}`}>
+                    <div className={`conv-last-msg ${conv.unread_count && conv.unread_count > 0 ? 'fw-bold text-body' : ''}`}>
                       {conv.last_message.content}
                     </div>
                   )}

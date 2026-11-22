@@ -5,7 +5,7 @@
 {% block page_title %}
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h2 class="mb-0 text-dark-mode-white"><i class="bi bi-calendar-event me-2 text-hubs"></i>Explorar Eventos</h2>
+            <h2 class="mb-0"><i class="bi bi-calendar-event me-2 text-hubs"></i>Explorar Eventos</h2>
             <p class="text-muted small mb-0">Busca por nombre, nivel o terapia</p>
         </div>
         <a href="{% url 'posts:event_create' %}" class="btn btn-hubs shadow-sm">
@@ -19,26 +19,26 @@
     
     {# SECCIÓN: BARRA DE FILTROS #}
     <div class="card border-0 shadow-sm mb-5">
-        <div class="card-body bg-light rounded border-start border-hubs border-4">
+        <div class="card-body bg-body-tertiary rounded border-start border-hubs border-4">
             <form method="GET" action="{% url 'posts:event_list' %}" class="row g-2 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold text-muted dark-mode-text-dark">¿Qué buscas?</label>
+                    <label class="form-label small fw-bold text-body-secondary">¿Qué buscas?</label>
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-hubs"></i></span>
+                        <span class="input-group-text bg-body border-end-0"><i class="bi bi-search text-hubs"></i></span>
                         <input type="text" name="q" class="form-control border-start-0" placeholder="Título..." value="{{ current_q }}">
                     </div>
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label small fw-bold text-muted dark-mode-text-dark">Ciudad</label>
+                    <label class="form-label small fw-bold text-body-secondary">Ciudad</label>
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-geo-alt text-hubs"></i></span>
+                        <span class="input-group-text bg-body border-end-0"><i class="bi bi-geo-alt text-hubs"></i></span>
                         <input type="text" name="city" class="form-control border-start-0" placeholder="Ej: Madrid..." value="{{ current_city }}">
                     </div>
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label small fw-bold text-muted dark-mode-text-dark">Categoría</label>
+                    <label class="form-label small fw-bold text-body-secondary">Categoría</label>
                     <select name="hobby" id="hobby-select" class="form-select form-select-sm">
                         <option value="all">Todas</option>
                         {% for hobby in hobbies %}
@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold text-muted dark-mode-text-dark">Nivel de la actividad</label>
+                    <label class="form-label small fw-bold text-body-secondary">Nivel de la actividad</label>
                     <select name="level" class="form-select form-select-sm">
                         <option value="any" {% if current_level == 'any' %}selected{% endif %}>Cualquier nivel</option>
                         <option value="all" {% if current_level == 'all' %}selected{% endif %}>Para todos</option>
@@ -72,7 +72,7 @@
                 <div class="col-12 mt-3">
                     <div class="form-check form-switch small">
                         <input class="form-check-input" type="checkbox" role="switch" id="myHobbiesSwitch" name="my_hobbies" value="true" {% if current_my_hobbies %}checked{% endif %} onchange="this.form.submit()">
-                        <label class="form-check-label text-muted fw-bold dark-mode-text-dark" for="myHobbiesSwitch">
+                        <label class="form-check-label text-body-secondary fw-bold" for="myHobbiesSwitch">
                             <i class="bi bi-star-fill text-warning me-1"></i>Mostrar solo mis terapias
                         </label>
                     </div>
@@ -130,7 +130,7 @@
                                     <i class="bi bi-reception-3"></i> Avanzado
                                 </span>
                             {% elif event.level == 'expert' %}
-                                <span class="badge bg-dark text-white border border-dark badge-level-text">
+                                <span class="badge bg-secondary-subtle text-body-emphasis border border-secondary-subtle badge-level-text">
                                     <i class="bi bi-reception-4"></i> Experto
                                 </span>
                             {% endif %}
@@ -150,7 +150,7 @@
                     </h5>
                     <p class="text-muted small mb-3">{{ event.plain_text_description|truncatechars:80 }}</p>
                     
-                    <div class="bg-light p-3 rounded mb-3 small border-start border-hubs border-3 dark-mode-text-dark">
+                    <div class="bg-body-tertiary p-3 rounded mb-3 small border-start border-hubs border-3">
                         {% if event.is_online and event.location %}
                             <div class="mb-1"><span class="badge bg-primary me-2"><i class="bi bi-globe me-1"></i>Híbrido</span><strong>{{ event.location }} y Online</strong></div>
                         {% elif event.is_online %}
@@ -214,35 +214,6 @@
 {% block extra_css %}
 <!-- Tom Select CSS for Searchable Dropdown -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<style>
-/* Ajustes para modo oscuro y visualización consistente */
-[data-bs-theme="dark"] .ts-control {
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
-    border-color: var(--bs-border-color);
-}
-[data-bs-theme="dark"] .ts-dropdown {
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
-    border-color: var(--bs-border-color);
-}
-[data-bs-theme="dark"] .ts-dropdown .option {
-    color: var(--bs-body-color);
-}
-[data-bs-theme="dark"] .ts-dropdown .active {
-    background-color: var(--bs-secondary-bg);
-    color: var(--bs-body-color);
-}
-.ts-control {
-    border-radius: 0.25rem;
-    min-height: 31px; /* Para igualar el tamaño form-select-sm */
-    padding-top: 4px;
-    padding-bottom: 4px;
-}
-.ts-dropdown {
-    z-index: 1055;
-}
-</style>
 {% endblock %}
 
 {% block extra_js %}

@@ -38,7 +38,7 @@
                     <ul class="dropdown-menu shadow-sm border-0 mt-1 rounded-3 min-w-200" aria-labelledby="directorioDropdown">
                         {% if user.is_authenticated %}
                         <li>
-                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'library' in request.resolver_match.app_name %}bg-light text-dark fw-bold{% endif %}" 
+                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'library' in request.resolver_match.app_name %}bg-body-secondary text-body fw-bold{% endif %}" 
                                href="{% url 'library:article_list' %}"
                                title="Artículos, casos clínicos y recursos de la comunidad">
                                 <i class="bi bi-book me-2 text-info"></i> Biblioteca
@@ -50,7 +50,7 @@
                         </li>
                         {% endif %}
                         <li>
-                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'posts' in request.resolver_match.app_name and 'event' in request.resolver_match.url_name %}bg-light text-dark fw-bold{% endif %}" 
+                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'posts' in request.resolver_match.app_name and 'event' in request.resolver_match.url_name %}bg-body-secondary text-body fw-bold{% endif %}" 
                                href="{% url 'posts:event_list' %}"
                                title="Explora y únete a eventos de la comunidad">
                                 <i class="bi bi-calendar3 me-2 text-warning"></i> Eventos
@@ -61,7 +61,7 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'profiles' in request.resolver_match.app_name %}bg-light text-dark fw-bold{% endif %}" 
+                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'profiles' in request.resolver_match.app_name %}bg-body-secondary text-body fw-bold{% endif %}" 
                                href="{% url 'profiles:profile_list' %}"
                                title="Encuentra a cualquier terapeuta de la comunidad">
                                 <i class="bi bi-people me-2 text-primary"></i> Profesionales
@@ -72,7 +72,7 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'marketplace' in request.resolver_match.app_name %}bg-light text-dark fw-bold{% endif %}" 
+                            <a class="dropdown-item d-flex align-items-center py-2 {% if 'marketplace' in request.resolver_match.app_name %}bg-body-secondary text-body fw-bold{% endif %}" 
                                href="{% url 'marketplace:listing_list' %}"
                                title="Compra, venta y alquiler de material o espacios">
                                 <i class="bi bi-shop me-2 text-success"></i> Mercadillo
@@ -94,14 +94,14 @@
                     <ul class="dropdown-menu shadow-sm border-0 mt-1 rounded-3 min-w-200" aria-labelledby="agendaDropdown">
                         <li>
                             <a href="{% url 'posts:my_participations' %}" 
-                               class="dropdown-item d-flex align-items-center py-2 {% if request.resolver_match.url_name == 'my_participations' %}bg-light text-dark fw-bold{% endif %}"
+                               class="dropdown-item d-flex align-items-center py-2 {% if request.resolver_match.url_name == 'my_participations' %}bg-body-secondary text-body fw-bold{% endif %}"
                                title="Gestiona tus encuentros y citas confirmadas">
                                 <i class="bi bi-bookmark-check-fill me-2 text-success"></i> Mis Citas
                             </a>
                         </li>
                         <li>
                             <a href="{% url 'posts:my_events' %}" 
-                               class="dropdown-item d-flex align-items-center py-2 {% if request.resolver_match.url_name == 'my_events' %}bg-light text-dark fw-bold{% endif %}"
+                               class="dropdown-item d-flex align-items-center py-2 {% if request.resolver_match.url_name == 'my_events' %}bg-body-secondary text-body fw-bold{% endif %}"
                                title="Administra tus propuestas y planes creados">
                                 <i class="bi bi-calendar-plus-fill me-2 text-primary"></i> Mis Planes
                             </a>
@@ -118,7 +118,7 @@
 
                 <li class="nav-item ms-xl-2">
                     <a href="{% url 'posts:post_create' %}" 
-                       class="nav-link px-3 d-flex align-items-center text-nowrap rounded-pill border border-hubs-subtle text-hubs {% if request.resolver_match.url_name == 'post_create' %}active fw-bold bg-light{% endif %}" 
+                       class="nav-link px-3 d-flex align-items-center text-nowrap rounded-pill border border-hubs-subtle text-hubs {% if request.resolver_match.url_name == 'post_create' %}active fw-bold bg-body-tertiary{% endif %}" 
                        title="Añadir publicaciones y descubrir la comunidad">
                         <i class="bi bi-plus-circle-fill me-1"></i> Publicación Rápida
                     </a>
@@ -154,7 +154,7 @@
 
                 <li class="nav-item px-2 d-flex align-items-center">
                     <button id="themeToggleBtn" class="btn btn-link nav-link p-0 border-0" aria-label="Cambiar tema">
-                        <i id="themeIcon" class="bi bi-moon-stars-fill text-dark fs-5"></i>
+                        <i id="themeIcon" class="bi bi-moon-stars-fill text-body fs-5"></i>
                     </button>
                 </li>
 
@@ -171,7 +171,7 @@
                         </span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0 overflow-hidden min-w-320 rounded-4">
-                        <li class="bg-light p-3 border-bottom d-flex justify-content-between align-items-center">
+                        <li class="bg-body-tertiary p-3 border-bottom d-flex justify-content-between align-items-center">
                             <span class="small fw-bold text-uppercase text-muted">Avisos Recientes</span>
                             <button hx-delete="{% url 'notifications:delete_all_notifications' %}" 
                                     hx-target="#dropdown-notifications-list" 
@@ -192,7 +192,7 @@
                                         </div>
                                         <div class="flex-grow-1 pe-4">
                                             <a href="{% url 'notifications:read_and_redirect' n.id %}" class="text-decoration-none stretched-link">
-                                                <p class="mb-0 small text-dark text-dark-mode-white"><span class="fw-bold">{{ n.sender.username }}</span> {{ n.text|default:n.get_notification_type_display }}</p>
+                                                <p class="mb-0 small text-body"><span class="fw-bold">{{ n.sender.username }}</span> {{ n.text|default:n.get_notification_type_display }}</p>
                                                 <small class="text-muted fs-xxs">{{ n.created_at|timesince }}</small>
                                             </a>
                                         </div>
@@ -210,7 +210,7 @@
                                 <div class="text-center py-4"><p class="small text-muted mb-0">Sin notificaciones</p></div>
                             {% endfor %}
                         </div>
-                        <li><a class="dropdown-item text-center py-2 small fw-bold text-primary bg-light position-relative z-3" href="{% url 'notifications:list' %}">Ver historial</a></li>
+                        <li><a class="dropdown-item text-center py-2 small fw-bold text-primary bg-body-tertiary position-relative z-3" href="{% url 'notifications:list' %}">Ver historial</a></li>
                     </ul>
                 </li>
                 {% endif %}

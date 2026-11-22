@@ -4,15 +4,15 @@
         <div class="{{ card_col_class|default:'col-12 col-md-6 col-lg-3' }}">
             <div class="card h-100 shadow-sm border-0 card-hubs rounded-4 overflow-hidden">
 
-                <div class="card-header bg-white py-2 border-bottom-0">
+                <div class="card-header bg-transparent py-2 border-bottom-0">
                     <div class="d-flex align-items-center flex-wrap gap-2">
                         {% if post.user.profile %}
-                            <a href="{% url 'profiles:profile' post.user.profile.id %}" class="text-decoration-none text-dark d-flex align-items-center">
+                            <a href="{% url 'profiles:profile' post.user.profile.id %}" class="text-decoration-none text-body d-flex align-items-center">
                                 {% if post.user.profile.profile_picture %}
                                     <img src="{{ post.user.profile.profile_picture.url }}" 
                                          class="rounded-circle me-2 avatar-xxs">
                                 {% else %}
-                                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center me-2 avatar-xxs">
+                                    <div class="rounded-circle bg-body-secondary d-inline-flex align-items-center justify-content-center me-2 avatar-xxs">
                                         <i class="bi bi-person text-muted small"></i>
                                     </div>
                                 {% endif %}
@@ -20,7 +20,7 @@
                                 <div class="d-flex flex-column">
                                     <span class="fw-bold extra-small lh-1">{{ post.user.username }}</span>
                                     {% if post.location %}
-                                        <small class="text-dark extra-small mt-1 fs-nano">
+                                        <small class="text-body-secondary extra-small mt-1 fs-nano">
                                             <i class="bi bi-geo-alt-fill text-danger opacity-75"></i> {{ post.location }}
                                         </small>
                                     {% endif %}
@@ -43,7 +43,7 @@
                         {% endif %}
 
                         <div class="ms-auto d-flex align-items-center gap-2">
-                            <small class="text-dark fs-xxs">
+                            <small class="text-body-secondary fs-xxs">
                                 {{ post.created_at|date:"d M" }}
                             </small>
 
@@ -94,25 +94,25 @@
                     {% endif %}
                 </div>
                 {% elif post.document %}
-                <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center border-bottom position-relative">
+                <div class="ratio ratio-4x3 bg-body-secondary d-flex align-items-center justify-content-center border-bottom position-relative">
                     <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
                         <i class="bi bi-file-earmark-pdf-fill text-danger mb-2 fs-3xl"></i>
-                        <span class="fw-bold text-dark small">Documento PDF</span>
+                        <span class="fw-bold text-body small">Documento PDF</span>
                         <span class="badge bg-danger-subtle text-danger extra-small mt-1">Artículo Extenso</span>
                     </a>
                 </div>
                 {% elif post.external_url %}
-                <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center border-bottom position-relative">
+                <div class="ratio ratio-4x3 bg-body-secondary d-flex align-items-center justify-content-center border-bottom position-relative">
                     <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-center p-4 w-100 h-100 d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0">
                         <i class="bi bi-link-45deg text-primary mb-2 fs-3xl"></i>
-                        <span class="fw-bold text-dark small">Enlace Externo</span>
+                        <span class="fw-bold text-body small">Enlace Externo</span>
                         <span class="badge bg-primary-subtle text-primary extra-small mt-1">Recurso de interés</span>
                     </a>
                 </div>
                 {% endif %}
 
                 <div class="card-body p-3 d-flex flex-column">
-                    <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-dark">
+                    <a href="{% url 'posts:post_detail' post.pk %}" class="text-decoration-none text-body">
                         <h6 class="fw-bold mb-1 fs-xs">{{ post.title|default:"" }}</h6>
                         <p class="small text-muted mb-2">{{ post.plain_text_caption|truncatechars:60 }}</p>
                     </a>
@@ -129,7 +129,7 @@
                             </span>
                         {% endif %}
                         {% if post.video and post.image %}
-                            <span class="badge bg-dark-subtle text-dark extra-small" title="Vídeo incluido">
+                            <span class="badge bg-dark-subtle text-body-emphasis extra-small" title="Vídeo incluido">
                                 <i class="bi bi-camera-video me-1"></i>Vídeo
                             </span>
                         {% endif %}

@@ -1,7 +1,8 @@
 import React, { useState, useRef, ChangeEvent, FormEvent } from 'react';
 import { Send, Smile, Paperclip, Mic, Trash } from 'lucide-react';
-import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
+import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 import useClickOutside from '../../hooks/useClickOutside';
+import { useHostTheme } from '../../hooks/useHostTheme';
 
 export interface MessageInputProps {
   inputValue: string;
@@ -30,6 +31,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   uploading,
   hasAttachment,
 }) => {
+  const hostTheme = useHostTheme();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -82,6 +84,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             onEmojiClick={handleEmojiClick}
             width={300}
             height={350}
+            theme={hostTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
             searchPlaceholder="Buscar emoji..."
             lazyLoadEmojis={true}
           />
@@ -131,7 +134,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              color: showEmojiPicker ? '#0d6efd' : '#6c757d',
+              color: showEmojiPicker ? 'var(--hubs-primary, #0b5961)' : 'var(--bs-secondary-color)',
               cursor: 'pointer',
               padding: '0 8px 0 0',
               display: 'flex',
@@ -148,7 +151,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              color: '#6c757d',
+              color: 'var(--bs-secondary-color)',
               cursor: 'pointer',
               padding: '0 8px 0 0',
               display: 'flex',

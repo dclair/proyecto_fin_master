@@ -144,10 +144,10 @@ const DocumentAttachment: React.FC<{ msg: ChatMessage }> = ({ msg }) => {
     <div
       className="document-attachment-card d-flex align-items-center justify-content-between gap-3 p-2 rounded-3 my-1"
       style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid rgba(0,0,0,0.12)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-        color: '#1e293b',
+        backgroundColor: 'var(--bs-card-bg)',
+        border: '1px solid var(--bs-border-color)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        color: 'var(--bs-body-color)',
         maxWidth: '340px',
         minWidth: '240px',
       }}
@@ -157,7 +157,7 @@ const DocumentAttachment: React.FC<{ msg: ChatMessage }> = ({ msg }) => {
         target="_blank"
         rel="noopener noreferrer"
         className="d-flex align-items-center gap-2 text-decoration-none flex-grow-1 overflow-hidden"
-        style={{ color: '#1e293b' }}
+        style={{ color: 'var(--bs-body-color)' }}
         title={`Abrir ${fileInfo.name}`}
       >
         <div
@@ -195,7 +195,7 @@ const DocumentAttachment: React.FC<{ msg: ChatMessage }> = ({ msg }) => {
         <div className="d-flex flex-column overflow-hidden text-start">
           <span
             className="fw-bold text-truncate"
-            style={{ fontSize: '0.88rem', lineHeight: '1.25', color: '#0f172a' }}
+            style={{ fontSize: '0.88rem', lineHeight: '1.25', color: 'var(--bs-body-color)' }}
             title={fileInfo.name}
           >
             {fileInfo.name}
@@ -216,8 +216,8 @@ const DocumentAttachment: React.FC<{ msg: ChatMessage }> = ({ msg }) => {
         style={{
           width: '32px',
           height: '32px',
-          backgroundColor: '#f8fafc',
-          border: '1px solid #e2e8f0',
+          backgroundColor: 'var(--bs-tertiary-bg)',
+          border: '1px solid var(--bs-border-color)',
           color: fileInfo.color,
         }}
         title={`Descargar ${fileInfo.name}`}

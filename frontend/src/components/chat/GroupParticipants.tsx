@@ -38,11 +38,12 @@ export const GroupParticipants: React.FC<GroupParticipantsProps> = ({
         right: '10px',
         width: '250px',
         zIndex: 1000,
-        border: '1px solid #ccc',
-        backgroundColor: 'white',
+        border: '1px solid var(--bs-border-color)',
+        backgroundColor: 'var(--bs-card-bg)',
+        color: 'var(--bs-body-color)',
       }}
     >
-      <div className="text-dark fw-bold mb-2" style={{ fontSize: '0.85rem' }}>
+      <div className="text-body fw-bold mb-2" style={{ fontSize: '0.85rem' }}>
         Participantes ({participants.length})
       </div>
       <input
@@ -59,7 +60,7 @@ export const GroupParticipants: React.FC<GroupParticipantsProps> = ({
         {filtered.map((p) => (
           <div
             key={p.id}
-            className="list-group-item py-1 px-2 d-flex align-items-center border-0"
+            className="list-group-item py-1 px-2 d-flex align-items-center border-0 bg-transparent text-body"
           >
             <img
               src={p.profile_picture_url || 'https://via.placeholder.com/24'}
@@ -68,7 +69,7 @@ export const GroupParticipants: React.FC<GroupParticipantsProps> = ({
               style={{ width: '24px', height: '24px', objectFit: 'cover' }}
             />
             <span
-              className="text-truncate text-dark flex-grow-1"
+              className="text-truncate text-body flex-grow-1"
               style={{ fontSize: '0.8rem' }}
             >
               {p.first_name || p.username}

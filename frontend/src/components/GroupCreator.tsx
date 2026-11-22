@@ -68,7 +68,7 @@ export const GroupCreator: React.FC<GroupCreatorProps> = ({ onBack, onGroupCreat
   };
 
   return (
-    <div className="group-creator d-flex flex-column h-100 bg-white">
+    <div className="group-creator d-flex flex-column h-100 bg-body">
       <div className="p-3 border-bottom d-flex align-items-center">
         <button
           type="button"
@@ -92,7 +92,7 @@ export const GroupCreator: React.FC<GroupCreatorProps> = ({ onBack, onGroupCreat
         )}
 
         <div className="mb-3">
-          <label className="form-label fw-bold text-muted" style={{ fontSize: '0.85rem' }}>
+          <label className="form-label fw-bold text-body-secondary" style={{ fontSize: '0.85rem' }}>
             Nombre del Grupo
           </label>
           <input
@@ -105,7 +105,7 @@ export const GroupCreator: React.FC<GroupCreatorProps> = ({ onBack, onGroupCreat
         </div>
 
         <div className="mb-2">
-          <label className="form-label fw-bold text-muted" style={{ fontSize: '0.85rem' }}>
+          <label className="form-label fw-bold text-body-secondary" style={{ fontSize: '0.85rem' }}>
             Añadir Participantes ({selectedUserIds.length} seleccionados)
           </label>
           <input
@@ -125,7 +125,7 @@ export const GroupCreator: React.FC<GroupCreatorProps> = ({ onBack, onGroupCreat
                 key={user.id}
                 type="button"
                 className={`list-group-item list-group-item-action d-flex align-items-center p-2 rounded mb-1 border-0 ${
-                  isSelected ? 'bg-light' : ''
+                  isSelected ? 'bg-primary-subtle' : 'bg-transparent text-body'
                 }`}
                 onClick={() => toggleUser(user.id)}
               >
@@ -136,7 +136,7 @@ export const GroupCreator: React.FC<GroupCreatorProps> = ({ onBack, onGroupCreat
                   style={{ width: '32px', height: '32px', objectFit: 'cover' }}
                 />
                 <div className="flex-grow-1 text-truncate text-start pe-2">
-                  <div className="fw-bold text-dark text-truncate" style={{ fontSize: '0.85rem' }}>
+                  <div className="fw-bold text-body text-truncate" style={{ fontSize: '0.85rem' }}>
                     {user.first_name || user.username} {user.last_name || ''}
                   </div>
                   <div className="text-muted text-truncate" style={{ fontSize: '0.75rem' }}>
@@ -150,11 +150,11 @@ export const GroupCreator: React.FC<GroupCreatorProps> = ({ onBack, onGroupCreat
         </div>
       </div>
 
-      <div className="p-3 border-top bg-light">
+      <div className="p-3 border-top bg-body-tertiary">
         <button
           type="button"
           className="btn btn-sm text-white w-100 fw-bold py-2"
-          style={{ backgroundColor: '#0b5961' }}
+          style={{ backgroundColor: 'var(--hubs-primary, #0b5961)' }}
           onClick={handleCreateGroup}
           disabled={loading}
         >

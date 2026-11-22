@@ -61,11 +61,12 @@ export const GroupAddMember: React.FC<GroupAddMemberProps> = ({
         right: '10px',
         width: '250px',
         zIndex: 1000,
-        border: '1px solid #ccc',
-        backgroundColor: 'white',
+        border: '1px solid var(--bs-border-color)',
+        backgroundColor: 'var(--bs-card-bg)',
+        color: 'var(--bs-body-color)',
       }}
     >
-      <div className="text-dark fw-bold mb-2" style={{ fontSize: '0.85rem' }}>
+      <div className="text-body fw-bold mb-2" style={{ fontSize: '0.85rem' }}>
         Añadir miembros
       </div>
       <input
@@ -86,7 +87,7 @@ export const GroupAddMember: React.FC<GroupAddMemberProps> = ({
               key={u.id}
               type="button"
               className={`list-group-item list-group-item-action py-1 px-2 d-flex align-items-center border-0 ${
-                isSelected ? 'bg-light' : ''
+                isSelected ? 'bg-primary-subtle' : 'bg-transparent text-body'
               }`}
               onClick={() => toggleSelect(u.id)}
             >
@@ -97,7 +98,7 @@ export const GroupAddMember: React.FC<GroupAddMemberProps> = ({
                 style={{ width: '28px', height: '28px', objectFit: 'cover' }}
               />
               <div
-                className="text-truncate text-dark"
+                className="text-truncate text-body"
                 style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
               >
                 <span style={{ fontSize: '0.8rem' }}>
@@ -120,7 +121,7 @@ export const GroupAddMember: React.FC<GroupAddMemberProps> = ({
       <button
         type="button"
         className="btn btn-sm text-white w-100"
-        style={{ backgroundColor: '#0b5961' }}
+        style={{ backgroundColor: 'var(--hubs-primary, #0b5961)' }}
         onClick={handleConfirm}
         disabled={adding || selectedUserIds.length === 0}
       >

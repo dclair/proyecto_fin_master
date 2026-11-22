@@ -65,7 +65,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({ selectedFi
 
   return (
     <div
-      className="p-2 border-top bg-light position-relative"
+      className="p-2 border-top bg-body-tertiary position-relative"
       style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
     >
       {isImage ? (
@@ -123,7 +123,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({ selectedFi
       )}
 
       <div className="text-truncate flex-grow-1" style={{ fontSize: '0.8rem' }}>
-        <div className="fw-bold text-dark">{selectedFile.name}</div>
+        <div className="fw-bold text-body">{selectedFile.name}</div>
         <div className="text-muted">
           {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
         </div>
@@ -131,9 +131,9 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({ selectedFi
 
       <button
         type="button"
-        className="btn btn-sm btn-light rounded-circle p-1"
+        className="btn btn-sm btn-outline-secondary rounded-circle p-1"
         onClick={onCancel}
-        style={{ border: '1px solid #ccc', flexShrink: 0 }}
+        style={{ flexShrink: 0 }}
         title="Cancelar adjunto"
       >
         <X size={14} className="text-danger" />

@@ -35,11 +35,11 @@ export const UserExplorer: React.FC<UserExplorerProps> = ({ onBack, onStartChat 
   });
 
   return (
-    <div className="d-flex flex-column h-100 bg-white">
-      <div className="p-3 border-bottom d-flex align-items-center bg-light">
+    <div className="d-flex flex-column h-100 bg-body">
+      <div className="p-3 border-bottom d-flex align-items-center bg-body-tertiary">
         <button
           type="button"
-          className="btn btn-sm btn-link text-dark p-0 me-3"
+          className="btn btn-sm btn-link text-body p-0 me-3"
           onClick={onBack}
         >
           <ArrowLeft size={20} />
@@ -67,7 +67,7 @@ export const UserExplorer: React.FC<UserExplorerProps> = ({ onBack, onStartChat 
             {filteredUsers.map((user) => (
               <div
                 key={user.id}
-                className="list-group-item list-group-item-action d-flex align-items-center border-0 rounded mb-1"
+                className="list-group-item list-group-item-action d-flex align-items-center border-0 rounded mb-1 bg-transparent"
                 style={{ cursor: 'pointer' }}
                 onClick={() => onStartChat(user.id)}
               >
@@ -78,7 +78,7 @@ export const UserExplorer: React.FC<UserExplorerProps> = ({ onBack, onStartChat 
                   style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                 />
                 <div className="flex-grow-1 text-truncate pe-2">
-                  <div className="fw-bold text-dark text-truncate">
+                  <div className="fw-bold text-body text-truncate">
                     {user.first_name || user.username} {user.last_name || ''}
                   </div>
                   <div className="text-muted text-truncate" style={{ fontSize: '0.8rem' }}>

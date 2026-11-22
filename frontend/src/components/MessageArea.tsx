@@ -310,7 +310,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
               )}
               <button
                 type="button"
-                className="btn btn-sm btn-link text-dark p-0"
+                className="btn btn-sm btn-link text-body p-0"
                 onClick={() => setShowAddMember((prev) => !prev)}
                 title="Añadir participante"
               >

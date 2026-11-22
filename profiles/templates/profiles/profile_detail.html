@@ -60,7 +60,7 @@
                 </div>
             </div>
 
-            <div class="bg-light p-3 rounded mb-4 shadow-sm">
+            <div class="bg-body-secondary p-3 rounded mb-4 shadow-sm">
                 {% if user_profile.user.get_full_name %}
                     <div class="mb-2">
                         <span class="fw-bold me-2">Nombre:</span>
@@ -127,8 +127,8 @@
                                         alt="{{ post.title }}">
                                 </a>
                                 
-                                <div class="p-3 bg-white">
-                                    <h6 class="fw-bold mb-1 text-dark text-truncate-custom" title="{{ post.title }}">
+                                <div class="p-3 bg-body">
+                                    <h6 class="fw-bold mb-1 text-body text-truncate-custom" title="{{ post.title }}">
                                         {{ post.title|default:"Sin título" }}
                                     </h6>
                                     
@@ -164,8 +164,8 @@
 </div>
 
 <style>
-    .nav-tabs .nav-link { color: #8e8e8e; font-size: 0.8rem; letter-spacing: 1px; }
-    .nav-tabs .nav-link.active { color: #000; border-top: 1.5px solid #000 !important; border-radius: 0; }
+    .nav-tabs .nav-link { color: var(--bs-secondary-color); font-size: 0.8rem; letter-spacing: 1px; }
+    .nav-tabs .nav-link.active { color: var(--bs-heading-color); border-top: 1.5px solid var(--bs-heading-color) !important; border-radius: 0; }
     .card:hover img { filter: brightness(0.8); transition: 0.3s; }
 </style>
 {% endblock content %}

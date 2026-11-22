@@ -30,11 +30,12 @@ export const GroupPendingRequests: React.FC<GroupPendingRequestsProps> = ({
         right: '10px',
         width: '250px',
         zIndex: 1000,
-        border: '1px solid #ccc',
-        backgroundColor: 'white',
+        border: '1px solid var(--bs-border-color)',
+        backgroundColor: 'var(--bs-card-bg)',
+        color: 'var(--bs-body-color)',
       }}
     >
-      <div className="text-dark fw-bold mb-2" style={{ fontSize: '0.85rem' }}>
+      <div className="text-body fw-bold mb-2" style={{ fontSize: '0.85rem' }}>
         Solicitudes Pendientes
       </div>
       <div
@@ -44,7 +45,7 @@ export const GroupPendingRequests: React.FC<GroupPendingRequestsProps> = ({
         {requests.map((r) => (
           <div
             key={r.id}
-            className="list-group-item py-2 px-2 d-flex flex-column border-bottom"
+            className="list-group-item py-2 px-2 d-flex flex-column border-bottom bg-transparent text-body"
           >
             <div className="d-flex align-items-center mb-1">
               <img
@@ -54,7 +55,7 @@ export const GroupPendingRequests: React.FC<GroupPendingRequestsProps> = ({
                 style={{ width: '20px', height: '20px', objectFit: 'cover' }}
               />
               <span
-                className="text-truncate text-dark fw-bold"
+                className="text-truncate text-body fw-bold"
                 style={{ fontSize: '0.8rem' }}
               >
                 {r.user.first_name || r.user.username}

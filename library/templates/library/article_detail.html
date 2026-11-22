@@ -15,15 +15,15 @@
                 </ol>
             </nav>
 
-            <h1 class="fw-bold mb-3 text-dark-mode-white">{{ article.title }}</h1>
+            <h1 class="fw-bold mb-3">{{ article.title }}</h1>
             
             <div class="d-flex align-items-center mb-4 text-muted flex-wrap">
                 <img src="{{ article.author.profile.profile_picture_url|default:'' }}" class="rounded-circle me-2 avatar-sm" onerror="this.src='{% static 'img/default_profile.png' %}'">
                 <span>Por 
                 {% if article.author.profile %}
-                    <a href="{% url 'profiles:profile' article.author.profile.pk %}" class="fw-bold text-decoration-none text-dark">{{ article.author.username }}</a>
+                    <a href="{% url 'profiles:profile' article.author.profile.pk %}" class="fw-bold text-decoration-none text-body">{{ article.author.username }}</a>
                 {% else %}
-                    <span class="fw-bold text-dark">{{ article.author.username }}</span>
+                    <span class="fw-bold text-body">{{ article.author.username }}</span>
                 {% endif %}
                 </span>
                 <span class="mx-2">&bull;</span>
@@ -48,7 +48,7 @@
 
             <!-- Media Attachments -->
             {% if article.attached_video or article.external_video_url or article.attached_document or article.external_document_url %}
-            <div class="card border-0 shadow-sm mb-5 bg-light">
+            <div class="card border-0 shadow-sm mb-5 bg-body-tertiary">
                 <div class="card-body">
                     <h5 class="fw-bold mb-3"><i class="bi bi-paperclip me-2"></i>Recursos Adjuntos</h5>
                     <div class="row g-3">
@@ -117,7 +117,7 @@
                     <div class="d-flex mb-4">
                         <img src="{{ comment.author.profile.profile_picture_url|default:'' }}" onerror="this.src='{% static 'img/default_profile.png' %}'" class="rounded-circle me-3 avatar-sm">
                         <div>
-                            <div class="bg-light p-3 rounded dark-mode-text-dark">
+                            <div class="bg-body-tertiary p-3 rounded">
                                 <strong class="d-block mb-1">{{ comment.author.username }}</strong>
                                 <p class="mb-0">{{ comment.content }}</p>
                             </div>

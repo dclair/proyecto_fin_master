@@ -10,13 +10,13 @@
                 {{ hobby.name|slice:":1"|upper }}
             </div>
             <div>
-                <h1 class="mb-0 fw-bold text-dark-mode-hubs">{{ hobby.name }}</h1>
+                <h1 class="mb-0 fw-bold">{{ hobby.name }}</h1>
                 <p class="text-muted mb-0">Comunidad de terapias</p>
             </div>
         </div>
 
         {# 1. CONTADOR Y SISTEMA DE SEGUIMIENTO (HTMX) #}
-        <div id="hobby-status-wrapper" class="d-flex align-items-center gap-3 bg-light p-2 px-3 rounded-pill border">
+        <div id="hobby-status-wrapper" class="d-flex align-items-center gap-3 bg-body-secondary p-2 px-3 rounded-pill border">
             <div class="text-center border-end pe-3">
                 <h5 class="fw-bold mb-0 text-hubs">{{ member_count }}</h5>
                 <small class="text-muted text-uppercase fs-micro ls-1">Miembros</small>
@@ -64,7 +64,7 @@
                                 {% elif event.level == 'advanced' %}
                                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle extra-small fs-nano">Avanzado</span>
                                 {% elif event.level == 'expert' %}
-                                    <span class="badge bg-dark text-white border border-dark extra-small">Experto</span>
+                                    <span class="badge bg-secondary-subtle text-body-emphasis border border-secondary-subtle extra-small">Experto</span>
                                 {% endif %}
                             </div>
 
@@ -78,17 +78,17 @@
                             </div>
                         </div>
 
-                        <h5 class="card-title fw-bold text-dark text-dark-mode-white">{{ event.title }}</h5>
+                        <h5 class="card-title fw-bold text-body">{{ event.title }}</h5>
                         
-                        <div class="bg-light p-2 rounded mb-3 small border-start border-hubs border-3">
+                        <div class="bg-body-tertiary p-2 rounded mb-3 small border-start border-hubs border-3">
                             {% if event.is_online and event.location %}
-                                <div class="mb-1"><span class="badge bg-primary me-2"><i class="bi bi-globe me-1"></i>Híbrido</span><strong class="text-truncate d-inline-block align-bottom dark-mode-text-dark max-w-120">{{ event.location }}</strong></div>
+                                <div class="mb-1"><span class="badge bg-primary me-2"><i class="bi bi-globe me-1"></i>Híbrido</span><strong class="text-truncate d-inline-block align-bottom max-w-120">{{ event.location }}</strong></div>
                             {% elif event.is_online %}
-                                <div class="mb-1"><span class="badge bg-info text-dark me-2"><i class="bi bi-laptop me-1"></i>Online</span><strong class="dark-mode-text-dark">Directo</strong></div>
+                                <div class="mb-1"><span class="badge bg-info text-dark me-2"><i class="bi bi-laptop me-1"></i>Online</span><strong>Directo</strong></div>
                             {% else %}
-                                <div class="mb-1"><span class="badge bg-secondary me-2"><i class="bi bi-geo-alt-fill me-1"></i>Presencial</span><strong class="text-truncate d-inline-block align-bottom dark-mode-text-dark max-w-120">{{ event.location }}</strong></div>
+                                <div class="mb-1"><span class="badge bg-secondary me-2"><i class="bi bi-geo-alt-fill me-1"></i>Presencial</span><strong class="text-truncate d-inline-block align-bottom max-w-120">{{ event.location }}</strong></div>
                             {% endif %}
-                            <div class="mt-2 text-muted dark-mode-text-dark"><i class="bi bi-calendar-event me-1"></i>{{ event.event_date|date:"d M, Y" }}</div>
+                            <div class="mt-2 text-muted"><i class="bi bi-calendar-event me-1"></i>{{ event.event_date|date:"d M, Y" }}</div>
                         </div>
                         <a href="{% url 'posts:event_detail' event.id %}" class="btn btn-sm btn-hubs w-100 rounded-pill">Ver detalles</a>
                     </div>
@@ -125,18 +125,18 @@
                                 <i class="bi bi-play-btn-fill text-danger display-3"></i>
                             </div>
                         {% else %}
-                            <div class="bg-light d-flex align-items-center justify-content-center h-180">
+                            <div class="bg-body-secondary d-flex align-items-center justify-content-center h-180">
                                 <i class="bi bi-image text-muted display-3"></i>
                             </div>
                         {% endif %}
                     </a>
 
                     <div class="card-body p-3">
-                        <h6 class="fw-bold mb-1 text-dark text-dark-mode-white text-truncate">{{ post.title|default:"Sin título" }}</h6>
+                        <h6 class="fw-bold mb-1 text-body text-truncate">{{ post.title|default:"Sin título" }}</h6>
                         <p class="small text-muted mb-2 card-description">{{ post.plain_text_caption|truncatechars:60 }}</p>
 
                         <div class="d-flex justify-content-between align-items-center mt-auto">
-                            <span class="badge bg-light text-dark fw-normal border">
+                            <span class="badge bg-body-secondary text-body fw-normal border">
                                 <i class="bi bi-heart-fill text-danger me-1"></i>{{ post.likes.count }}
                             </span>
                             <button hx-get="{% url 'posts:post_detail' post.pk %}?modal=1" 

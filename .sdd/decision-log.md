@@ -376,5 +376,40 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 - Transición a HTTPS en menos de 2 minutos una vez delegado el DNS.
 - Renovaciones automáticas transparentes sin caída de servicio.
 
+## D-024: Re-arquitectura Semántica del Tema Oscuro con Bootstrap 5.3 y React Microfrontend
+
+**Date:** 2026-11-22  
+**Decision:** Adoptar el Camino A (Saneamiento Quirúrgico y Migración Semántica a Bootstrap 5.3) en lugar de una re-arquitectura con design tokens propietarios, normalizando la jerarquía de elevación tonal en CSS, purgando clases anti-patrón de 35 templates Django y sincronizando de forma reactiva el microfrontend de React y editores WYSIWYG.
+
+**Why:**
+
+- La auditoría técnica identificó 87 ocurrencias de `text-dark` que causaban contraste ciego (1.15:1) en modo oscuro y 113 contenedores con `bg-white` o `bg-light` fijos que generaban parches blancos cegadores.
+- Existían parches destructivos como `.dark-mode-text-dark` en `style.css` que forzaban texto oscuro dentro de modo oscuro para compensar clases rígidas.
+- El microfrontend de React (`ChatApp.tsx`) tenía forzado `data-bs-theme="light"` en el portal, permaneciendo completamente desacoplado del selector de tema del host Django.
+- Crear un sistema de tokens propietario (Camino B) hubiera roto `crispy-forms` y modales nativos de Bootstrap, introduciendo sobreingeniería innecesaria.
+
+**Architecture & Implementation Details:**
+
+1. **Tokens Semánticos y Eliminación de Parches (`static/css/style.css`):**
+   - Configurada la jerarquía de elevación tonal para `[data-bs-theme="dark"]` (`--bs-body-bg: #121614`, `--bs-card-bg: #1b231e`, `--bs-tertiary-bg: #2a362f`, `--bs-body-color: #e4ebe6`, `--bs-border-color: #354239`) con contraste verificado WCAG AAA/AA.
+   - Purgada la clase `.dark-mode-text-dark` y corregida la inversión de `--hubs-dark`.
+   - Soporte semántico unificado para Crispy Forms y TomSelect (`.ts-control`, `.ts-dropdown`) sin requerir estilos locales.
+2. **Barrido Semántico en 35 Templates Django:**
+   - Erradicadas todas las clases de parche y bloques `<style>` locales con `#fff !important`.
+   - Migración de `bg-white` a `bg-transparent` en cabeceras de cards y a `bg-body` / `bg-body-secondary` en contenedores.
+   - Reemplazo de `bg-light` por `bg-body-tertiary` y `text-dark` por `text-body` / `text-body-emphasis`.
+3. **Sincronización React Microfrontend (`frontend/src/`):**
+   - Implementado el hook `useHostTheme` con triple canal reactivo: lectura DOM/localStorage, escucha del CustomEvent `themeChanged` emitido por `theme-toggle.js` y `MutationObserver` defensivo sobre `document.documentElement[data-bs-theme]`.
+   - `ChatApp.css` y subcomponentes adaptados a variables nativas de Bootstrap 5.3 y soporte dinámico en `EmojiPicker`.
+4. **Editores TinyMCE Dinámicos:**
+   - Inyección reactiva de `skin: oxide-dark` y `content_css: dark` ante conmutación de tema en vivo.
+
+**Implications:**
+
+- 100% de cumplimiento con WCAG AA (> 4.5:1) en modo oscuro y claro.
+- Código limpio sin duplicación de CSS ni especificidades forzadas.
+- Sincronización instantánea en tiempo real entre Django y el microfrontend de React sin recargar la página.
+
+
 
 

@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0 text-dark-mode-hubs"><i class="bi bi-bell me-2"></i>Tus Notificaciones</h2>
+                <h2 class="mb-0"><i class="bi bi-bell me-2 text-hubs"></i>Tus Notificaciones</h2>
                 {% if notifications %}
                 <button hx-delete="{% url 'notifications:delete_all_notifications' %}" 
                         hx-target="#historial-notificaciones" 
@@ -20,7 +20,7 @@
             <div class="list-group shadow-sm" id="historial-notificaciones">
                 {% for n in notifications %}
                     <div class="list-group-item list-group-item-action p-3 position-relative
-                       {% if not n.is_read %}bg-light border-start border-primary border-4{% endif %}
+                       {% if not n.is_read %}bg-body-tertiary border-start border-primary border-4{% endif %}
                        {% if n.notification_type == 'event' and n.event.is_canceled %}bg-danger-subtle{% endif %}">
                         
                         <div class="d-flex w-100 justify-content-between align-items-center">
@@ -58,10 +58,10 @@
                                 </div>
 
                                 <div>
-                                    <strong class="text-dark text-dark-mode-white">@{{ n.sender.username }}</strong>
+                                    <strong class="text-body">@{{ n.sender.username }}</strong>
                                     
-                                    <span class="text-dark text-dark-mode-white">
-                                        <a href="{% url 'notifications:notification_redirect' n.pk %}" class="text-decoration-none text-dark text-dark-mode-white stretched-link">
+                                    <span class="text-body">
+                                        <a href="{% url 'notifications:notification_redirect' n.pk %}" class="text-decoration-none text-body stretched-link">
                                             {% if n.message %}
                                                 {{ n.message }}
                                             {% elif n.notification_type == 'follow' %}

@@ -10,7 +10,7 @@
                      class="card-img-top object-fit-cover h-180 {% if event.is_canceled %}grayscale-filter{% endif %}" 
                      alt="{{ event.title }}">
             {% else %}
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center h-180">
+                <div class="card-img-top bg-body-secondary d-flex align-items-center justify-content-center h-180">
                     <i class="bi bi-calendar-check text-muted display-4"></i>
                 </div>
             {% endif %}
@@ -56,7 +56,7 @@
         </div>
 
         <h6 class="card-title fw-bold mb-2">
-            <a href="{% url 'posts:event_detail' event.id %}" class="text-decoration-none text-dark">
+            <a href="{% url 'posts:event_detail' event.id %}" class="text-decoration-none text-body">
                 {{ event.title }}
             </a>
         </h6>

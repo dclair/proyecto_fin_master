@@ -2,16 +2,26 @@
    1. VARIABLES GLOBALES Y RESET (BOOTSTRAP 5.3 MAPPING)
    Tema: Medicina Natural - Oliva & Bambú Minimalista
    ============================================================ */
-:root {
+:root, [data-bs-theme="light"] {
+    /* --- Bootstrap 5.3 Semantic Elevation Hierarchy (Light) --- */
+    --bs-body-bg: #f8faf9;
+    --bs-body-color: #212529;
+    --bs-card-bg: #ffffff;
+    --bs-secondary-bg: #e8efe9;
+    --bs-tertiary-bg: #f1f5f2;
+    --bs-border-color: #d8e2da;
+    --bs-secondary-color: #5c6e63;
+    --bs-heading-color: #1a221d;
+    --bs-link-color: #2d6a4f;
+    --bs-link-hover-color: #1a392b;
+    --bs-link-color-rgb: 45, 106, 79;
+
     /* --- Bootstrap 5.3 Native Theme Mapping --- */
     --bs-primary: #234938;
     --bs-primary-rgb: 35, 73, 56;
     --bs-primary-text-emphasis: #142d22;
     --bs-primary-bg-subtle: #edf4ef;
     --bs-primary-border-subtle: #c5ded0;
-    --bs-link-color: #2b5643;
-    --bs-link-hover-color: #1a392b;
-    --bs-link-color-rgb: 43, 86, 67;
 
     /* Curvaturas orgánicas y modernas */
     --bs-border-radius: 14px;
@@ -27,10 +37,10 @@
     --hubs-primary-subtle: var(--bs-primary-bg-subtle);
     --hubs-accent: #4e7c59;
     --hubs-accent-rgb: 78, 124, 89;
-    --hubs-dark: #202722;
-    --hubs-text-muted: #616e65;
-    --hubs-light: #f8f9f6; 
-    --hubs-border: #e3eae5;
+    --hubs-dark: #1b231e;
+    --hubs-text-muted: var(--bs-secondary-color);
+    --hubs-light: var(--bs-body-bg); 
+    --hubs-border: var(--bs-border-color);
     --hubs-success: #2d6a4f;
     --hubs-danger: #c94a4a;
     --hubs-radius: 14px;
@@ -38,14 +48,14 @@
     --hubs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
     --navbar-height: 76px;
     --hubs-text-shadow-depth: none; 
-    --hubs-card-bg: #ffffff;
+    --hubs-card-bg: var(--bs-card-bg);
 }
 
 body {
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: -0.01em;
-    color: var(--hubs-dark);
-    background-color: var(--hubs-light);
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -59,29 +69,35 @@ body {
 }
 
 [data-bs-theme="dark"] {
+    /* --- Bootstrap 5.3 Semantic Elevation Hierarchy (Dark - Oliva & Bambú Minimalista) --- */
+    --bs-body-bg: #121614;           /* Fondo base profundo y mate */
+    --bs-body-color: #e4ebe6;        /* Texto principal con alto contraste (WCAG AAA) */
+    --bs-card-bg: #1b231e;           /* Superficies elevadas (Cards, Modals) */
+    --bs-secondary-bg: #222b25;      /* Superficies secundarias */
+    --bs-tertiary-bg: #2a362f;       /* Superficies terciarias (burbujas, inputs deshabilitados) */
+    --bs-border-color: #354239;      /* Bordes nítidos sin ser estridentes */
+    --bs-secondary-color: #a3b5aa;   /* Texto secundario (WCAG AA > 4.5:1) */
+    --bs-heading-color: #f1f5f2;     /* Encabezados claros e impactantes */
+    --bs-link-color: #6eb98f;        /* Enlaces legibles en fondo oscuro */
+    --bs-link-hover-color: #92d1ad;
+    --bs-link-color-rgb: 110, 185, 143;
+
     /* Bootstrap 5.3 Dark Mode Overrides (Ciprés y Bambú Luminoso) */
     --bs-primary: #52a378;
     --bs-primary-rgb: 82, 163, 120;
     --bs-primary-text-emphasis: #a3e2bf;
     --bs-primary-bg-subtle: rgba(82, 163, 120, 0.16);
     --bs-primary-border-subtle: rgba(82, 163, 120, 0.3);
-    --bs-link-color: #5ebd88;
-    --bs-link-hover-color: #82d8a6;
-    --bs-link-color-rgb: 94, 189, 136;
 
-    --bs-body-bg: #0f1813;
-    --bs-body-color: #e1eae4;
-    --bs-card-bg: #15221b;
-    --bs-border-color: rgba(255, 255, 255, 0.08);
-
-    /* Hubs Aliases in Dark Mode */
+    /* Hubs Aliases in Dark Mode (Desacoplados de clases de texto destructivas) */
     --hubs-primary: var(--bs-primary);
     --hubs-primary-hover: var(--bs-link-hover-color);
     --hubs-primary-subtle: var(--bs-primary-bg-subtle);
-    --hubs-dark: #e1eae4;
-    --hubs-border: rgba(255, 255, 255, 0.08);
-    --hubs-light: #0f1813;
-    --hubs-card-bg: #15221b;
+    --hubs-dark: #1b231e;
+    --hubs-border: var(--bs-border-color);
+    --hubs-light: var(--bs-body-bg);
+    --hubs-card-bg: var(--bs-card-bg);
+    --hubs-text-muted: var(--bs-secondary-color);
 }
 
 [data-bs-theme="dark"] body {
@@ -97,7 +113,7 @@ main, .container {
    2. TIPOGRAFÍA Y BOTONES (MEDICINA NATURAL & BIENESTAR)
    ============================================================ */
 h1, h2, h3, h4, h5, h6 {
-    color: var(--hubs-primary);
+    color: var(--bs-heading-color);
     font-weight: 700;
     letter-spacing: -0.025em;
 }
@@ -217,7 +233,7 @@ h1, h2 { text-shadow: none; }
 .card-hubs,
 .card-click,
 .sidebar-group {
-    background-color: var(--hubs-card-bg);
+    background-color: var(--bs-card-bg);
 }
 
 [data-bs-theme="dark"] .profile-post-card,
@@ -234,7 +250,7 @@ h1, h2 { text-shadow: none; }
 }
 
 .profile-post-card, .post-card {
-    border: 1px solid var(--hubs-border);
+    border: 1px solid var(--bs-border-color);
     border-radius: var(--hubs-radius);
     transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.25s ease, border-color 0.25s ease;
     overflow: hidden;
@@ -255,12 +271,8 @@ h1, h2 { text-shadow: none; }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--hubs-dark);
-    font-weight: 700;
-}
-
-[data-bs-theme="dark"] .text-truncate-custom {
     color: var(--bs-body-color);
+    font-weight: 700;
 }
 
 /* --- SIDEBAR BADGES & ANIMATIONS --- */
@@ -372,7 +384,7 @@ h1, h2 { text-shadow: none; }
 }
 
 [data-bs-theme="dark"] .text-muted {
-    color: #adb5bd;
+    color: var(--bs-secondary-color);
 }
 
 [data-bs-theme="dark"] .text-dark-mode-white {
@@ -383,16 +395,17 @@ h1, h2 { text-shadow: none; }
     color: var(--hubs-primary);
 }
 
-[data-bs-theme="dark"] .dark-mode-text-dark {
-    color: #212529;
+/* Purgadas clases anti-patrón que forzaban texto oscuro en dark mode */
+.dark-mode-text-dark {
+    color: inherit;
 }
 
-[data-bs-theme="dark"] .dark-mode-text-navbar {
-    color: #2b3035; /* Gris del navbar en tema oscuro */
+.dark-mode-text-navbar {
+    color: inherit;
 }
 
 [data-bs-theme="dark"] .dark-mode-border {
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--bs-border-color);
 }
 
 /* ============================================================
@@ -680,7 +693,7 @@ footer a:active {
 .hobby-name {
     font-size: 0.9rem;
     font-weight: 600;
-    color: var(--hubs-dark);
+    color: var(--bs-body-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -858,7 +871,7 @@ footer a:active {
         right: 0;
         bottom: 8px; /* Deja libre el espacio del scrollbar para poder tocarlo */
         width: 45px;
-        background: linear-gradient(to right, rgba(238, 244, 245, 0) 0%, var(--hubs-light) 100%);
+        background: linear-gradient(to right, rgba(238, 244, 245, 0) 0%, var(--bs-body-bg) 100%);
         pointer-events: none; /* Permite hacer clic a través del gradiente */
         z-index: 2;
         transition: opacity 0.3s ease;
@@ -876,21 +889,21 @@ footer a:active {
         scroll-snap-align: start;
         gap: 0.6rem;
         padding: 0.5rem 1rem;
-        background-color: #ffffff;
-        border: 1px solid var(--hubs-border);
+        background-color: var(--bs-card-bg);
+        border: 1px solid var(--bs-border-color);
         border-radius: 50rem;
         box-shadow: var(--hubs-shadow);
         text-decoration: none;
-        color: var(--hubs-dark);
+        color: var(--bs-body-color);
         white-space: nowrap;
         transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         font-size: 0.95rem;
     }
 
     [data-bs-theme="dark"] .mobile-hobby-pill {
-        background-color: var(--bs-body-bg);
-        border-color: var(--hubs-border);
-        color: var(--hubs-light);
+        background-color: var(--bs-card-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
     }
 
     .mobile-hobby-pill:hover {
@@ -1268,45 +1281,109 @@ footer a:active {
 }
 
 /* ============================================================
-   FIX: FORMULARIOS EN MODO OSCURO
+   FORMULARIOS Y CRISPY FORMS (SEMANTIC TOKENS BOOTSTRAP 5.3)
    ============================================================ */
-[data-bs-theme="dark"] .form-control,
-[data-bs-theme="dark"] .form-select,
-[data-bs-theme="dark"] textarea.form-control,
-[data-bs-theme="dark"] input.form-control {
-    color: #ffffff;
-    background-color: var(--bs-dark);
-    border-color: rgba(255, 255, 255, 0.2);
+.form-control,
+.form-select {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
 }
 
-[data-bs-theme="dark"] .form-control:focus,
-[data-bs-theme="dark"] .form-select:focus,
-[data-bs-theme="dark"] textarea.form-control:focus,
-[data-bs-theme="dark"] input.form-control:focus {
-    color: #ffffff;
-    background-color: #2b3035;
-    border-color: var(--hubs-primary);
+.form-control:focus,
+.form-select:focus {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
-[data-bs-theme="dark"] .form-label,
-[data-bs-theme="dark"] label,
-[data-bs-theme="dark"] .col-form-label,
-[data-bs-theme="dark"] .form-text,
-[data-bs-theme="dark"] .text-muted.help-text,
-[data-bs-theme="dark"] span.helptext,
-[data-bs-theme="dark"] .help-block {
-    color: #ffffff;
+.form-label,
+.col-form-label,
+label {
+    color: var(--bs-heading-color);
 }
 
-[data-bs-theme="dark"] .form-control::placeholder,
-[data-bs-theme="dark"] textarea.form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+.form-text,
+.text-muted.help-text,
+span.helptext,
+.help-block {
+    color: var(--bs-secondary-color);
 }
 
-[data-bs-theme="dark"] .input-group-text {
-    color: #ffffff;
-    background-color: #343a40;
-    border-color: rgba(255, 255, 255, 0.2);
+.form-control::placeholder,
+textarea.form-control::placeholder {
+    color: var(--bs-secondary-color);
+    opacity: 0.7;
+}
+
+.input-group-text {
+    color: var(--bs-secondary-color);
+    background-color: var(--bs-tertiary-bg);
+    border-color: var(--bs-border-color);
+}
+
+/* ============================================================
+   TOMSELECT (SOPORTE SEMÁNTICO LIGHT & DARK)
+   ============================================================ */
+.ts-control {
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: var(--bs-border-radius-sm);
+    box-shadow: none;
+}
+
+.ts-control input {
+    color: var(--bs-body-color) !important;
+}
+
+.ts-control input::placeholder {
+    color: var(--bs-secondary-color) !important;
+}
+
+.ts-dropdown {
+    background-color: var(--bs-card-bg) !important;
+    color: var(--bs-body-color) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: var(--bs-border-radius-sm);
+    box-shadow: var(--hubs-shadow);
+    z-index: 1055;
+}
+
+.ts-dropdown .option {
+    color: var(--bs-body-color) !important;
+    background-color: transparent;
+    padding: 0.5rem 0.75rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ts-dropdown .option:hover,
+.ts-dropdown .option.active,
+.ts-dropdown .active {
+    background-color: var(--bs-tertiary-bg) !important;
+    color: var(--bs-heading-color) !important;
+}
+
+.ts-dropdown .option.selected {
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-heading-color) !important;
+}
+
+.ts-dropdown .optgroup-header {
+    color: var(--bs-secondary-color) !important;
+    background-color: var(--bs-card-bg) !important;
+}
+
+.ts-dropdown .no-results {
+    color: var(--bs-secondary-color) !important;
+}
+
+.ts-wrapper.multi .ts-control > div {
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-body-color) !important;
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: 4px;
 }
 
 /* ============================================================
@@ -1365,21 +1442,21 @@ footer a:active {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     background-color: rgba(255, 255, 255, 0.94) !important;
-    border-bottom: 1px solid var(--hubs-border);
+    border-bottom: 1px solid var(--bs-border-color);
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 [data-bs-theme="dark"] .navbar-hubs {
-    background-color: rgba(21, 34, 27, 0.92) !important;
-    border-bottom: 1px solid var(--hubs-border);
+    background-color: rgba(27, 35, 30, 0.95) !important;
+    border-bottom: 1px solid var(--bs-border-color);
 }
 
 /* ============================================================
    SECCIÓN DE EVENTOS RECOMENDADOS (HOME - MODO CLARO Y OSCURO)
    ============================================================ */
 .recommended-events-box {
-    background-color: var(--hubs-light);
-    border: 1px solid var(--hubs-border);
+    background-color: var(--bs-card-bg);
+    border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius);
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
@@ -1391,13 +1468,13 @@ footer a:active {
 }
 
 [data-bs-theme="dark"] .recommended-events-box {
-    background-color: var(--bs-body-bg);
-    border: 1px solid var(--hubs-border);
+    background-color: var(--bs-card-bg);
+    border: 1px solid var(--bs-border-color);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 [data-bs-theme="dark"] .recommended-events-box .recommended-events-subtitle {
-    color: #ffffff;
+    color: var(--bs-body-color);
 }
 
 [data-bs-theme="dark"] .badge-recommended-icon {
@@ -1413,8 +1490,8 @@ footer a:active {
    BARRA DE PESTAÑAS (HOME TABS - MODO CLARO Y OSCURO)
    ============================================================ */
 .nav-pills-hubs {
-    background-color: var(--hubs-light);
-    border: 1px solid var(--hubs-border);
+    background-color: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius-pill);
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
@@ -1432,31 +1509,31 @@ footer a:active {
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs {
-    background-color: var(--bs-body-bg);
-    border: 1px solid var(--hubs-border);
+    background-color: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) {
-    color: var(--hubs-light);
+    color: var(--bs-secondary-color);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) i {
-    color: var(--hubs-light);
+    color: var(--bs-secondary-color);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active):hover {
     background-color: rgba(var(--bs-primary-rgb), 0.18);
-    color: var(--hubs-primary);
+    color: var(--bs-primary);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active):hover i {
-    color: var(--hubs-primary);
+    color: var(--bs-primary);
 }
 
 [data-bs-theme="dark"] .nav-pills-hubs .nav-link:not(.active) .tab-counter-badge {
     background-color: rgba(var(--bs-primary-rgb), 0.25);
-    color: var(--hubs-light);
+    color: var(--bs-heading-color);
     font-weight: 800;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }

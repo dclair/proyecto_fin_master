@@ -29,7 +29,7 @@
         {% elif object.level == 'advanced' %}
             <span class="badge bg-danger-subtle text-danger border border-danger-subtle badge-level-text"><i class="bi bi-reception-3 me-1"></i>Avanzado</span>
         {% elif object.level == 'expert' %}
-            <span class="badge bg-dark text-white border border-dark badge-level-text"><i class="bi bi-reception-4 me-1"></i>Experto</span>
+            <span class="badge bg-secondary-subtle text-body-emphasis border border-secondary-subtle badge-level-text"><i class="bi bi-reception-4 me-1"></i>Experto</span>
         {% endif %}
     </div>
 
@@ -56,7 +56,7 @@
             </div>
         {% else %}
             {# INFO SI NO HAY MATCH NI MENTORÍA #}
-            <div class="p-3 bg-light rounded border-start border-3 border-secondary">
+            <div class="p-3 bg-body-tertiary rounded border-start border-3 border-secondary">
                 <div class="small text-muted">
                     <i class="bi bi-person-badge me-1"></i>
                     Tu nivel en {{ object.hobby.name }}: <strong>{{ user_level_label }}</strong>
@@ -138,7 +138,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="col-lg-4 bg-white border-start d-flex align-items-center">
+        <div class="col-lg-4 bg-body border-start d-flex align-items-center">
             <div class="p-4 w-100">
                 {% if event.hobby.slug == 'agora' %}
                     <span class="badge-agora-solid mb-2">
@@ -151,7 +151,7 @@
                     {{ event.title }}
                 </h2>
 
-                <div class="bg-light p-3 rounded-4 border-start border-4 border-hubs dark-mode-text-dark">
+                <div class="bg-body-tertiary p-3 rounded-4 border-start border-4 border-hubs">
                     <div class="mb-2 d-flex align-items-center">
                         <i class="bi bi-calendar3 me-2 text-hubs"></i>
                         <strong>{{ event.event_date|date:"l, d F" }}</strong>
@@ -222,10 +222,10 @@
             <div class="d-flex mb-3">
                 <img src="{% if comment.user.profile.profile_picture %}{{ comment.user.profile.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ comment.user.username }}&background=0b5961&color=fff{% endif %}"
                      class="rounded-circle border shadow-sm avatar-45">
-                <div class="ms-3 bg-white p-3 rounded-4 shadow-sm flex-grow-1 dark-mode-text-dark dark-mode-border">
+                <div class="ms-3 bg-body-tertiary p-3 rounded-4 shadow-sm flex-grow-1 border">
                     <div class="d-flex justify-content-between mb-1">
                         <strong class="text-hubs">@{{ comment.user.username }}</strong>
-                        <small class="text-muted dark-mode-text-dark">{{ comment.created_at|timesince }}</small>
+                        <small class="text-body-secondary">{{ comment.created_at|timesince }}</small>
                     </div>
                     <p class="mb-0">{{ comment.content|linebreaksbr }}</p>
                 </div>
@@ -250,7 +250,7 @@
             <div class="card border-0 shadow-sm p-4 card-hubs">
                 <h5 class="fw-bold text-hubs mb-2">
                     <i class="bi bi-people me-2"></i>Asistentes
-                    <span class="badge bg-light text-hubs border ms-1">
+                    <span class="badge bg-body-secondary text-hubs border ms-1">
                         {{ event.physical_participants_count }}/{{ event.max_participants }} presencial
                     </span>
                     {% if event.is_online %}
@@ -277,7 +277,7 @@
                         {% if attendance.user == event.organizer %}
                         <span class="badge-organizer" title="Organizador"><i class="bi bi-star-fill"></i></span>
                         {% elif attendance.attendance_type == 'online' %}
-                        <span class="position-absolute bottom-0 start-100 translate-middle p-1 bg-info border border-light rounded-circle" title="Asistencia Online">
+                        <span class="position-absolute bottom-0 start-100 translate-middle p-1 bg-info border border-secondary-subtle rounded-circle" title="Asistencia Online">
                             <span class="visually-hidden">Online</span>
                         </span>
                         {% endif %}
@@ -286,7 +286,7 @@
                 </div>
 
                 {% if event.is_past %}
-                    <div class="text-center p-3 bg-light rounded-4 text-muted border shadow-sm">
+                    <div class="text-center p-3 bg-body-tertiary rounded-4 text-muted border shadow-sm">
                         <i class="bi bi-calendar-check-fill me-2 text-secondary"></i>
                         <span class="fw-bold">Evento finalizado</span>
                     </div>

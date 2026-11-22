@@ -6,45 +6,6 @@
 
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<style>
-  .ts-wrapper.form-select {
-      padding: 0 !important;
-      border: none !important;
-  }
-  .ts-control {
-      border-radius: 0.5rem !important;
-      padding: 0.475rem 0.75rem !important;
-      border: 1px solid #dee2e6 !important;
-      font-size: 0.9rem !important;
-      background-color: #fff !important;
-      box-shadow: none !important;
-      min-height: calc(1.5em + 0.95rem + 2px) !important;
-      display: flex !important;
-      align-items: center !important;
-  }
-  .ts-control input {
-      font-size: 0.9rem !important;
-  }
-  .ts-dropdown {
-      border-radius: 0.5rem !important;
-      border: 1px solid #dee2e6 !important;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.12) !important;
-      font-size: 0.9rem !important;
-      z-index: 1060 !important;
-      margin-top: 4px !important;
-  }
-  .ts-dropdown .active {
-      background-color: #f1f5f9 !important;
-      color: #0f172a !important;
-      font-weight: 600 !important;
-  }
-  .ts-dropdown .option {
-      padding: 0.5rem 0.85rem !important;
-  }
-  .ts-dropdown .option:hover {
-      background-color: #f8fafc !important;
-  }
-</style>
 {% endblock %}
 
 {% block page_title %}
@@ -128,13 +89,13 @@
                                     <label class="form-label small fw-bold text-muted mb-0">
                                         <i class="bi bi-paperclip text-hubs me-1"></i> Recursos Multimedia y Adjuntos
                                     </label>
-                                    <span class="badge bg-light text-muted border extra-small">No excluyentes</span>
+                                    <span class="badge bg-body-secondary text-body-secondary border extra-small">No excluyentes</span>
                                 </div>
                                 <p class="text-muted extra-small mb-3">
                                     Puedes añadir una foto, vídeo, enlace de interés o documento PDF para complementar tu publicación.
                                 </p>
 
-                                <ul class="nav nav-pills nav-fill gap-2 p-1 bg-light rounded-4 mb-3" id="mediaPills" role="tablist">
+                                <ul class="nav nav-pills nav-fill gap-2 p-1 bg-body-secondary rounded-4 mb-3" id="mediaPills" role="tablist">
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link active rounded-pill py-2 small fw-semibold" id="pill-photo-tab" data-bs-toggle="tab" data-bs-target="#pane-photo" type="button" role="tab">
                                             <i class="bi bi-camera me-1"></i> Foto <span class="badge bg-success ms-1 d-none" id="badgePhoto">✓</span>
@@ -157,14 +118,14 @@
                                     </li>
                                 </ul>
 
-                                <div class="tab-content border rounded-4 p-3 bg-light-subtle shadow-sm" id="mediaPillsContent">
+                                <div class="tab-content border rounded-4 p-3 bg-body-tertiary shadow-sm" id="mediaPillsContent">
                                     <!-- 1. Foto -->
                                     <div class="tab-pane fade show active" id="pane-photo" role="tabpanel">
-                                        <label for="id_image" class="image-upload-container rounded-3 p-3 text-center upload-container-hubs bg-white border d-block w-100 mb-0" id="imageUploadContainer">
+                                        <label for="id_image" class="image-upload-container rounded-3 p-3 text-center upload-container-hubs bg-body border d-block w-100 mb-0" id="imageUploadContainer">
                                             <div id="uploadPlaceholder">
                                                 <i class="bi bi-camera fs-2 text-muted"></i>
                                                 <p class="small text-muted mb-0 d-block">Haz clic para añadir una foto de portada</p>
-                                                <span class="badge bg-light text-muted border extra-small mt-1">JPG, PNG (máx. 5MB)</span>
+                                                <span class="badge bg-body-secondary text-body-secondary border extra-small mt-1">JPG, PNG (máx. 5MB)</span>
                                             </div>
                                             <div id="imagePreview" class="d-none">
                                                 <img id="image-preview" src="#" alt="Previsualización" class="img-fluid rounded-3 shadow-sm mx-auto media-max-250">
@@ -179,11 +140,11 @@
 
                                     <!-- 2. Vídeo -->
                                     <div class="tab-pane fade" id="pane-video" role="tabpanel">
-                                        <label for="id_video" class="image-upload-container rounded-3 p-3 text-center upload-container-hubs bg-white border d-block w-100 mb-0" id="videoUploadContainer">
+                                        <label for="id_video" class="image-upload-container rounded-3 p-3 text-center upload-container-hubs bg-body border d-block w-100 mb-0" id="videoUploadContainer">
                                             <div id="videoUploadPlaceholder">
                                                 <i class="bi bi-camera-video fs-2 text-muted"></i>
                                                 <p class="small text-muted mb-0 d-block">Haz clic para subir un vídeo corto</p>
-                                                <span class="badge bg-light text-muted border extra-small mt-1">MP4, MOV, WEBM (máx. 20MB)</span>
+                                                <span class="badge bg-body-secondary text-body-secondary border extra-small mt-1">MP4, MOV, WEBM (máx. 20MB)</span>
                                             </div>
                                             <div id="videoPreview" class="d-none">
                                                 <video id="video-preview" controls class="img-fluid rounded-3 shadow-sm mx-auto media-max-250"></video>
@@ -198,16 +159,16 @@
 
                                     <!-- 3. Enlace Genérico -->
                                     <div class="tab-pane fade" id="pane-link" role="tabpanel">
-                                        <div class="bg-white border rounded-3 p-3">
+                                        <div class="bg-body border rounded-3 p-3">
                                             <div class="d-flex align-items-center mb-2">
                                                 <i class="bi bi-link-45deg fs-4 text-hubs me-2"></i>
                                                 <div>
-                                                    <h6 class="fw-bold mb-0 small text-dark">Enlace de interés o recurso externo</h6>
+                                                    <h6 class="fw-bold mb-0 small text-body">Enlace de interés o recurso externo</h6>
                                                     <small class="text-muted extra-small">Web, artículo, vídeo externo o fuente de información</small>
                                                 </div>
                                             </div>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-light"><i class="bi bi-globe"></i></span>
+                                                <span class="input-group-text bg-body-secondary"><i class="bi bi-globe"></i></span>
                                                 {{ form.external_url }}
                                             </div>
                                             <small class="text-muted d-block mt-2 extra-small">
@@ -218,14 +179,14 @@
 
                                     <!-- 4. Documento PDF -->
                                     <div class="tab-pane fade" id="pane-doc" role="tabpanel">
-                                        <label for="id_document" class="image-upload-container rounded-3 p-3 text-center upload-container-hubs bg-white border d-block w-100 mb-0" id="documentUploadContainer">
+                                        <label for="id_document" class="image-upload-container rounded-3 p-3 text-center upload-container-hubs bg-body border d-block w-100 mb-0" id="documentUploadContainer">
                                             <div id="documentUploadPlaceholder">
                                                 <i class="bi bi-file-earmark-pdf fs-2 text-danger"></i>
                                                 <p class="small text-muted mb-0 d-block">Haz clic para adjuntar documento PDF</p>
-                                                <span class="badge bg-light text-muted border extra-small mt-1">PDF para artículos extensos (máx. 10MB)</span>
+                                                <span class="badge bg-body-secondary text-body-secondary border extra-small mt-1">PDF para artículos extensos (máx. 10MB)</span>
                                             </div>
                                             <div id="documentPreview" class="d-none">
-                                                <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 text-start">
+                                                <div class="d-flex align-items-center justify-content-between p-3 bg-body-secondary rounded-3 text-start">
                                                     <div class="d-flex align-items-center gap-3 text-truncate">
                                                         <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
                                                         <div class="text-truncate">
@@ -259,7 +220,7 @@
                 </div>
 
                 <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden" id="trending-section">
-                    <div class="card-header bg-white border-0 pt-3 pb-0">
+                    <div class="card-header bg-transparent border-0 pt-3 pb-0">
                         <h5 class="fw-bold mb-0 small"><i class="bi bi-graph-up-arrow me-2 text-hubs"></i>Tendencias hoy</h5>
                     </div>
                     <div class="card-body p-3">
@@ -271,11 +232,11 @@
                                         <i class="bi bi-hash"></i>
                                     </div>
                                     <div>
-                                        <span class="d-block fw-bold small text-dark text-dark-mode-white">{{ cat.name }}</span>
+                                        <span class="d-block fw-bold small text-body">{{ cat.name }}</span>
                                         <small class="text-muted fs-xxs">{{ cat.num_posts }} posts</small>
                                     </div>
                                 </div>
-                                <a href="javascript:void(0);" class="btn btn-sm btn-light rounded-pill px-3 d-lg-none btn-trending-view fs-xxs">Ver</a>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-secondary-subtle rounded-pill px-3 d-lg-none btn-trending-view fs-xxs">Ver</a>
                             </li>
                             {% empty %}
                                 <li class="list-group-item border-0 px-0 py-2 text-muted small text-center">No hay tendencias aún.</li>
@@ -289,7 +250,7 @@
         <div class="col-lg-7 order-2">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold h5 mb-0"><i class="bi bi-globe2 me-2 text-hubs"></i>Descubre la Comunidad</h3>
-                <span class="badge bg-light text-muted dark-mode-text-dark border">Últimos Clicks</span>
+                <span class="badge bg-body-secondary text-body-secondary border">Últimos Clicks</span>
             </div>
             {% include '_includes/_post.html' with last_posts=global_posts card_col_class='col-12 col-sm-6 col-lg-4' %}
         </div>

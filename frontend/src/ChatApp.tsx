@@ -8,6 +8,7 @@ import GroupExplorer from './components/GroupExplorer';
 import UserExplorer from './components/UserExplorer';
 import chatService from './api/chat.service';
 import { Conversation } from './types/chat.types';
+import { useHostTheme } from './hooks/useHostTheme';
 import './ChatApp.css';
 
 /**
@@ -15,6 +16,7 @@ import './ChatApp.css';
  * Architecture: Clean & decoupled with centralized ChatService
  */
 export const ChatApp: React.FC = () => {
+  const hostTheme = useHostTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
@@ -232,7 +234,7 @@ export const ChatApp: React.FC = () => {
           <div
             className="d-flex align-items-center justify-content-center text-white shadow-sm"
             style={{
-              backgroundColor: '#0b5961',
+              backgroundColor: 'var(--hubs-primary, #0b5961)',
               width: '28px',
               height: '28px',
               borderRadius: '50%',
@@ -244,7 +246,7 @@ export const ChatApp: React.FC = () => {
           </div>
           {unreadCount > 0 && (
             <span
-              className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white"
+              className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light"
               style={{
                 fontSize: '0.55rem',
                 padding: '0.2rem 0.35rem',
@@ -263,7 +265,7 @@ export const ChatApp: React.FC = () => {
           <div
             ref={panelRef}
             className="chat-panel shadow-lg"
-            data-bs-theme="light"
+            data-bs-theme={hostTheme}
             style={{
               position: 'fixed',
               top: isMobile ? '10vh' : 'auto',
@@ -277,16 +279,17 @@ export const ChatApp: React.FC = () => {
               maxWidth: '100vw',
               maxHeight: '100vh',
               resize: 'both',
-              backgroundColor: 'white',
-              border: '1px solid #e5e5e5',
+              backgroundColor: 'var(--bs-card-bg)',
+              color: 'var(--bs-body-color)',
+              border: '1px solid var(--bs-border-color)',
               borderRadius: '12px',
               zIndex: 99999,
               overflow: 'hidden',
               transform: `translate(${position.x}px, ${position.y}px)`,
               transition: isDragging ? 'none' : 'box-shadow 0.2s',
               boxShadow: isDragging
-                ? '0 15px 30px rgba(0,0,0,0.2)'
-                : '0 10px 20px rgba(0,0,0,0.1)',
+                ? '0 15px 30px rgba(0,0,0,0.3)'
+                : '0 10px 20px rgba(0,0,0,0.15)',
             }}
           >
             <div
@@ -294,8 +297,8 @@ export const ChatApp: React.FC = () => {
               onMouseDown={handleDragStart}
               onTouchStart={handleDragStart}
               style={{
-                backgroundColor: '#0b5961',
-                color: 'white',
+                backgroundColor: 'var(--hubs-primary, #0b5961)',
+                color: '#ffffff',
                 padding: '12px 15px',
                 fontWeight: '600',
                 display: 'flex',

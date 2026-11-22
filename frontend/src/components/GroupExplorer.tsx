@@ -40,11 +40,11 @@ export const GroupExplorer: React.FC<GroupExplorerProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="d-flex flex-column h-100 bg-white">
-      <div className="p-3 bg-light border-bottom d-flex align-items-center">
+    <div className="d-flex flex-column h-100 bg-body">
+      <div className="p-3 bg-body-tertiary border-bottom d-flex align-items-center">
         <button
           type="button"
-          className="btn btn-link text-dark p-0 me-3"
+          className="btn btn-link text-body p-0 me-3"
           onClick={onBack}
         >
           <ArrowLeft size={20} />
@@ -61,14 +61,14 @@ export const GroupExplorer: React.FC<GroupExplorerProps> = ({ onBack }) => {
           groups.map((g) => (
             <div
               key={g.id}
-              className="d-flex align-items-center p-2 mb-2 border rounded shadow-sm"
+              className="d-flex align-items-center p-2 mb-2 border rounded shadow-sm bg-body"
             >
-              <div className="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center">
+              <div className="bg-body-secondary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center">
                 <Users size={20} className="text-secondary" />
               </div>
               <div className="flex-grow-1 text-truncate pe-2">
                 <div
-                  className="fw-bold text-dark text-truncate"
+                  className="fw-bold text-body text-truncate"
                   style={{ fontSize: '0.9rem' }}
                 >
                   {g.name || `Grupo #${g.id}`}
