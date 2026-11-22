@@ -3,6 +3,7 @@ import { ArrowLeft, Users, Trash2, UserCheck, UserPlus } from 'lucide-react';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useChatRecorder } from '../hooks/useChatRecorder';
 import chatService from '../api/chat.service';
+import { Conversation, ChatUser, JoinRequest } from '../types/chat.types';
 
 // Subcomponentes presentacionales (Dumb Components)
 import MessageTimeline from './chat/MessageTimeline';
@@ -12,12 +13,22 @@ import GroupParticipants from './chat/GroupParticipants';
 import GroupPendingRequests from './chat/GroupPendingRequests';
 import GroupAddMember from './chat/GroupAddMember';
 
+export interface MessageAreaProps {
+  conversationId: number;
+  conversationTitle: string;
+  isGroup: boolean;
+  activeConversation?: Conversation;
+  onBack: () => void;
+  onConversationDeleted?: () => void;
+  currentUsername: string;
+}
+
 /**
  * MessageArea (Smart Container Component)
  * Pattern: Container - Presentational (Gentleman Programming)
  * Responsibilities: State orchestration, API service calls, and component composition.
  */
-const MessageArea = ({
+export const MessageArea: React.FC<MessageAreaProps> = ({
   conversationId,
   conversationTitle,
   isGroup,
@@ -33,25 +44,25 @@ const MessageArea = ({
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Group Admin UI states
   const [showParticipants, setShowParticipants] = useState(false);
   const [showPending, setShowPending] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
-  const [pendingRequests, setPendingRequests] = useState([]);
-  const [usersToAdd, setUsersToAdd] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
+  const [usersToAdd, setUsersToAdd] = useState<ChatUser[]>([]);
   const [addingUsers, setAddingUsers] = useState(false);
 
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Auth & Permissions
   const me = activeConversation?.participants?.find((p) => p.username === currentUsername);
-  const isAdmin = isGroup && me && activeConversation?.admin === me.id;
+  const isAdmin = Boolean(isGroup && me && activeConversation?.admin === me.id);
 
   // Voice recording integration
-  const handleAudioRecorded = useCallback((audioFile) => {
+  const handleAudioRecorded = useCallback((audioFile: File) => {
     setSelectedFile(audioFile);
     setPreviewUrl('audio');
   }, []);
@@ -130,7 +141,7 @@ const MessageArea = ({
   };
 
   // Manejar selección de archivos desde el input
-  const handleFileSelect = (file) => {
+  const handleFileSelect = (file: File) => {
     setSelectedFile(file);
     const mime = file.type;
     if (mime.startsWith('image/')) {
@@ -143,7 +154,7 @@ const MessageArea = ({
   };
 
   // Enviar mensaje o adjunto
-  const handleSend = async (e) => {
+  const handleSend = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (uploading) return;
 
@@ -172,8 +183,8 @@ const MessageArea = ({
   };
 
   // Eliminar o esconder mensaje
-  const handleDeleteMessage = async (messageId, isMe) => {
-    let type = 'me';
+  const handleDeleteMessage = async (messageId: number, isMe: boolean) => {
+    let type: 'me' | 'all' = 'me';
     if (isMe) {
       const delAll = window.confirm('¿Deseas eliminar este mensaje para TODOS?');
       if (delAll) {
@@ -218,7 +229,7 @@ const MessageArea = ({
   };
 
   // Gestionar solicitudes de acceso a grupo
-  const handleManageRequest = async (requestId, action) => {
+  const handleManageRequest = async (requestId: number, action: 'accept' | 'reject') => {
     try {
       await chatService.manageJoinRequest(requestId, action);
       setPendingRequests((prev) => prev.filter((r) => r.id !== requestId));
@@ -228,7 +239,7 @@ const MessageArea = ({
   };
 
   // Añadir miembros seleccionados al grupo
-  const handleAddUsers = async (userIds) => {
+  const handleAddUsers = async (userIds: number[]): Promise<void> => {
     setAddingUsers(true);
     try {
       await chatService.addUsersToGroup(conversationId, userIds);

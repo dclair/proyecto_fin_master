@@ -1,14 +1,22 @@
 import React, { useState, useRef } from 'react';
 import useClickOutside from '../../hooks/useClickOutside';
+import { ChatUser } from '../../types/chat.types';
 
-export const GroupParticipants = ({
+export interface GroupParticipantsProps {
+  isOpen: boolean;
+  onClose: () => void;
+  participants?: ChatUser[];
+  adminId?: number | null;
+}
+
+export const GroupParticipants: React.FC<GroupParticipantsProps> = ({
   isOpen,
   onClose,
   participants = [],
   adminId,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const popoverRef = useRef(null);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
 
   useClickOutside(popoverRef, onClose, isOpen);
 
@@ -54,7 +62,7 @@ export const GroupParticipants = ({
             className="list-group-item py-1 px-2 d-flex align-items-center border-0"
           >
             <img
-              src={p.profile_picture_url}
+              src={p.profile_picture_url || 'https://via.placeholder.com/24'}
               alt=""
               className="rounded-circle me-2"
               style={{ width: '24px', height: '24px', objectFit: 'cover' }}
@@ -83,4 +91,3 @@ export const GroupParticipants = ({
 };
 
 export default GroupParticipants;
-

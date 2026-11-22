@@ -41,7 +41,7 @@
     {% if request.user.is_authenticated %}
         {% vite_hmr_client %}
         {% vite_react_refresh %}
-        {% vite_asset 'src/main.jsx' %}
+        {% vite_asset 'src/main.tsx' %}
     {% endif %}
 </head>
 

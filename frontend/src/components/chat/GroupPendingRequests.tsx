@@ -1,13 +1,21 @@
 import React, { useRef } from 'react';
 import useClickOutside from '../../hooks/useClickOutside';
+import { JoinRequest } from '../../types/chat.types';
 
-export const GroupPendingRequests = ({
+export interface GroupPendingRequestsProps {
+  isOpen: boolean;
+  onClose: () => void;
+  requests?: JoinRequest[];
+  onManageRequest: (requestId: number, action: 'accept' | 'reject') => void;
+}
+
+export const GroupPendingRequests: React.FC<GroupPendingRequestsProps> = ({
   isOpen,
   onClose,
   requests = [],
   onManageRequest,
 }) => {
-  const popoverRef = useRef(null);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
 
   useClickOutside(popoverRef, onClose, isOpen);
 
@@ -40,7 +48,7 @@ export const GroupPendingRequests = ({
           >
             <div className="d-flex align-items-center mb-1">
               <img
-                src={r.user.profile_picture_url}
+                src={r.user.profile_picture_url || 'https://via.placeholder.com/20'}
                 alt=""
                 className="rounded-circle me-2"
                 style={{ width: '20px', height: '20px', objectFit: 'cover' }}
@@ -83,4 +91,3 @@ export const GroupPendingRequests = ({
 };
 
 export default GroupPendingRequests;
-

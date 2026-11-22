@@ -5,29 +5,31 @@ import {
   FileSpreadsheet,
   FileArchive,
   FileCode,
-  File,
+  File as FileIcon,
   Download,
+  LucideIcon,
 } from 'lucide-react';
+import { ChatMessage, AttachmentType } from '../../types/chat.types';
 
-const isImage = (url, type, name) => {
+const isImage = (url?: string | null, type?: AttachmentType | null, name?: string | null): boolean => {
   if (type === 'image') return true;
   const target = (name || url || '').toLowerCase();
   return /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(target);
 };
 
-const isVideo = (url, type, name) => {
+const isVideo = (url?: string | null, type?: AttachmentType | null, name?: string | null): boolean => {
   if (type === 'video') return true;
   const target = (name || url || '').toLowerCase();
   return /\.(mp4|webm|mov)(\?.*)?$/i.test(target);
 };
 
-const isAudio = (url, type, name) => {
+const isAudio = (url?: string | null, type?: AttachmentType | null, name?: string | null): boolean => {
   if (type === 'audio') return true;
   const target = (name || url || '').toLowerCase();
   return /\.(mp3|wav|ogg|m4a)(\?.*)?$/i.test(target);
 };
 
-const getAttachmentDisplayName = (msg) => {
+const getAttachmentDisplayName = (msg: ChatMessage): string => {
   if (msg.attachment_name) return msg.attachment_name;
   if (msg.attachment) {
     const clean = msg.attachment.replace(/\/+$/, '');
@@ -37,11 +39,22 @@ const getAttachmentDisplayName = (msg) => {
   return 'Archivo adjunto';
 };
 
-const getFileInfo = (msg) => {
-  const name = getAttachmentDisplayName(msg);
-  const ext = (name.includes('.') ? name.split('.').pop() : '').toLowerCase();
+interface FileInfo {
+  type: string;
+  badge: string;
+  label: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  icon: LucideIcon;
+  name: string;
+}
 
-  if (ext === 'pdf' || msg.attachment_type === 'pdf') {
+const getFileInfo = (msg: ChatMessage): FileInfo => {
+  const name = getAttachmentDisplayName(msg);
+  const ext = (name.includes('.') ? name.split('.').pop() : '')?.toLowerCase() || '';
+
+  if (ext === 'pdf' || (msg.attachment_type === 'document' && ext === 'pdf')) {
     return {
       type: 'pdf',
       badge: 'PDF',
@@ -113,14 +126,16 @@ const getFileInfo = (msg) => {
     color: '#475569',
     bgColor: '#f1f5f9',
     borderColor: '#cbd5e1',
-    icon: File,
+    icon: FileIcon,
     name,
   };
 };
 
-const DocumentAttachment = ({ msg }) => {
+const DocumentAttachment: React.FC<{ msg: ChatMessage }> = ({ msg }) => {
   const fileInfo = getFileInfo(msg);
   const IconComponent = fileInfo.icon;
+  if (!msg.attachment) return null;
+
   const downloadUrl = msg.attachment.includes('?')
     ? `${msg.attachment}&download=1`
     : `${msg.attachment}?download=1`;
@@ -213,7 +228,7 @@ const DocumentAttachment = ({ msg }) => {
   );
 };
 
-const renderMessageWithLinks = (text) => {
+const renderMessageWithLinks = (text: string): React.ReactNode => {
   if (!text) return null;
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = text.split(urlRegex);
@@ -237,7 +252,15 @@ const renderMessageWithLinks = (text) => {
   });
 };
 
-export const MessageTimeline = ({
+export interface MessageTimelineProps {
+  messages: ChatMessage[];
+  loading: boolean;
+  currentUsername: string;
+  onDeleteMessage: (messageId: number, isMe: boolean) => void;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+}
+
+export const MessageTimeline: React.FC<MessageTimelineProps> = ({
   messages,
   loading,
   currentUsername,
@@ -277,7 +300,7 @@ export const MessageTimeline = ({
                     <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
                       <img
                         src={msg.attachment}
-                        alt={displayName || "Adjunto"}
+                        alt={displayName || 'Adjunto'}
                         style={{
                           maxHeight: '200px',
                           maxWidth: '100%',
@@ -312,10 +335,10 @@ export const MessageTimeline = ({
                     />
                   )}
                   {!isImage(msg.attachment, msg.attachment_type, displayName) &&
-                   !isVideo(msg.attachment, msg.attachment_type, displayName) &&
-                   !isAudio(msg.attachment, msg.attachment_type, displayName) && (
-                    <DocumentAttachment msg={msg} />
-                  )}
+                    !isVideo(msg.attachment, msg.attachment_type, displayName) &&
+                    !isAudio(msg.attachment, msg.attachment_type, displayName) && (
+                      <DocumentAttachment msg={msg} />
+                    )}
                 </div>
               )}
 
@@ -329,6 +352,7 @@ export const MessageTimeline = ({
               )}
 
               <button
+                type="button"
                 className={`btn btn-sm btn-link p-0 position-absolute ${
                   isMe ? 'text-danger' : 'text-secondary'
                 }`}
@@ -352,4 +376,3 @@ export const MessageTimeline = ({
 };
 
 export default MessageTimeline;
-

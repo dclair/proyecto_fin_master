@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MessageSquarePlus } from 'lucide-react';
 import chatService from '../api/chat.service';
+import { ChatUser } from '../types/chat.types';
 
-const UserExplorer = ({ onBack, onStartChat }) => {
-  const [users, setUsers] = useState([]);
+export interface UserExplorerProps {
+  onBack: () => void;
+  onStartChat: (userId: number) => void;
+}
+
+export const UserExplorer: React.FC<UserExplorerProps> = ({ onBack, onStartChat }) => {
+  const [users, setUsers] = useState<ChatUser[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -73,7 +79,7 @@ const UserExplorer = ({ onBack, onStartChat }) => {
                 />
                 <div className="flex-grow-1 text-truncate pe-2">
                   <div className="fw-bold text-dark text-truncate">
-                    {user.first_name || user.username} {user.last_name}
+                    {user.first_name || user.username} {user.last_name || ''}
                   </div>
                   <div className="text-muted text-truncate" style={{ fontSize: '0.8rem' }}>
                     @{user.username}{' '}

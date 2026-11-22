@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Users, ArrowLeft } from 'lucide-react';
 import chatService from '../api/chat.service';
+import { Conversation } from '../types/chat.types';
 
-const GroupExplorer = ({ onBack }) => {
-  const [groups, setGroups] = useState([]);
+export interface GroupExplorerProps {
+  onBack: () => void;
+}
+
+type RequestStatusMap = Record<number, 'sending' | 'sent' | 'error'>;
+
+export const GroupExplorer: React.FC<GroupExplorerProps> = ({ onBack }) => {
+  const [groups, setGroups] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [requestStatus, setRequestStatus] = useState({}); // { id: 'sending' | 'sent' | 'error' }
+  const [requestStatus, setRequestStatus] = useState<RequestStatusMap>({});
 
   useEffect(() => {
     chatService
@@ -20,7 +27,7 @@ const GroupExplorer = ({ onBack }) => {
       });
   }, []);
 
-  const handleRequestJoin = async (groupId) => {
+  const handleRequestJoin = async (groupId: number) => {
     setRequestStatus((prev) => ({ ...prev, [groupId]: 'sending' }));
 
     try {

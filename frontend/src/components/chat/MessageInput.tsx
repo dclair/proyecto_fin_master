@@ -1,9 +1,23 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, ChangeEvent, FormEvent } from 'react';
 import { Send, Smile, Paperclip, Mic, Trash } from 'lucide-react';
-import EmojiPicker from 'emoji-picker-react';
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import useClickOutside from '../../hooks/useClickOutside';
 
-export const MessageInput = ({
+export interface MessageInputProps {
+  inputValue: string;
+  onChangeInput: (value: string) => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  onFileSelect: (file: File) => void;
+  isRecording: boolean;
+  recordingTimeFormatted: string;
+  onStartRecording: () => void;
+  onStopRecording: () => void;
+  onCancelRecording: () => void;
+  uploading: boolean;
+  hasAttachment: boolean;
+}
+
+export const MessageInput: React.FC<MessageInputProps> = ({
   inputValue,
   onChangeInput,
   onSubmit,
@@ -17,17 +31,17 @@ export const MessageInput = ({
   hasAttachment,
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const emojiPickerRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const emojiPickerRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Cerrar emoji picker al hacer clic afuera
   useClickOutside(emojiPickerRef, () => setShowEmojiPicker(false), showEmojiPicker);
 
-  const handleEmojiClick = (emojiObject) => {
+  const handleEmojiClick = (emojiObject: EmojiClickData) => {
     onChangeInput(inputValue + emojiObject.emoji);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -181,4 +195,3 @@ export const MessageInput = ({
 };
 
 export default MessageInput;
-

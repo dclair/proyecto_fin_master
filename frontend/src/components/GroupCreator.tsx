@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Users, Check } from 'lucide-react';
 import chatService from '../api/chat.service';
+import { ChatUser } from '../types/chat.types';
 
-const GroupCreator = ({ onBack, onGroupCreated }) => {
-  const [users, setUsers] = useState([]);
-  const [selectedUserIds, setSelectedUserIds] = useState([]);
+export interface GroupCreatorProps {
+  onBack: () => void;
+  onGroupCreated: (groupId: number) => void;
+}
+
+export const GroupCreator: React.FC<GroupCreatorProps> = ({ onBack, onGroupCreated }) => {
+  const [users, setUsers] = useState<ChatUser[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [groupName, setGroupName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,7 +34,7 @@ const GroupCreator = ({ onBack, onGroupCreated }) => {
     return fullName.includes(query) || username.includes(query) || email.includes(query);
   });
 
-  const toggleUser = (userId) => {
+  const toggleUser = (userId: number) => {
     setSelectedUserIds((prev) => {
       if (prev.includes(userId)) {
         return prev.filter((id) => id !== userId);
@@ -54,7 +60,7 @@ const GroupCreator = ({ onBack, onGroupCreated }) => {
     try {
       const newGroup = await chatService.createGroup(groupName, selectedUserIds);
       onGroupCreated(newGroup.id);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error al crear el grupo:', err);
       setError(err?.response?.data?.error || 'Error al crear el grupo.');
       setLoading(false);
@@ -131,7 +137,7 @@ const GroupCreator = ({ onBack, onGroupCreated }) => {
                 />
                 <div className="flex-grow-1 text-truncate text-start pe-2">
                   <div className="fw-bold text-dark text-truncate" style={{ fontSize: '0.85rem' }}>
-                    {user.first_name || user.username} {user.last_name}
+                    {user.first_name || user.username} {user.last_name || ''}
                   </div>
                   <div className="text-muted text-truncate" style={{ fontSize: '0.75rem' }}>
                     @{user.username} {user.email && `• ${user.email}`}

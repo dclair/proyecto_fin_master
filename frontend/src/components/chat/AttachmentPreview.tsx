@@ -1,13 +1,26 @@
 import React from 'react';
-import { Video, Mic, FileText, FileSpreadsheet, FileArchive, FileCode, X } from 'lucide-react';
+import { Video, Mic, FileText, FileSpreadsheet, FileArchive, FileCode, X, LucideIcon } from 'lucide-react';
 
-export const AttachmentPreview = ({ selectedFile, previewUrl, onCancel }) => {
+export interface AttachmentPreviewProps {
+  selectedFile: File | null;
+  previewUrl: string | null;
+  onCancel: () => void;
+}
+
+interface DocPreviewInfo {
+  icon: LucideIcon;
+  color: string;
+  bgColor: string;
+  badge: string;
+}
+
+export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({ selectedFile, previewUrl, onCancel }) => {
   if (!selectedFile) return null;
 
   const isImage = previewUrl && !['video', 'document', 'audio'].includes(previewUrl);
 
-  const getDocPreview = () => {
-    const ext = (selectedFile.name.includes('.') ? selectedFile.name.split('.').pop() : '').toLowerCase();
+  const getDocPreview = (): DocPreviewInfo => {
+    const ext = (selectedFile.name.includes('.') ? selectedFile.name.split('.').pop() : '')?.toLowerCase() || '';
     if (ext === 'pdf' || selectedFile.type === 'application/pdf') {
       return {
         icon: FileText,
@@ -130,4 +143,3 @@ export const AttachmentPreview = ({ selectedFile, previewUrl, onCancel }) => {
 };
 
 export default AttachmentPreview;
-

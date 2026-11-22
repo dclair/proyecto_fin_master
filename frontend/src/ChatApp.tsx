@@ -7,22 +7,23 @@ import GroupCreator from './components/GroupCreator';
 import GroupExplorer from './components/GroupExplorer';
 import UserExplorer from './components/UserExplorer';
 import chatService from './api/chat.service';
+import { Conversation } from './types/chat.types';
 import './ChatApp.css';
 
 /**
  * ChatApp Main Shell
  * Architecture: Clean & decoupled with centralized ChatService
  */
-const ChatApp = () => {
+export const ChatApp: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [conversations, setConversations] = useState([]);
-  const [activeConversationId, setActiveConversationId] = useState(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [isExploringGroups, setIsExploringGroups] = useState(false);
   const [isExploringUsers, setIsExploringUsers] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const panelRef = useRef(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   // Estados para el arrastre (Drag & Drop)
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -39,12 +40,12 @@ const ChatApp = () => {
   }, []);
 
   // Funciones de arrastre
-  const handleDragStart = (e) => {
-    if (e.type === 'mousedown' && e.button !== 0) return;
+  const handleDragStart = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if ('button' in e && e.button !== 0) return;
     setIsDragging(true);
 
-    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 
     dragStartPos.current = {
       x: clientX - position.x,
@@ -53,14 +54,14 @@ const ChatApp = () => {
   };
 
   useEffect(() => {
-    const handleDragMove = (e) => {
+    const handleDragMove = (e: MouseEvent | TouchEvent) => {
       if (!isDragging) return;
-      if (e.type === 'touchmove' && e.cancelable) {
+      if ('cancelable' in e && e.cancelable && 'touches' in e) {
         e.preventDefault();
       }
 
-      const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-      const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 
       setPosition({
         x: clientX - dragStartPos.current.x,
@@ -147,8 +148,9 @@ const ChatApp = () => {
 
   // Escuchar evento global para iniciar chat desde perfiles
   useEffect(() => {
-    const handleOpenChat = (event) => {
-      const { userId } = event.detail;
+    const handleOpenChat = (event: Event) => {
+      const customEvent = event as CustomEvent<{ userId: number }>;
+      const { userId } = customEvent.detail;
       setIsOpen(true);
 
       chatService
@@ -173,7 +175,7 @@ const ChatApp = () => {
     refreshUnreadCount();
   };
 
-  const handleStartPrivateChat = async (userId) => {
+  const handleStartPrivateChat = async (userId: number) => {
     try {
       const conv = await chatService.createPrivateConversation(userId);
       setConversations((prev) => {
@@ -207,8 +209,8 @@ const ChatApp = () => {
   const sortedConversations = [...conversations].sort((a, b) => {
     if ((a.unread_count || 0) > 0 && (b.unread_count || 0) === 0) return -1;
     if ((b.unread_count || 0) > 0 && (a.unread_count || 0) === 0) return 1;
-    const dateA = a.last_message ? new Date(a.last_message.timestamp) : new Date(a.created_at);
-    const dateB = b.last_message ? new Date(b.last_message.timestamp) : new Date(b.created_at);
+    const dateA = a.last_message ? new Date(a.last_message.timestamp).getTime() : (a.created_at ? new Date(a.created_at).getTime() : 0);
+    const dateB = b.last_message ? new Date(b.last_message.timestamp).getTime() : (b.created_at ? new Date(b.created_at).getTime() : 0);
     return dateB - dateA;
   });
 

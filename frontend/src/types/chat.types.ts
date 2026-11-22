@@ -32,6 +32,7 @@ export interface Conversation {
   participants: ChatUser[];
   last_message?: ChatMessage | null;
   unread_count?: number;
+  created_at?: string;
 }
 
 export interface JoinRequest {
@@ -48,3 +49,15 @@ export interface UploadAttachmentPayload {
   content?: string;
 }
 
+export interface WebSocketMessagePayload {
+  action?: string;
+  message_id?: number;
+  id?: number;
+  message?: string;
+  content?: string;
+  sender?: string | ChatUser;
+  timestamp?: string;
+  attachment?: string | null;
+  attachment_name?: string | null;
+  attachment_type?: AttachmentType | null;
+}

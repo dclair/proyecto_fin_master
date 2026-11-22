@@ -1,8 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { Check } from 'lucide-react';
 import useClickOutside from '../../hooks/useClickOutside';
+import { ChatUser } from '../../types/chat.types';
 
-export const GroupAddMember = ({
+export interface GroupAddMemberProps {
+  isOpen: boolean;
+  onClose: () => void;
+  users?: ChatUser[];
+  onAddUsers: (userIds: number[]) => Promise<void>;
+  adding?: boolean;
+}
+
+export const GroupAddMember: React.FC<GroupAddMemberProps> = ({
   isOpen,
   onClose,
   users = [],
@@ -10,8 +19,8 @@ export const GroupAddMember = ({
   adding = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedUserIds, setSelectedUserIds] = useState([]);
-  const popoverRef = useRef(null);
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
 
   useClickOutside(popoverRef, () => {
     onClose();
@@ -21,7 +30,7 @@ export const GroupAddMember = ({
 
   if (!isOpen) return null;
 
-  const toggleSelect = (userId) => {
+  const toggleSelect = (userId: number) => {
     setSelectedUserIds((prev) =>
       prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
     );
@@ -82,7 +91,7 @@ export const GroupAddMember = ({
               onClick={() => toggleSelect(u.id)}
             >
               <img
-                src={u.profile_picture_url}
+                src={u.profile_picture_url || 'https://via.placeholder.com/28'}
                 alt=""
                 className="rounded-circle me-2"
                 style={{ width: '28px', height: '28px', objectFit: 'cover' }}
@@ -122,4 +131,3 @@ export const GroupAddMember = ({
 };
 
 export default GroupAddMember;
-
