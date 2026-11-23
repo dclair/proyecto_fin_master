@@ -134,15 +134,23 @@ python manage.py createsuperuser
 ### Paso 4: Levantar el Entorno de Desarrollo
 
 #### Opción A: Entorno Automatizado con Tmux (Recomendado)
-El proyecto incluye el script [start_dev.sh](file:///home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/PROYECTO_FIN_MASTER_V2/start_dev.sh) que levanta en paneles sincronizados:
-1. Panel 1: Servidor Django ASGI (`python manage.py runserver`)
+El proyecto incluye el script [start_dev.sh](file:///home/dclair/Documentos/MASTER_FULLSTACK/MIS_PROYECTOS/PROYECTO_FIN_MASTER_V2/start_dev.sh) que levanta en paneles sincronizados (Ventana 0 - "Servicios"):
+1. Panel 1: Servidor Django ASGI con Daphne (`python manage.py runserver`)
 2. Panel 2: Vite Dev Server para el Chat React (`cd frontend && npm run dev`)
-3. Panel 3: Servidor Redis (`redis-server`)
-4. Panel 4: Consola interactiva para comandos
+3. Panel 3: Celery Worker para tareas asíncronas y emails (`celery -A aficionados_network worker -l info`)
+4. Panel 4: Redis Server / Monitor (`redis-server` / `redis-cli monitor`)
 
+Además, crea una **Ventana 1 ("Terminal")** independiente con el entorno virtual activo para comandos interactivos.
+
+Para iniciar:
 ```bash
-chmod +x start_dev.sh
+chmod +x start_dev.sh stop_dev.sh
 ./start_dev.sh
+```
+
+Para detener todo el entorno de forma limpia (liberando procesos, bases de datos y puertos):
+```bash
+./stop_dev.sh
 ```
 
 #### Opción B: Ejecución Manual
