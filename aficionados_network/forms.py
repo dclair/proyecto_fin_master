@@ -28,17 +28,33 @@ class RegisterForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         self.fields['first_name'].required = True
         self.fields['first_name'].label = "Nombre Completo"
-        self.fields['first_name'].help_text = "Nombre y apellidos completos. La persona que está registrada en la asociación"
+        self.fields['first_name'].help_text = "Nombre y apellidos tal como figuran en tu registro de la asociación."
         self.fields['email'].required = True
-        self.fields['email'].help_text = "Mismo email con el que estás registrado en la Asociación."
-        self.fields['username'].help_text = "Letras, números y caracteres @/./+/-/_ únicamente."
+        self.fields['email'].help_text = "Email oficial asociado a tu membresía."
+        self.fields['username'].help_text = "Tu identificador único en la plataforma para menciones y perfil."
         
-        # Sobrescribimos el help_text por defecto de password1
+        # Inyectar form-control y placeholders modernos para todos los campos
+        placeholders = {
+            "first_name": "Ej: María García López",
+            "username": "Ej: mariagarcia",
+            "email": "tu-email-asociado@ejemplo.com",
+            "razon_social": "Nombre de tu consulta, empresa o autónomo",
+            "numero_socio": "Ej: SOC-12345",
+            "password1": "Mínimo 8 caracteres seguros",
+            "password2": "Repite tu contraseña exactamente igual",
+        }
+        for name, field in self.fields.items():
+            existing_class = field.widget.attrs.get("class", "")
+            if "form-control" not in existing_class:
+                field.widget.attrs["class"] = f"{existing_class} form-control".strip()
+            if name in placeholders and "placeholder" not in field.widget.attrs:
+                field.widget.attrs["placeholder"] = placeholders[name]
+        
+        # Sobrescribimos el help_text por defecto de password1 con formato conciso
         self.fields['password1'].help_text = (
             "<ul>"
-            "<li>La contraseña no debe parecer o contener a su nombre, razón social, nombre de usuario o email.</li>"
-            "<li>Debe contener al menos 8 caracteres.</li>"
-            "<li>No puede ser una clave utilizada comúnmente.</li>"
+            "<li>Mínimo 8 caracteres.</li>"
+            "<li>No debe ser similar a tus datos personales ni común.</li>"
             "<li>No puede ser completamente numérica.</li>"
             "</ul>"
         )

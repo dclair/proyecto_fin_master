@@ -232,17 +232,34 @@ h1, h2 { text-shadow: none; }
 .post-card,
 .card-hubs,
 .card-click,
-.sidebar-group {
+.sidebar-group,
+.hero-welcome-card,
+.member-welcome-card {
     background-color: var(--bs-card-bg);
+}
+
+.hero-welcome-card {
+    background: linear-gradient(135deg, var(--bs-card-bg) 0%, var(--bs-tertiary-bg) 100%);
+    border: 1px solid var(--bs-border-color);
+}
+
+.member-welcome-card {
+    border: 1px solid var(--bs-border-color);
 }
 
 [data-bs-theme="dark"] .profile-post-card,
 [data-bs-theme="dark"] .post-card,
 [data-bs-theme="dark"] .card-hubs,
 [data-bs-theme="dark"] .card-click,
-[data-bs-theme="dark"] .sidebar-group {
+[data-bs-theme="dark"] .sidebar-group,
+[data-bs-theme="dark"] .hero-welcome-card,
+[data-bs-theme="dark"] .member-welcome-card {
     background-color: var(--bs-card-bg);
     border: 1px solid var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .hero-welcome-card {
+    background: linear-gradient(135deg, var(--bs-card-bg) 0%, var(--bs-secondary-bg) 100%);
 }
 
 [data-bs-theme="dark"] .card.border-0 {
