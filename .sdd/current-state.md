@@ -1,6 +1,6 @@
 # Current State
 
-**Last reviewed:** 2026-11-22  
+**Last reviewed:** 2026-11-24  
 **Role:** single operational truth for the project today.
 
 This document is the first place to check before modifying Hubs&Clicks. It summarizes what is currently true, what is verified, what is risky, and where deeper details live.
@@ -12,6 +12,10 @@ Hubs&Clicks is a private Django social network for connecting therapists and wel
 Current user-facing capabilities:
 
 - Register with email, activate account, log in, and log out with robust CSRF and session hardening.
+- Redesigned Professional Registration: 2-step semantic cards (Membership & Profession / Credentials & Access), password toggles, and institutional verification alert.
+- Bimodal Home Architecture:
+  - For visitors: Conversion hero with value proposition, double CTA (*"Unirme a la Comunidad"* / *"Explorar Terapias"*), 3 social proof badges (Verified Community, Clinical Library, Meetups/Workshops), and ecosystem illustration.
+  - For authenticated members: Welcome Cockpit with personalized avatar greeting (*"¡Hola de nuevo, [Nombre]! 👋"*), activity pulse, and quick content creation shortcuts.
 - Edit profile data: avatar, bio (with TinyMCE rich text and local image upload), birth date, location, website, identity fields.
 - Add hobbies to profile with experience levels.
 - Follow and unfollow other profiles with dynamic follower/following counters.
@@ -21,6 +25,10 @@ Current user-facing capabilities:
 - Create hobby-based events with TinyMCE rich descriptions and TomSelect searchable category dropdowns sorted alphabetically.
 - Join or leave events when allowed, with hybrid support (physical vs. online) and physical capacity limit enforcement.
 - Cancel, reactivate, duplicate, edit, and list owned events.
+- Explore Events with Past Events Filter & Empty State:
+  - Filter toggle switch for *"Ver todos los eventos (incluidos pasados)"* (`show_past=true`).
+  - Clear empty state card when no future events match: *"NO hemos encontrado eventos futuros aún por realizarse o con los filtros aplicados."* with quick action button to show past events.
+  - Badges contextuales de estado *"Finalizado"* para eventos con fecha cumplida.
 - Automatic Chat Synchronization for Online Events: online events generate a private group chat via Django Signals, automatically adding participants upon joining.
 - Automated 24h Event Reminders:
   - Scheduled daily at 08:00 AM via Celery Beat (`posts.tasks.send_event_reminders_task`).
@@ -43,7 +51,7 @@ Current user-facing capabilities:
 - Official Institutional Channel "Ágora" (`slug="agora"`):
   - Automatically assigned to all new users upon registration as their default primary therapy.
   - Retroactively assigned to all existing profiles via migration `0010_assign_agora_to_all_profiles`.
-  - Publishing strictly restricted to `is_staff` users (superusers, admins, board members).
+  - Publishing strictly restricted to `is_staff` users across Posts, Library, and Marketplace listings.
   - High-visibility orange badge (`.badge-agora` / `.badge-agora-solid`, `#ea580c`) with official shield icon.
   - Pinned to first position (index 0) in Home feeds (Posts, Events, Library) via ORM `Case/When` annotation (`is_agora`).
 - Universal Plain-Text Extraction & HTML Entity Sanitization:
@@ -51,6 +59,9 @@ Current user-facing capabilities:
   - `nh3` HTML sanitizer enforced on model `save()` methods and template tag `|sanitize_html`.
 - Harmonized Dark Mode (Theme):
   - Recommended Events container (`.recommended-events-box`) and Home Tabs navigation (`.nav-pills-hubs`) feature dark body background, brand teal/green border (`1.5px solid var(--hubs-primary)`, `#2ba1ab`), white text on inactive items, and white counter badges with colored numbers.
+- Multi-Device LAN Mobile Testing Support:
+  - Dynamic local IP detection in `DEBUG` mode adding host LAN IP to `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`.
+  - Vite dev server listening on `0.0.0.0:5173` with dynamic `dev_server_host` in `DJANGO_VITE` for mobile browsers on the same WiFi.
 
 
 ## Runtime & Infrastructure
@@ -91,8 +102,8 @@ Docker Compose Services:
 Operational command for tests:
 
 ```bash
-# Backend unit & integration test suite (126 tests)
-./env/bin/python manage.py test
+# Backend unit & integration test suite (129 tests)
+DB_ENGINE=sqlite ./env/bin/python manage.py test
 
 # Frontend TypeScript type check (0 errors)
 cd frontend && npm run type-check
@@ -101,7 +112,7 @@ cd frontend && npm run type-check
 Last known verification:
 
 ```text
-Ran 126 tests in ~6.1s (100% GREEN)
+Ran 129 tests in ~4.5s (100% GREEN)
 Frontend type-check: 0 errors (tsc --noEmit clean)
 ```
 

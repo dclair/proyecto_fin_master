@@ -1,9 +1,94 @@
 # Logical Changelog
 
-**Last reviewed:** 2026-11-22  
+**Last reviewed:** 2026-11-24  
 **Purpose:** semantic change history of the system, independent from Git commits.
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
+
+## 2026-11-24: Past Events Filter and Empty State UX in Event Explorer
+
+**Type:** feature / UI / UX / testing  
+**Status:** done
+
+What changed:
+- **Soporte de Eventos Pasados (`posts/views.py`)**:
+  - `EventListView.get_queryset` analiza el parámetro `show_past=true`. Por defecto, solo filtra eventos a futuro (`event_date__gte=now`); si `show_past=true`, levanta todos los eventos ordenados por `-event_date`.
+  - Inyección de `show_past` en el contexto del template.
+- **Empty State Profesional e Informativo (`event_list.html`)**:
+  - Reemplazado el texto escueto por una tarjeta visual con icono de calendario y el mensaje exacto: *"NO hemos encontrado eventos futuros aún por realizarse o con los filtros aplicados."*.
+  - Botón de acción rápida: *"Ver todos los eventos (incluidos pasados)"* manteniendo filtros activos (`q`, `city`, `hobby`, `level`, `my_hobbies`).
+  - Toggle switch en la barra de filtros para alternar visualización de eventos pasados.
+  - Distintivo visual *"Finalizado"* en tarjetas de eventos con fecha cumplida (`event.is_past`).
+  - Paginación adaptada para propagar `&show_past=true`.
+- **Tests Unitarios e Integración (`posts/tests/test_posts.py`)**:
+  - Nuevo test `test_event_list_empty_future_events_shows_empty_state_and_past_button`.
+  - 32/32 tests de posts pasando en verde; suite global de 129 tests pasando en verde.
+
+Why:
+- Evitar pantallas vacías confusas cuando no hay eventos futuros programados y permitir a los terapeutas explorar el histórico de talleres y quedadas.
+
+Impact:
+- Navegación clara, sin callejones sin salida en el calendario de eventos.
+
+## 2026-11-24: Dynamic LAN Multi-Device Support for Mobile Testing
+
+**Type:** infrastructure / DX / mobile  
+**Status:** done
+
+What changed:
+- **Detección Automática de IP Local (`settings.py`)**:
+  - En modo `DEBUG=True`, resuelve la IP LAN de la máquina host vía socket UDP dummy y la añade a `ALLOWED_HOSTS` y `CSRF_TRUSTED_ORIGINS`.
+- **Sincronización con Vite Dev Server (`frontend/vite.config.ts`, `settings.py`)**:
+  - Configurado Vite para escuchar en `0.0.0.0:5173` con CORS habilitado.
+  - `DJANGO_VITE` configurado con `dev_server_host = LOCAL_LAN_IP` dinámico para servir bundles React a móviles sin fallar por `localhost`.
+- **Script de Inicio (`start_dev.sh`)**:
+  - Servidor Django en `0.0.0.0:8000` y Vite en `0.0.0.0:5173`. Salida con la IP directa para conexión móvil en la misma red WiFi.
+
+Why:
+- Permitir al desarrollador auditar la experiencia de usuario directamente en smartphones reales conectados a la red local.
+
+Impact:
+- Desarrollo y validación responsive sin fricción ni cambios manuales de IP en git.
+
+## 2026-11-24: Bimodal Home Architecture and Therapist Registration Redesign
+
+**Type:** feature / UI / UX / architecture  
+**Status:** done
+
+What changed:
+- **Portada Bimodal (`home.html`, `views.py`)**:
+  - Para anónimos: Hero institucional con propuesta de valor, doble CTA (*"Unirme a la Comunidad"* / *"Explorar Terapias"*), 3 badges de social proof (Comunidad Verificada, Casos Clínicos, Quedadas) e ilustración del ecosistema.
+  - Para autenticados: Cockpit de bienvenida con avatar, saludo personalizado (*"¡Hola de nuevo, [Nombre]! 👋"*), pulso de actividad y accesos de creación.
+  - Eliminado mensaje flash redundante de bienvenida en login y carrusel duplicado de eventos recomendados.
+  - Pestaña de eventos renombrada a *"Últimos Eventos"*.
+- **Rediseño del Registro de Terapeutas (`register.html`, `forms.py`)**:
+  - Tarjeta estructurada en dos bloques semánticos (*Membresía y Profesión* / *Credenciales y Acceso*).
+  - Iconos en input-groups y alternador de contraseña accesible (`bi-eye` / `bi-eye-slash`).
+  - Card previa de verificación de socio: *"Verificación institucional: Para garantizar un entorno seguro y riguroso, comprobaremos tus datos de socio antes de activar el acceso completo a la comunidad. Mantente atento a tu email."*.
+
+Why:
+- Incrementar la captación de nuevos miembros y ofrecer una experiencia de inicio ágil y profesional para miembros recurrentes.
+
+Impact:
+- Mayor tasa de conversión y coherencia de diseño en los puntos de entrada principales.
+
+## 2026-11-24: Ágora Channel Hardening in Marketplace
+
+**Type:** security / architecture / testing  
+**Status:** done
+
+What changed:
+- **Protección de Categoría Institucional (`marketplace/forms.py`, `marketplace/views.py`)**:
+  - Inyección de `request.user` en `ListingCreateView` y `ListingUpdateView`.
+  - Exclusión de `slug="agora"` en el queryset de categorías para usuarios no staff (`not is_staff`).
+  - Validación en `ListingForm.clean_hobby` rechazando cualquier intento de asignar Ágora a anuncios de particulares.
+  - Tests en `marketplace/tests.py`.
+
+Why:
+- Blindar el canal institucional Ágora contra anuncios comerciales no autorizados.
+
+Impact:
+- Integridad absoluta de las publicaciones institucionales en todas las áreas de la plataforma.
 
 ## 2026-11-22: Fix CSS Cascade Order and Specificity for TomSelect and Form Controls in Dark Mode
 

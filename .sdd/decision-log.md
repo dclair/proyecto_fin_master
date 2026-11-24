@@ -441,6 +441,92 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 - Cualquier componente de terceros inyectado en plantillas hijas respetará obligatoriamente la jerarquía visual de Hubs&Clicks.
 - 100% de consistencia de Tema Oscuro en todos los desplegables TomSelect y nativos de la plataforma.
 
+## D-026: Hardening Institucional del Canal Ágora en Marketplace y Restricción de Publicación a Staff
 
+**Date:** 2026-11-24  
+**Decision:** Excluir la categoría institucional "Ágora" (`slug="agora"`) de los selectores de categoría en creación y edición de anuncios del Mercadillo (`marketplace/forms.py`) para usuarios no administradores (`not request.user.is_staff`), y reforzar la validación limpia a nivel servidor en `clean_hobby` para prevenir manipulaciones de payloads POST.
 
+**Why:**
+- El canal "Ágora" es una categoría de uso estrictamente institucional (reservada a anuncios oficiales de la directiva y comunicados colegiales).
+- Aunque ya estaba blindada en Posts y Biblioteca Clínica, un terapeuta estándar podía publicar anuncios en el Mercadillo bajo la categoría Ágora si conocía su ID.
+
+**Architecture & Implementation Details:**
+1. En `ListingCreateView` y `ListingUpdateView`, se inyecta `request.user` en los `get_form_kwargs()`.
+2. En `ListingForm.__init__`, si el usuario no es staff, se filtra el queryset del campo `hobby` con `.exclude(slug="agora")`.
+3. En `ListingForm.clean_hobby`, se valida que un usuario regular no pueda asignar `slug="agora"`, levantando un `ValidationError` descriptivo.
+4. Cobertura completa de pruebas agregada a `marketplace/tests.py`.
+
+**Implications:**
+- Blindaje homogéneo del canal institucional en todos los módulos de contenido del sistema.
+- Cero anuncios no oficiales en los feeds prioritarios de Ágora.
+
+## D-027: Arquitectura Bimodal del Home (Hero de Captación para Visitantes vs. Cockpit de Bienvenida para Miembros)
+
+**Date:** 2026-11-24  
+**Decision:** Implementar una experiencia bimodal en la portada (`home.html`): Hero de captación institucional y propuesta de valor con doble Call To Action para usuarios anónimos, y Cockpit de bienvenida personalizado con pulso de actividad y accesos directos para usuarios autenticados.
+
+**Why:**
+- La portada carecía de elementos de motivación y propuesta de valor para terapeutas que llegaban por primera vez sin cuenta activa, reduciendo la conversión de registro.
+- Para terapeutas ya autenticados, se generaba redundancia visual con mensajes flash duplicados de login y bloques repetitivos de eventos ya presentes en las pestañas inferiores.
+
+**Architecture & Implementation Details:**
+1. **Visitantes Anónimos:** Hero con titular motivacional (*"El punto de encuentro para terapeutas y apasionados de las terapias naturales"*), resumen de valor, doble CTA (*"Unirme a la Comunidad"* -> `/register/`, *"Explorar Terapias"* -> scroll a `#homeTabs`), 3 píldoras de social proof (Comunidad Verificada, Biblioteca de Casos, Quedadas) e ilustración del ecosistema.
+2. **Miembros Autenticados:** Cockpit con avatar del usuario, saludo personalizado (*"¡Hola de nuevo, [Nombre]! 👋"*), subtítulo contextual y botones de acción rápida (*"Crear Publicación"*, *"Proponer Plan"*).
+3. **Eliminación de Redundancias:** Se suprimió el mensaje flash duplicado `messages.success(..., f"¡Bienvenido/a {user.username}!")` de `LoginView.form_valid`, el carrusel horizontal duplicado de eventos recomendados, y se ajustó el copy de pestaña a *"Últimos Eventos"* para reflejar la realidad cronológica de eventos concluidos.
+
+**Implications:**
+- Clara separación de objetivos de UX entre conversión (anónimos) y productividad comunitaria (logueados).
+
+## D-028: Rediseño Semántico y Verificación Institucional en el Registro de Terapeutas
+
+**Date:** 2026-11-24  
+**Decision:** Rediseñar visual y funcionalmente el formulario de registro (`register.html` y `RegisterForm`) organizándolo en dos bloques semánticos con iconografía integrada, alternador de visualización de contraseña y aviso previo de verificación institucional.
+
+**Why:**
+- El formulario de registro previo presentaba una estética tosca que desentonaba con la identidad cuidada de la plataforma y no explicaba el proceso de validación del número de colegiado/socio.
+
+**Architecture & Implementation Details:**
+1. Estructura en tarjeta con fondo adaptativo (`bg-body`), bordes redondeados (`rounded-4`) y sombra sutil.
+2. Bloque 1: *Datos de Membresía y Profesión* (`first_name`, `razon_social`, `numero_socio`).
+3. Bloque 2: *Credenciales y Acceso* (`username`, `email`, `password1`, `password2`).
+4. Iconos descriptivos en `input-group-text` y botones de alternar visibilidad de clave (`bi-eye` / `bi-eye-slash`) con script en vainilla JS accesible.
+5. Banner institucional informativo: *"Verificación institucional: Para garantizar un entorno seguro y riguroso, comprobaremos tus datos de socio antes de activar el acceso completo a la comunidad. Mantente atento a tu email."*.
+
+**Implications:**
+- Alta tasa de confianza inicial en el proceso de onboarding y estética unificada con el resto de formularios del sistema.
+
+## D-029: Soporte Dinámico para Acceso Multi-Dispositivo Móvil en Red Local (LAN)
+
+**Date:** 2026-11-24  
+**Decision:** Configurar detección automática y no intrusiva de la dirección IP local de la interfaz LAN en `settings.py` cuando `DEBUG=True`, incorporándola a `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` y comunicándola a `DJANGO_VITE` y Vite Dev Server (`0.0.0.0:5173`).
+
+**Why:**
+- Permitir al desarrollador probar y auditar la experiencia de usuario real en smartphones conectados a la misma red WiFi local sin modificar manualmente archivos de configuración ni romper URLs de producción o desarrollo habitual en `localhost`.
+
+**Architecture & Implementation Details:**
+1. `settings.py` resuelve mediante socket UDP dummy (`8.8.8.8:80`) la IP LAN activa del host (ej. `192.168.1.134`) y la añade dinámicamente a `ALLOWED_HOSTS` y `CSRF_TRUSTED_ORIGINS`.
+2. `DJANGO_VITE` utiliza `VITE_DEV_SERVER_HOST = LOCAL_LAN_IP` permitiendo al navegador del smartphone solicitar los bundles React a la IP de la máquina host en lugar de a `localhost`.
+3. `frontend/vite.config.ts` configurado con `server: { host: '0.0.0.0', port: 5173, cors: true }`.
+4. `start_dev.sh` arranca Django en `0.0.0.0:8000`, Vite en `0.0.0.0:5173` y presenta en terminal la URL directa para móviles.
+
+**Implications:**
+- Pruebas en dispositivos móviles sin fricción ni riesgos de commits con IPs estáticas cableadas.
+
+## D-030: Filtrado de Eventos Pasados y Empty State Explicativo en Exploración de Eventos
+
+**Date:** 2026-11-24  
+**Decision:** Incorporar soporte para el parámetro `show_past=true` en `EventListView`, sustituir el mensaje vacío ambiguo por un Empty State descriptivo con opciones de acción rápida y marcar visualmente los eventos concluidos con badge "Finalizado".
+
+**Why:**
+- Cuando no había eventos futuros programados, la vista mostraba un texto confuso (*"No hemos encontrado quedadas con estos filtros."*) incluso sin filtros aplicados, impidiendo al terapeuta consultar eventos o talleres que ya habían tenido lugar.
+
+**Architecture & Implementation Details:**
+1. `EventListView.get_queryset` evalúa `show_past`: por defecto solo muestra eventos a futuro (`event_date__gte=now`), pero si `show_past=true`, lista todos los eventos ordenados por `-event_date`.
+2. En `event_list.html`, el empty state presenta un diseño cuidado con icono, el texto solicitado: *"NO hemos encontrado eventos futuros aún por realizarse o con los filtros aplicados."*, y un botón directo para consultar todos los eventos preservando los filtros de búsqueda.
+3. Se integró un interruptor tipo switch en la barra de filtros para alternar eventos pasados en cualquier momento.
+4. Badge contextual `Finalizado` en las tarjetas de eventos pasados mediante la propiedad `@property is_past`.
+5. Paginación adaptada para propagar `&show_past=true`.
+
+**Implications:**
+- Eliminación de pantallas vacías sin salida y acceso completo a la memoria histórica de eventos de la comunidad.
 

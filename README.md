@@ -14,6 +14,9 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
   - **Garantía Zero-Duplicates:** Control de idempotencia a nivel base de datos (`reminder_sent`, `reminder_sent_at` e índice compuesto en `EventAttendance`), deduplicación en el modelo `Notification` y transaccionalidad atómica (`transaction.atomic()`).
   - Despacho de emails HTML corporativos con detalles específicos según la modalidad (enlace de streaming para eventos online o mapa y dirección para eventos presenciales).
 - **Sistema de Duplicado y Cancelación:** Clonación de eventos pasados con un clic y protocolo seguro de cancelación con alertas automáticas a todos los participantes.
+- **Filtro de Eventos Pasados y Empty States Inteligentes:**
+  - Exploración de eventos con conmutador dinámico `show_past=true` para auditar el histórico de talleres y quedadas concluidas con badge contextual `Finalizado`.
+  - Empty states informativos con diseño cuidado que guían al usuario (*"NO hemos encontrado eventos futuros aún por realizarse o con los filtros aplicados."*) y ofrecen acciones inmediatas de recuperación preservando los filtros de búsqueda.
 
 ### 2. Notificaciones Centralizadas (`NotificationDispatcher`)
 - **Arquitectura de Despacho Desacoplado:** Motor centralizado en `notifications/services.py` que coordina notificaciones en-app (campana con badges y recarga asíncrona HTMX) y correos HTML corporativos.
@@ -45,7 +48,7 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
 
 ### 5. Directorio de Terapeutas, Mercadillo y Biblioteca Clínica
 - **Comunidad de Profesionales:** Exploración fluida mediante scroll infinito (HTMX) y búsqueda multi-campo. Privacidad de contacto (teléfono, email, dirección) reservada a miembros registrados.
-- **Canal Oficial "Ágora" (`slug="agora"`):** Categoría institucional reservada exclusivamente para directiva (`is_staff`), asignada automáticamente a todos los usuarios registrados y fijada prioritariamente al inicio de los feeds de la plataforma.
+- **Canal Oficial "Ágora" (`slug="agora"`):** Categoría institucional reservada exclusivamente para directiva (`is_staff`) blindada transversalmente en Posts, Biblioteca Clínica y Anuncios del Mercadillo, asignada automáticamente a todos los usuarios registrados y fijada prioritariamente al inicio de los feeds de la plataforma.
 - **Biblioteca de Casos Clínicos y Artículos:** Publicaciones de divulgación técnica con editor enriquecido TinyMCE, extracción y decodificación universal de entidades HTML (`plain_text_summary`), y sistema de comentarios y valoraciones integrado con el `NotificationDispatcher`.
 - **Mercadillo de Profesionales:** Directorio de compra, venta, alquiler e intercambio de material y espacios terapéuticos, con enlaces directos a salas de chat privadas y sistema de valoraciones (reviews de 1 a 5 estrellas).
 
@@ -55,6 +58,14 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
 - **Arquitectura de Cascada CSS Invertida y Blindaje de Terceros:**
   - Carga prioritaria de librerías CDN en `{% block extra_css %}` antes de `style.css` en `layout.html`, asegurando la precedencia de diseño de la aplicación.
   - Blindaje con selector calificado `[data-bs-theme="dark"]` y variables semánticas para componentes complejos como TomSelect (`.ts-control`, `.ts-dropdown`) y editores WYSIWYG TinyMCE (`oxide-dark`), garantizando contraste perfecto y legibilidad sin fondos blancos residuales.
+
+### 7. Portada Bimodal y Onboarding Profesional de Terapeutas ✨
+- **Portada Bimodal Adaptativa (`home.html`):**
+  - **Para Visitantes (No logueados):** Hero de captación con titular inspirador, propuesta de valor clara, doble Call to Action (`[ Unirme a la Comunidad ]` y `[ Explorar Terapias ]`), píldoras de social proof (Comunidad Verificada, Casos Clínicos, Quedadas) e ilustración del ecosistema.
+  - **Para Miembros Logueados:** Cockpit de bienvenida personalizado con avatar, saludo dinámico (*"¡Hola de nuevo, [Nombre]! 👋"*), pulso de actividad y accesos rápidos de creación sin duplicidades visuales.
+- **Formulario de Registro Rediseñado (`register.html`):**
+  - Estructurado en tarjeta semántica dividida en *Datos de Membresía y Profesión* y *Credenciales y Acceso*, con iconografía en inputs y alternadores interactivos de visibilidad de contraseña.
+  - Card previa de verificación institucional alertando al aspirante sobre la comprobación rigurosa de sus datos de socio antes de activar la cuenta.
 
 ---
 
@@ -73,7 +84,7 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
 | **Frontend Chat** | React 19, TypeScript 5+, Vite 8 | Módulo de chat en tiempo real 100% tipado, empaquetado como bundle optimizado. |
 | **Frontend Web** | Bootstrap 5.3, HTMX, Vanilla JS | Renderizado server-side accesible, scroll infinito y modo oscuro armonizado. |
 | **Seguridad & Media** | `nh3`, Pillow 10+ | Sanitización estricta de HTML y validación binaria de metadatos EXIF. |
-| **Calidad & Testing** | Django Test Runner, TypeScript Compiler | 126 tests unitarios/integración en ~6.1s (100% GREEN) + `tsc --noEmit`. |
+| **Calidad & Testing** | Django Test Runner, TypeScript Compiler | 129 tests unitarios/integración en ~4.5s (100% GREEN) + `tsc --noEmit`. |
 
 ---
 
@@ -179,12 +190,12 @@ El proyecto cuenta con una batería de pruebas rigurosa que cubre modelos, servi
 ### 1. Tests Unitarios y de Integración (Backend)
 Configurados con aceleración en memoria (`MD5PasswordHasher`, `InMemoryChannelLayer`, `CELERY_TASK_ALWAYS_EAGER`):
 ```bash
-# Ejecución con el entorno virtual activo (126 tests)
-./env/bin/python manage.py test
+# Ejecución con el entorno virtual activo (129 tests)
+DB_ENGINE=sqlite ./env/bin/python manage.py test
 ```
 *Salida esperada:*
 ```text
-Ran 126 tests in ~6.1s
+Ran 129 tests in ~4.5s
 OK
 ```
 
@@ -204,6 +215,14 @@ npm run type-check
 cd frontend
 npm run build
 ```
+
+---
+
+## 📱 Acceso Multi-Dispositivo y Testing en Móviles (Red Local)
+
+El proyecto incluye detección automática de la dirección IP local de tu máquina de desarrollo:
+- Al iniciar con `./start_dev.sh`, el script muestra la URL directa accesible desde cualquier smartphone o tablet conectado a la misma red WiFi (ej. `http://192.168.1.134:8000`).
+- Tanto Django (`ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`) como Vite Dev Server (`0.0.0.0:5173`, `DJANGO_VITE dev_server_host`) se configuran en caliente sin tocar archivos de configuración.
 
 ---
 
@@ -240,7 +259,7 @@ Para desplegar en servidores de producción (ej. Oracle Cloud, Ubuntu Server):
 - [x] **Seguridad de Archivos y Anti-IDOR:** Bloqueo de acceso directo en Nginx y descarga validada con `X-Accel-Redirect`, comprobación binaria de magic bytes y eliminación de metadatos EXIF con Pillow.
 - [x] **Hardening OWASP:** Saneamiento Stored XSS con `nh3`, mitigación de CSWSH en ASGI, Rate Limiting en Nginx y purga de secretos.
 - [x] **Zero-Downtime SSL Readiness:** Nginx configurado con ACME challenge webroot, servicio Certbot en Docker Compose y plantilla de producción lista.
-- [x] **Suite de Tests Exhaustiva:** 126 tests automatizados ejecutados en ~6.1s con 100% de éxito.
+- [x] **Suite de Tests Exhaustiva:** 129 tests automatizados ejecutados en ~4.5s con 100% de éxito.
 
 ---
 
