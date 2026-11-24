@@ -46,11 +46,11 @@ if [ $? != 0 ]; then
   
   # Capturamos el ID único del primer panel (Django)
   PANE_DJANGO=$(tmux display-message -p -t "$SESSION_NAME:0" "#{pane_id}")
-  tmux send-keys -t "$PANE_DJANGO" "cd '$PROJECT_DIR' && source env/bin/activate && python manage.py runserver" C-m
+  tmux send-keys -t "$PANE_DJANGO" "cd '$PROJECT_DIR' && source env/bin/activate && python manage.py runserver 0.0.0.0:8000" C-m
   
   # Panel Vite (Dividimos horizontalmente a la derecha)
   PANE_VITE=$(tmux split-window -h -P -F "#{pane_id}" -t "$PANE_DJANGO" -c "$PROJECT_DIR/frontend")
-  tmux send-keys -t "$PANE_VITE" "cd '$PROJECT_DIR/frontend' && npm run dev" C-m
+  tmux send-keys -t "$PANE_VITE" "cd '$PROJECT_DIR/frontend' && npm run dev -- --host 0.0.0.0" C-m
   
   # Panel Celery Worker (Dividimos verticalmente el panel izquierdo inferior)
   PANE_CELERY=$(tmux split-window -v -P -F "#{pane_id}" -t "$PANE_DJANGO" -c "$PROJECT_DIR")
@@ -58,13 +58,15 @@ if [ $? != 0 ]; then
   
   # Panel Redis (Dividimos verticalmente el panel derecho inferior)
   PANE_REDIS=$(tmux split-window -v -P -F "#{pane_id}" -t "$PANE_VITE" -c "$PROJECT_DIR")
-  tmux send-keys -t "$PANE_REDIS" "if redis-cli ping &>/dev/null; then echo '🟢 Redis ya está activo en 127.0.0.1:6379'; redis-cli monitor; else redis-server; fi" C-m
+  tmux send-keys -t "$PANE_REDIS" "if redis-cli ping &>/dev/null; then echo '🟢 Redis activo en 127.0.0.1:6379 (Servicio de sistema)'; redis-cli info server | grep -E 'redis_version|tcp_port'; echo ''; echo '⚡ Para monitorear tráfico en vivo ejecuta: redis-cli monitor'; else redis-server; fi" C-m
   
   # Ventana 2: Consola libre para el desarrollador
   tmux new-window -t "$SESSION_NAME:1" -n "Terminal" -c "$PROJECT_DIR"
+  LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
   tmux send-keys -t "$SESSION_NAME:1" "cd '$PROJECT_DIR' && source env/bin/activate && clear" C-m
   tmux send-keys -t "$SESSION_NAME:1" "echo '⚡ Terminal libre lista para usar con el venv activo.'" C-m
   tmux send-keys -t "$SESSION_NAME:1" "echo '📊 Django, Vite, Celery y Redis están en la ventana 0 (Atajo: Ctrl+b, 0)'" C-m
+  tmux send-keys -t "$SESSION_NAME:1" "echo '📱 Acceso móvil (misma Wi-Fi): http://'\${LOCAL_IP:-'192.168.1.134'}':8000'" C-m
   
   # Seleccionar panel de Django en la ventana 0 por defecto
   tmux select-window -t "$SESSION_NAME:0"

@@ -36,11 +36,33 @@ def env_list(name, default=""):
 
 DEBUG = env_bool("DEBUG", True)
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-this-secret-key")
+
+# Detección dinámica de IP LAN para acceso móvil en desarrollo
+LOCAL_LAN_IP = None
+if DEBUG:
+    try:
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0.1)
+        s.connect(("8.8.8.8", 80))
+        LOCAL_LAN_IP = s.getsockname()[0]
+        s.close()
+    except Exception:
+        LOCAL_LAN_IP = None
+
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost" if DEBUG else "")
+if DEBUG and LOCAL_LAN_IP and LOCAL_LAN_IP not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(LOCAL_LAN_IP)
+
 CSRF_TRUSTED_ORIGINS = env_list(
     "CSRF_TRUSTED_ORIGINS",
     "http://127.0.0.1:8000,http://localhost:8000,http://127.0.0.1:5173,http://localhost:5173" if DEBUG else "",
 )
+if DEBUG and LOCAL_LAN_IP:
+    for port_suffix in [":8000", ":5173", ""]:
+        origin = f"http://{LOCAL_LAN_IP}{port_suffix}"
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin)
 
 if not DEBUG and SECRET_KEY.startswith("django-insecure"):
     raise ValueError("Define a secure SECRET_KEY in .env for production.")
@@ -207,8 +229,8 @@ USE_I18N = True
 USE_TZ = True
 
 # CONFIGURACIÓN DE CELERY
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", os.getenv("REDIS_URL", "redis://redis:6379/1"))
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", os.getenv("REDIS_URL", "redis://redis:6379/1"))
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"))
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"))
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -231,6 +253,7 @@ STATICFILES_DIRS = [
 DJANGO_VITE = {
     "default": {
         "dev_mode": DEBUG,
+        "dev_server_host": os.getenv("VITE_DEV_SERVER_HOST", LOCAL_LAN_IP or "localhost"),
         "dev_server_port": 5173,
         "manifest_path": BASE_DIR / "frontend" / "dist" / ".vite" / "manifest.json",
     }
