@@ -69,6 +69,11 @@ class ListingCreateView(LoginRequiredMixin, CreateView):
     form_class = ListingForm
     template_name = 'marketplace/listing_form.html'
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         form.instance.seller = self.request.user
         messages.success(self.request, "Tu anuncio ha sido publicado exitosamente.")
@@ -81,6 +86,11 @@ class ListingUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Listing
     form_class = ListingForm
     template_name = 'marketplace/listing_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
         messages.success(self.request, "Anuncio actualizado correctamente.")

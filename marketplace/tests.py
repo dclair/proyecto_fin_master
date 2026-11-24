@@ -66,3 +66,49 @@ class MarketplaceTests(TestCase):
         
         self.assertFalse(SellerReview.objects.filter(seller=self.seller, reviewer=self.seller).exists())
         self.assertRedirects(response, reverse("marketplace:listing_list"), fetch_redirect_response=False)
+
+    def test_non_staff_cannot_select_or_submit_agora_in_marketplace(self):
+        agora, _ = Hobby.objects.get_or_create(name="Ágora", slug="agora")
+        from marketplace.forms import ListingForm
+
+        # 1. El queryset del formulario no debe incluir Ágora para usuario común
+        form = ListingForm(user=self.seller)
+        self.assertNotIn(agora, form.fields["hobby"].queryset)
+
+        # 2. Si intenta forzar Ágora en el POST
+        form_post = ListingForm(
+            data={
+                "hobby": agora.pk,
+                "title": "Intento venta institucional",
+                "description": "Descripción de prueba para verificar seguridad",
+                "price": 99.00,
+                "listing_type": "SALE",
+                "status": "AVAILABLE",
+            },
+            user=self.seller,
+        )
+        self.assertFalse(form_post.is_valid())
+        self.assertIn("hobby", form_post.errors)
+
+    def test_staff_can_select_agora_in_marketplace(self):
+        agora, _ = Hobby.objects.get_or_create(name="Ágora", slug="agora")
+        staff_user = User.objects.create_user(
+            username="staff_market", email="staff_m@test.com", password="PassComplex123!", is_staff=True
+        )
+        from marketplace.forms import ListingForm
+
+        form = ListingForm(user=staff_user)
+        self.assertIn(agora, form.fields["hobby"].queryset)
+
+        form_post = ListingForm(
+            data={
+                "hobby": agora.pk,
+                "title": "Publicación Oficial de Equipamiento",
+                "description": "Donación institucional o venta oficial",
+                "price": 0.00,
+                "listing_type": "OTHER",
+                "status": "AVAILABLE",
+            },
+            user=staff_user,
+        )
+        self.assertTrue(form_post.is_valid(), form_post.errors)
