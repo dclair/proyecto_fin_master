@@ -191,11 +191,11 @@ class HomeViewRestructureTests(TestCase):
             self.assertFalse(event.is_canceled)
             self.assertGreaterEqual(event.event_date, now)
 
-        # Verificar tabs en HTML
+        # Verificar tabs y cockpit en HTML
         self.assertContains(response, 'id="posts-tab"')
         self.assertContains(response, 'id="events-tab"')
         self.assertContains(response, 'id="library-tab"')
-        self.assertContains(response, "Eventos recomendados para ti")
+        self.assertContains(response, "¡Hola de nuevo")
 
         # 2. Test para usuario anónimo
         self.client.logout()

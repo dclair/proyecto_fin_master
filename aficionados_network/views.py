@@ -211,7 +211,6 @@ class LoginView(FormView):
 
         if user is not None:
             login(self.request, user)
-            messages.success(self.request, f"¡Bienvenido/a {user.username}!")
             return super().form_valid(form)
         else:
             messages.error(self.request, "Usuario o contraseña incorrectos")
