@@ -427,13 +427,16 @@ class EventListView(LoginRequiredMixin, ListView):
     paginate_by = 9
 
     def get_queryset(self):
-        # 1. Base del queryset (añadimos .distinct() aquí al principio)
-        queryset = (
-            Event.objects.select_related("hobby", "organizer")
-            .filter(event_date__gte=timezone.now())
-            .distinct()  # <--- Lo movemos aquí
-            .order_by("event_date")
-        )
+        show_past = self.request.GET.get("show_past") == "true"
+
+        # 1. Base del queryset
+        queryset = Event.objects.select_related("hobby", "organizer")
+        if not show_past:
+            queryset = queryset.filter(event_date__gte=timezone.now()).order_by("event_date")
+        else:
+            queryset = queryset.order_by("-event_date")
+
+        queryset = queryset.distinct()
 
         # 2. Captura de filtros
         search_query = self.request.GET.get("q")
@@ -468,6 +471,7 @@ class EventListView(LoginRequiredMixin, ListView):
         context["current_hobby"] = self.request.GET.get("hobby", "all")
         context["current_level"] = self.request.GET.get("level", "any")
         context["current_my_hobbies"] = self.request.GET.get("my_hobbies") == "true"
+        context["show_past"] = self.request.GET.get("show_past") == "true"
         
         if self.request.user.is_authenticated:
             user_levels_qs = UserHobby.objects.filter(

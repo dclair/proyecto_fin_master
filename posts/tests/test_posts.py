@@ -293,6 +293,29 @@ class EventRouteTests(TestCase):
         self.assertTrue(response.context["is_match"])
         self.assertFalse(response.context["is_mentor"])
 
+    def test_event_list_empty_future_events_shows_empty_state_and_past_button(self):
+        # Update event to be in the past
+        self.event.event_date = timezone.now() - timedelta(days=2)
+        self.event.save()
+
+        self.client.force_login(self.participant)
+        response = self.client.get(reverse("posts:event_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["events"]), 0)
+        self.assertContains(
+            response,
+            "NO hemos encontrado eventos futuros aún por realizarse o con los filtros aplicados.",
+        )
+        self.assertContains(response, "Ver todos los eventos (incluidos pasados)")
+
+        # Now request with show_past=true
+        response_past = self.client.get(reverse("posts:event_list"), {"show_past": "true"})
+        self.assertEqual(response_past.status_code, 200)
+        self.assertEqual(len(response_past.context["events"]), 1)
+        self.assertEqual(response_past.context["events"][0].pk, self.event.pk)
+        self.assertContains(response_past, "Finalizado")
+
     def test_event_create_adds_organizer_as_participant(self):
         self.client.force_login(self.organizer)
 
