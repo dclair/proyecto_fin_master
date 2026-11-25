@@ -530,3 +530,33 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 **Implications:**
 - Eliminación de pantallas vacías sin salida y acceso completo a la memoria histórica de eventos de la comunidad.
 
+## D-031: Blindaje Perimetral de Seguridad (Rate Limiting en Capas, 403 Explícito en Chat API y Rotación Zero-Downtime de SECRET_KEY)
+
+**Date:** 2026-11-25  
+**Decision:** Implementar y verificar cuatro capas críticas de blindaje de seguridad y resiliencia arquitectónica:
+1. **Chat API - Rechazo Explícito 403:** En `chat/api_views.py` (`MessageListView`), levantar `PermissionDenied("No eres participante de esta conversación")` en lugar de responder un queryset vacío con 200 OK cuando un usuario no participante intenta consultar los mensajes de una conversación, devolviendo HTTP 403 Forbidden estricto.
+2. **Rate Limiting Perimetral en Capas (Nginx & DRF):**
+   - En Nginx (`default.conf` y `production-ssl.conf.template`): Protección de fuerza bruta en `/password-reset/` y `/password_reset/` bajo la zona `auth_limit` (`burst=3 nodelay`), y activación de la zona `api_limit:10m` (`rate=60r/m burst=20 nodelay`) para todas las rutas `/api/`.
+   - En Django REST Framework (`aficionados_network/settings.py`): Configuración global de limitación de tasa en capas mediante `DEFAULT_THROTTLE_CLASSES` (`AnonRateThrottle`, `UserRateThrottle`) y `DEFAULT_THROTTLE_RATES` (`anon: '60/minute'`, `user: '300/minute'`).
+3. **Rotación Zero-Downtime de SECRET_KEY:**
+   - Soporte nativo para `SECRET_KEY_FALLBACKS = [k.strip() for k in os.getenv("SECRET_KEY_FALLBACKS", "").split(",") if k.strip()]`.
+   - Validación defensiva obligatoria en producción (`if not DEBUG:`): Verificación estricta de que ningún fallback sea trivial (`len >= 32`) ni utilice prefijos inseguros (`django-insecure`).
+   - Procedimiento de Rotación Cero-Downtime:
+     * Paso 1: Generar una nueva clave criptográficamente segura (`python -c "import secrets; print(secrets.token_urlsafe(50))"`).
+     * Paso 2: Copiar el valor actual de `SECRET_KEY` en `SECRET_KEY_FALLBACKS` (o añadir a la lista separada por comas) en `.env.prod`.
+     * Paso 3: Asignar la nueva clave a `SECRET_KEY` en `.env.prod`.
+     * Paso 4: Reiniciar servicios (`docker compose restart web celery_worker celery_beat`). Las sesiones activas de los usuarios y tokens previamente firmados continúan siendo válidos transparentemente vía `SECRET_KEY_FALLBACKS` sin invalidar cookies ni forzar re-autenticación masiva.
+     * Paso 5: Cumplido el ciclo de expiración (`SESSION_COOKIE_AGE = 3600`), retirar la clave antigua de los fallbacks.
+4. **Verificación Automatizada de Aislamiento:**
+   - Cobertura de pruebas con respuesta `403 Forbidden` garantizada para no participantes en API y cierre de conexión para anónimos/no participantes en WebSockets (`ChatConsumer` con `WebsocketCommunicator`).
+   - Cobertura de pruebas de aislamiento horizontal en Biblioteca (`ArticleUpdateView` y `ArticleDeleteView` rechazando usuarios ajenos con 403 Forbidden).
+
+**Why:**
+- Prevenir ataques de fuerza bruta, credential stuffing y DoS en endpoints sensibles y de API.
+- Evitar fugas de información o ambigüedad de estados permitiendo que el cliente detecte claramente la denegación de permisos (403) en lugar de listas vacías indistinguibles de chats sin mensajes.
+- Permitir la rotación periódica de credenciales maestras sin degradación del servicio ni disrupción de usuarios logueados.
+
+**Implications:**
+- Seguridad perimetral robusta en Nginx combinada con throttling granular en la capa de aplicación.
+- Garantía de cero brechas de autorización entre usuarios.
+

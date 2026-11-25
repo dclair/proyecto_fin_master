@@ -1,5 +1,6 @@
 import os
 from rest_framework import generics, permissions
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from .models import Conversation, Message, ConversationParticipant
 from .api_serializers import ConversationSerializer, MessageSerializer
@@ -60,7 +61,7 @@ class MessageListView(generics.ListAPIView):
         conversation_id = self.kwargs['conversation_id']
         # Validar que el usuario pertenece a la conversación
         if not ConversationParticipant.objects.filter(conversation_id=conversation_id, user=self.request.user).exists():
-            return Message.objects.none()
+            raise PermissionDenied("No eres participante de esta conversación")
         
         return Message.objects.filter(conversation_id=conversation_id).exclude(hidden_by=self.request.user).order_by('timestamp')
 

@@ -36,6 +36,7 @@ def env_list(name, default=""):
 
 DEBUG = env_bool("DEBUG", True)
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-this-secret-key")
+SECRET_KEY_FALLBACKS = [k.strip() for k in os.getenv("SECRET_KEY_FALLBACKS", "").split(",") if k.strip()]
 
 # Detección dinámica de IP LAN para acceso móvil en desarrollo
 LOCAL_LAN_IP = None
@@ -66,6 +67,8 @@ if DEBUG and LOCAL_LAN_IP:
 
 if not DEBUG and SECRET_KEY.startswith("django-insecure"):
     raise ValueError("Define a secure SECRET_KEY in .env for production.")
+if not DEBUG and any(k.startswith("django-insecure") or len(k) < 32 for k in SECRET_KEY_FALLBACKS):
+    raise ValueError("All SECRET_KEY_FALLBACKS must be secure keys with at least 32 characters in production.")
 if not DEBUG and not ALLOWED_HOSTS:
     raise ValueError("Define ALLOWED_HOSTS in .env for production.")
 
@@ -270,7 +273,15 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/minute',
+        'user': '300/minute',
+    },
 }
 
 STATIC_ROOT = BASE_DIR / "staticfiles"

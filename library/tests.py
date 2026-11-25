@@ -85,3 +85,50 @@ class ArticleNotificationAndRatingTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Nueva valoración en tu artículo", mail.outbox[0].subject)
 
+
+@override_settings(DEBUG=True, SECURE_SSL_REDIRECT=False)
+class ArticleSecurityTests(TestCase):
+    def setUp(self):
+        self.author = User.objects.create_user(
+            username="autor_original", email="autor@test.com", password="password123"
+        )
+        self.other_user = User.objects.create_user(
+            username="otro_usuario", email="otro@test.com", password="password123"
+        )
+        self.hobby = Hobby.objects.create(name="Osteopatía", slug="osteopatia")
+        self.article = Article.objects.create(
+            title="Guía de Osteopatía Craneal",
+            slug="guia-osteopatia-craneal",
+            author=self.author,
+            hobby=self.hobby,
+            content="Contenido protegido",
+        )
+
+    def test_non_author_cannot_edit_article_forbidden(self):
+        self.client.force_login(self.other_user)
+        update_url = reverse("library:article_update", kwargs={"slug": self.article.slug})
+        # GET del formulario debe devolver 403 Forbidden
+        response_get = self.client.get(update_url)
+        self.assertEqual(response_get.status_code, 403)
+        # POST modificando datos debe devolver 403 Forbidden
+        response_post = self.client.post(update_url, {
+            "title": "Hacked Title",
+            "hobby": self.hobby.id,
+            "content": "Malicious content",
+        })
+        self.assertEqual(response_post.status_code, 403)
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.title, "Guía de Osteopatía Craneal")
+
+    def test_non_author_cannot_delete_article_forbidden(self):
+        self.client.force_login(self.other_user)
+        delete_url = reverse("library:article_delete", kwargs={"slug": self.article.slug})
+        # GET confirmación de borrado debe devolver 403 Forbidden
+        response_get = self.client.get(delete_url)
+        self.assertEqual(response_get.status_code, 403)
+        # POST borrado debe devolver 403 Forbidden
+        response_post = self.client.post(delete_url)
+        self.assertEqual(response_post.status_code, 403)
+        self.assertTrue(Article.objects.filter(id=self.article.id).exists())
+
+

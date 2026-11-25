@@ -212,3 +212,69 @@ class ChatAPITests(TestCase):
         self.assertEqual(res_download.status_code, 200)
         self.assertIn('attachment', res_download.headers.get("Content-Disposition", ""))
         self.assertIn('guia_usuario.pdf', res_download.headers.get("Content-Disposition", ""))
+
+    def test_message_list_non_participant_forbidden(self):
+        conv = Conversation.objects.create(is_group=False)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user1)
+        ConversationParticipant.objects.create(conversation=conv, user=self.user2)
+
+        Message.objects.create(conversation=conv, sender=self.user1, content="Mensaje confidencial")
+
+        url = reverse("api-messages", kwargs={"conversation_id": conv.id})
+
+        # User 1 (participante) -> 200 OK
+        self.client.force_login(self.user1)
+        res_ok = self.client.get(url)
+        self.assertEqual(res_ok.status_code, 200)
+        self.assertEqual(len(res_ok.data), 1)
+
+        # User 3 (NO participante) -> 403 Forbidden
+        self.client.force_login(self.user3)
+        res_denied = self.client.get(url)
+        self.assertEqual(res_denied.status_code, 403)
+        self.assertIn("detail", res_denied.data)
+        self.assertEqual(res_denied.data["detail"], "No eres participante de esta conversación")
+
+
+from django.test import TransactionTestCase
+from channels.testing import WebsocketCommunicator
+from django.contrib.auth.models import AnonymousUser
+from chat.consumers import ChatConsumer
+
+class ChatWebSocketSecurityTests(TransactionTestCase):
+    async def test_websocket_anonymous_user_rejected(self):
+        conv = await Conversation.objects.acreate(is_group=False)
+        communicator = WebsocketCommunicator(ChatConsumer.as_asgi(), f"/ws/chat/{conv.id}/")
+        communicator.scope["user"] = AnonymousUser()
+        communicator.scope["url_route"] = {"kwargs": {"conversation_id": str(conv.id)}}
+
+        connected, _ = await communicator.connect()
+        self.assertFalse(connected)
+        await communicator.disconnect()
+
+    async def test_websocket_non_participant_user_rejected(self):
+        user_p = await User.objects.acreate_user(username="participante_ws", email="p_ws@test.com", password="Pass123!Secure")
+        user_np = await User.objects.acreate_user(username="no_participante_ws", email="np_ws@test.com", password="Pass123!Secure")
+        conv = await Conversation.objects.acreate(is_group=False)
+        await ConversationParticipant.objects.acreate(conversation=conv, user=user_p)
+
+        communicator = WebsocketCommunicator(ChatConsumer.as_asgi(), f"/ws/chat/{conv.id}/")
+        communicator.scope["user"] = user_np
+        communicator.scope["url_route"] = {"kwargs": {"conversation_id": str(conv.id)}}
+
+        connected, _ = await communicator.connect()
+        self.assertFalse(connected)
+        await communicator.disconnect()
+
+    async def test_websocket_participant_user_accepted(self):
+        user_p = await User.objects.acreate_user(username="participante_autorizado", email="p_aut@test.com", password="Pass123!Secure")
+        conv = await Conversation.objects.acreate(is_group=False)
+        await ConversationParticipant.objects.acreate(conversation=conv, user=user_p)
+
+        communicator = WebsocketCommunicator(ChatConsumer.as_asgi(), f"/ws/chat/{conv.id}/")
+        communicator.scope["user"] = user_p
+        communicator.scope["url_route"] = {"kwargs": {"conversation_id": str(conv.id)}}
+
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+        await communicator.disconnect()
