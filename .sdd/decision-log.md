@@ -1,6 +1,6 @@
 # Decision Log
 
-**Last reviewed:** 2026-11-22  
+**Last reviewed:** 2026-11-25  
 **Purpose:** record important technical/product decisions and why they were made.
 
 This is not a commit log. It captures decisions that future developers and AI agents should understand before changing direction.
@@ -530,15 +530,15 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 **Implications:**
 - Eliminación de pantallas vacías sin salida y acceso completo a la memoria histórica de eventos de la comunidad.
 
-## D-031: Blindaje Perimetral de Seguridad (Rate Limiting en Capas, 403 Explícito en Chat API y Rotación Zero-Downtime de SECRET_KEY)
+## D-031: Defensa en Profundidad y Rotación de Secretos (Rate Limiting en Capas, 403 Explícito en Chat API y SECRET_KEY_FALLBACKS)
 
 **Date:** 2026-11-25  
 **Decision:** Implementar y verificar cuatro capas críticas de blindaje de seguridad y resiliencia arquitectónica:
-1. **Chat API - Rechazo Explícito 403:** En `chat/api_views.py` (`MessageListView`), levantar `PermissionDenied("No eres participante de esta conversación")` en lugar de responder un queryset vacío con 200 OK cuando un usuario no participante intenta consultar los mensajes de una conversación, devolviendo HTTP 403 Forbidden estricto.
+1. **Chat API - Rechazo Explícito 403 (Anti-IDOR/BOLA):** En `chat/api_views.py` (`MessageListView`), levantar `PermissionDenied("No eres participante de esta conversación")` en lugar de responder un queryset vacío con 200 OK cuando un usuario no participante intenta consultar los mensajes de una conversación, devolviendo HTTP 403 Forbidden estricto y eliminando ambigüedad o enumeración de identificadores de chat.
 2. **Rate Limiting Perimetral en Capas (Nginx & DRF):**
-   - En Nginx (`default.conf` y `production-ssl.conf.template`): Protección de fuerza bruta en `/password-reset/` y `/password_reset/` bajo la zona `auth_limit` (`burst=3 nodelay`), y activación de la zona `api_limit:10m` (`rate=60r/m burst=20 nodelay`) para todas las rutas `/api/`.
+   - En Nginx (`default.conf` y `production-ssl.conf.template`): Protección de fuerza bruta en `/login/`, `/register/`, `/password-reset/` y `/password_reset/` bajo la zona `auth_limit` (`5r/m`, `burst=3-5 nodelay`), y activación de la zona `api_limit:10m` (`rate=60r/m burst=20 nodelay`) para todas las rutas `/api/`.
    - En Django REST Framework (`aficionados_network/settings.py`): Configuración global de limitación de tasa en capas mediante `DEFAULT_THROTTLE_CLASSES` (`AnonRateThrottle`, `UserRateThrottle`) y `DEFAULT_THROTTLE_RATES` (`anon: '60/minute'`, `user: '300/minute'`).
-3. **Rotación Zero-Downtime de SECRET_KEY:**
+3. **Rotación Zero-Downtime de Secretos:**
    - Soporte nativo para `SECRET_KEY_FALLBACKS = [k.strip() for k in os.getenv("SECRET_KEY_FALLBACKS", "").split(",") if k.strip()]`.
    - Validación defensiva obligatoria en producción (`if not DEBUG:`): Verificación estricta de que ningún fallback sea trivial (`len >= 32`) ni utilice prefijos inseguros (`django-insecure`).
    - Procedimiento de Rotación Cero-Downtime:
@@ -550,6 +550,7 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 4. **Verificación Automatizada de Aislamiento:**
    - Cobertura de pruebas con respuesta `403 Forbidden` garantizada para no participantes en API y cierre de conexión para anónimos/no participantes en WebSockets (`ChatConsumer` con `WebsocketCommunicator`).
    - Cobertura de pruebas de aislamiento horizontal en Biblioteca (`ArticleUpdateView` y `ArticleDeleteView` rechazando usuarios ajenos con 403 Forbidden).
+   - Cobertura de autorización en borrado de posts (`PostDeleteView`) y eventos (`EventCancelView`, `EventReactivateView`).
 
 **Why:**
 - Prevenir ataques de fuerza bruta, credential stuffing y DoS en endpoints sensibles y de API.
@@ -558,5 +559,27 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 
 **Implications:**
 - Seguridad perimetral robusta en Nginx combinada con throttling granular en la capa de aplicación.
-- Garantía de cero brechas de autorización entre usuarios.
+- Garantía de cero brechas de autorización entre usuarios y 135 tests pasando al 100% en verde.
+
+## D-032: Páginas de Error Corporativas Resilientes (404, 403 y 500 Autocontenida) y Rediseño de Footer Botánico (.footer-hubs)
+
+**Date:** 2026-11-25  
+**Decision:**
+1. Crear páginas de error corporativas personalizadas: `404.html` (recurso extraviado) y `403.html` (acceso restringido) heredando de `general/layout.html` con estética y navegación congruente.
+2. Diseñar la página `500.html` como una plantilla **100% autocontenida y ultra-defensiva**: sin herencia de layout, sin etiquetas `{% static %}` locales de Django y sin interacción con el ORM ni la base de datos MariaDB, utilizando estilos CSS inline y fallback a CDN de Bootstrap.
+3. Rediseñar el footer institucional (`.footer-hubs`) en `templates/_includes/_footer.html` y `static/css/style.css` mediante tokens semánticos de anclaje visual verde bosque (`--hubs-footer-bg: #16281e` en claro, `#0c130f` en oscuro) y certificación de contrastes WCAG AAA.
+
+**Why:**
+- Ante un error interno del servidor (500) motivado por la caída del motor de base de datos MariaDB o la saturación de conexiones, un template estándar que intente consultar el usuario, perfiles, flatpages o context processors volvería a lanzar una excepción durante el propio renderizado del error, mostrando al usuario la pantalla blanca o el mensaje crudo de error del proxy Nginx.
+- Las páginas de error 404 y 403 carecían de branding y guiado de navegación hacia el inicio o soporte.
+- El footer presentaba fondo blanco y contraste insuficiente en tema oscuro, rompiendo la inmersión y la jerarquía de lectura del portal.
+
+**Architecture & Implementation Details:**
+1. `500.html` incluye inline toda su tipografía, estilos de card (`.error-card`), botones y mensajes de disculpa claros con enlaces directos a `/` y `/contact/`.
+2. `404.html` y `403.html` utilizan la tarjeta `bg-body-tertiary rounded-4` con botones píldora corporativos (`btn-hubs`).
+3. El footer utiliza variables CSS `:root` y `[data-bs-theme="dark"]` (`--hubs-footer-bg`, `--hubs-footer-border`, `--hubs-footer-text: #c5d3ca`, `--hubs-footer-brand: #8bd3ab`), dotando a la interfaz de anclaje cromático de inspiración botánica y total accesibilidad.
+
+**Implications:**
+- Renderizado de errores resiliente a prueba de fallos de infraestructura.
+- Identidad visual armónica y accesible en el cierre de todas las vistas.
 

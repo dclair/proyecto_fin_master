@@ -36,9 +36,22 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
   - **Presentación Enriquecida de Documentos:** Nombres de archivo reales limpios de sufijos aleatorios internos (`attachment_name`), previsualizaciones tematizadas con iconos de Lucide (badges rojos para PDF, verde para hojas de cálculo, azul para documentos, ámbar para comprimidos, violeta para código) y descarga directa con 1 clic (`?download=1`).
 - **Control Total:** Opciones de "Eliminar para todos" (borrado físico del mensaje y destrucción del archivo adjunto en disco) y "Eliminar para mí" (borrado lógico local).
 
-### 4. Seguridad Perimetral y OWASP Hardening 🛡️
+### 4. Seguridad Perimetral, Defensa en Profundidad y OWASP Hardening 🛡️
+- **Rate Limiting por Capas (Nginx + Django REST Framework):**
+  - **Capa Perimetral (Nginx `limit_req_zone`):**
+    - Zona `auth_limit:10m rate=5r/m`: Protección estricta contra ataques de fuerza bruta y *credential stuffing* en rutas de autenticación crítica (`/login/`, `/register/`, `/password-reset/`, `/password_reset/`) con ráfagas controladas (`burst=3-5 nodelay`).
+    - Zona `api_limit:10m rate=60r/m`: Limitación perimetral transversal en todas las rutas `/api/` con ráfaga (`burst=20 nodelay`) para neutralizar abusos, scraping y ataques DoS en endpoints de datos y WebSockets.
+  - **Capa de Aplicación (Django REST Framework Throttling):**
+    - Throttling nativo desacoplado mediante `DEFAULT_THROTTLE_CLASSES` (`AnonRateThrottle`, `UserRateThrottle`) y cuotas predeterminadas (`anon: 60/minute`, `user: 300/minute`) en `settings.py`, blindando las APIs internas ante peticiones anómalas sin perjudicar la navegación habitual del usuario.
+- **Control de Acceso Estricto y Mitigación Anti-IDOR/BOLA (HTTP 403 Forbidden):**
+  - **Chat API Blindada con Rechazo Explícito:** `MessageListView` levanta `PermissionDenied("No eres participante de esta conversación")`, emitiendo una respuesta terminante de **HTTP 403 Forbidden** para cualquier usuario que intente consultar mensajes de chats ajenos, impidiendo la deducción de salas privadas mediante querysets vacíos con 200 OK.
+  - **Aislamiento en WebSockets ASGI:** Desconexión y rechazo inmediato a nivel canal (`ChatConsumer`) ante tokens inválidos, sesiones no autenticadas o usuarios que no pertenezcan a la sala activa.
+  - **Verificación Transversal de Autorización:** Comprobación estricta de propiedad/autoría con rechazo explícito `403 Forbidden` en la mutación y eliminación de Artículos en Biblioteca (`ArticleUpdateView`, `ArticleDeleteView`), borrado de publicaciones (`PostDeleteView`), y cancelación/reactivación de eventos (`EventCancelView`, `EventReactivateView`).
+- **Rotación Zero-Downtime de Secretos (`SECRET_KEY_FALLBACKS`):**
+  - Soporte nativo y dinámico en `settings.py` para listas de claves de respaldo mediante la variable de entorno `SECRET_KEY_FALLBACKS`.
+  - **Procedimiento de Rotación sin Disrupción:** Permite actualizar `SECRET_KEY` trasladando la clave saliente a `SECRET_KEY_FALLBACKS` y reiniciando contenedores (`docker compose restart web celery_worker celery_beat`). Las sesiones activas y tokens previamente emitidos continúan siendo válidos transparentemente sin forzar cierres de sesión masivos ni invalidar cookies de navegación.
+  - **Validación Defensiva en Producción:** Comprobación estricta al iniciar el servidor en producción (`if not DEBUG:`) exigiendo que todas las claves maestras y fallbacks cuenten con un mínimo de 32 caracteres y prohibiendo prefijos triviales de desarrollo (`django-insecure`).
 - **Saneamiento Anti-XSS (Doble Barrera):** Motor de sanitización con `nh3` en métodos `save()` de modelos (`Article`, `Event`, `Profile`) con listas blancas rigurosas de etiquetas HTML seguras, y filtro de plantilla personalizado `|sanitize_html`.
-- **Rate Limiting Perimetral:** Reglas de limitación de tasa en Nginx (`limit_req_zone`) sobre endpoints sensibles (`/login/`, `/contact/`) para prevenir ataques de fuerza bruta y DoS.
 - **Zero-Downtime SSL/TLS Readiness:**
   - Infraestructura preparada para aprovisionar certificados Let's Encrypt mediante el protocolo **ACME Webroot** (`/.well-known/acme-challenge/`), compartiendo volúmenes entre Nginx y Certbot en Docker Compose.
   - Cero tiempo de inactividad: Nginx se mantiene en ejecución atendiendo tráfico web y sockets, y se recarga en caliente (`nginx -s reload`) en milisegundos tras la emisión o renovación.
@@ -52,20 +65,28 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
 - **Biblioteca de Casos Clínicos y Artículos:** Publicaciones de divulgación técnica con editor enriquecido TinyMCE, extracción y decodificación universal de entidades HTML (`plain_text_summary`), y sistema de comentarios y valoraciones integrado con el `NotificationDispatcher`.
 - **Mercadillo de Profesionales:** Directorio de compra, venta, alquiler e intercambio de material y espacios terapéuticos, con enlaces directos a salas de chat privadas y sistema de valoraciones (reviews de 1 a 5 estrellas).
 
-### 6. Sistema de Temas Unificado (Light & Dark) y Contraste Semántico (WCAG AA) 🎨
+### 6. Sistema de Temas Unificado (Light & Dark) y Contraste Semántico (WCAG AA/AAA) 🎨
 - **Jerarquía Tonal Semántica Bootstrap 5.3:** Tokens semánticos estandarizados (`--bs-body-bg`, `--bs-card-bg`, `--bs-tertiary-bg`, `--bs-body-color`, `--bs-border-color`) eliminando clases rígidas como `bg-white`, `bg-light` y `text-dark` en más de 35 templates Django.
 - **Sincronización Reactiva Multi-Capa en Microfrontend:** Hook `useHostTheme` en React sincronizado en tiempo real con el selector del host Django mediante CustomEvent (`themeChanged`) y `MutationObserver` defensivo.
 - **Arquitectura de Cascada CSS Invertida y Blindaje de Terceros:**
   - Carga prioritaria de librerías CDN en `{% block extra_css %}` antes de `style.css` en `layout.html`, asegurando la precedencia de diseño de la aplicación.
   - Blindaje con selector calificado `[data-bs-theme="dark"]` y variables semánticas para componentes complejos como TomSelect (`.ts-control`, `.ts-dropdown`) y editores WYSIWYG TinyMCE (`oxide-dark`), garantizando contraste perfecto y legibilidad sin fondos blancos residuales.
+- **Rediseño de Footer con Anclaje Visual Botánico (`.footer-hubs`) y Accesibilidad WCAG AAA:**
+  - Anclaje visual verde bosque profundo (`--hubs-footer-bg: #16281e` en tema claro, `#0c130f` en tema oscuro) que otorga solidez, elegancia y estabilidad arquitectónica al cierre de cada página.
+  - Sistema de tokens de color de alto contraste que supera las directrices WCAG AAA en legibilidad (`--hubs-footer-text: #c5d3ca`, títulos en `#f8faf9`/`#8bd3ab`, bordes semánticos `--hubs-footer-border`).
+  - Navegación enriquecida: Enlaces con micro-interacciones hover (`translateX`), botones redondeados para gestión adaptativa de cookies (`.footer-btn-cookies`) y enlaces directos a políticas legales y aviso de privacidad.
 
-### 7. Portada Bimodal y Onboarding Profesional de Terapeutas ✨
+### 7. Portada Bimodal, Onboarding Profesional y Páginas de Error Resilientes ✨
 - **Portada Bimodal Adaptativa (`home.html`):**
   - **Para Visitantes (No logueados):** Hero de captación con titular inspirador, propuesta de valor clara, doble Call to Action (`[ Unirme a la Comunidad ]` y `[ Explorar Terapias ]`), píldoras de social proof (Comunidad Verificada, Casos Clínicos, Quedadas) e ilustración del ecosistema.
   - **Para Miembros Logueados:** Cockpit de bienvenida personalizado con avatar, saludo dinámico (*"¡Hola de nuevo, [Nombre]! 👋"*), pulso de actividad y accesos rápidos de creación sin duplicidades visuales.
 - **Formulario de Registro Rediseñado (`register.html`):**
   - Estructurado en tarjeta semántica dividida en *Datos de Membresía y Profesión* y *Credenciales y Acceso*, con iconografía en inputs y alternadores interactivos de visibilidad de contraseña.
   - Card previa de verificación institucional alertando al aspirante sobre la comprobación rigurosa de sus datos de socio antes de activar la cuenta.
+- **Páginas de Error Personalizadas y Resiliencia Forense:**
+  - **404 (`404.html`):** Página de recurso extraviado integrada en `layout.html`, con iconografía de brújula y acciones de retorno al inicio o contacto.
+  - **403 (`403.html`):** Página corporativa de acceso denegado con iconografía de blindaje (`bi-shield-lock-fill`) para señalizar claramente restricciones de autorización.
+  - **500 Autocontenida (`500.html`):** Plantilla de arquitectura ultra-defensiva que **no** hereda de `layout.html`, no utiliza tags estáticos (`{% static %}`) ni realiza consultas a base de datos u ORM. Utiliza estilos inline y CDN aislado, garantizando renderizado infalible ante caídas de la base de datos MariaDB o saturación del servidor.
 
 ---
 
@@ -79,12 +100,12 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
 | **Broker & Caché** | Redis 7 Alpine | Canal de transporte para Django Channels y broker/backend de Celery. |
 | **Tareas Asíncronas** | Celery 5.7+ Worker | Encolado de emails corporativos y notificaciones pesadas con reintentos exponenciales. |
 | **Programador Periódico** | Celery Beat | Ejecución programada de recordatorios de eventos 24h a las 08:00 AM. |
-| **Proxy & Servidor Web** | Nginx 1.25 Alpine | Reverse proxy, terminación SSL/TLS, Rate Limiting, CSP Sandbox y `X-Accel-Redirect`. |
+| **Proxy & Servidor Web** | Nginx 1.25 Alpine | Reverse proxy, terminación SSL/TLS, Rate Limiting por capas, CSP Sandbox y `X-Accel-Redirect`. |
 | **Certificados SSL** | Certbot (Let's Encrypt) | Emisión y renovación automática de certificados SSL/TLS con Zero-Downtime Webroot. |
 | **Frontend Chat** | React 19, TypeScript 5+, Vite 8 | Módulo de chat en tiempo real 100% tipado, empaquetado como bundle optimizado. |
 | **Frontend Web** | Bootstrap 5.3, HTMX, Vanilla JS | Renderizado server-side accesible, scroll infinito y modo oscuro armonizado. |
-| **Seguridad & Media** | `nh3`, Pillow 10+ | Sanitización estricta de HTML y validación binaria de metadatos EXIF. |
-| **Calidad & Testing** | Django Test Runner, TypeScript Compiler | 129 tests unitarios/integración en ~4.5s (100% GREEN) + `tsc --noEmit`. |
+| **Seguridad & Media** | `nh3`, Pillow 10+ | Sanitización estricta de HTML, validación binaria EXIF y defensa en profundidad. |
+| **Calidad & Testing** | Django Test Runner, TypeScript Compiler | 135 tests unitarios/integración en ~4.5s (100% GREEN) + `tsc --noEmit`. |
 
 ---
 
@@ -190,12 +211,12 @@ El proyecto cuenta con una batería de pruebas rigurosa que cubre modelos, servi
 ### 1. Tests Unitarios y de Integración (Backend)
 Configurados con aceleración en memoria (`MD5PasswordHasher`, `InMemoryChannelLayer`, `CELERY_TASK_ALWAYS_EAGER`):
 ```bash
-# Ejecución con el entorno virtual activo (129 tests)
+# Ejecución con el entorno virtual activo (135 tests)
 DB_ENGINE=sqlite ./env/bin/python manage.py test
 ```
 *Salida esperada:*
 ```text
-Ran 129 tests in ~4.5s
+Ran 135 tests in ~4.5s
 OK
 ```
 
@@ -259,7 +280,12 @@ Para desplegar en servidores de producción (ej. Oracle Cloud, Ubuntu Server):
 - [x] **Seguridad de Archivos y Anti-IDOR:** Bloqueo de acceso directo en Nginx y descarga validada con `X-Accel-Redirect`, comprobación binaria de magic bytes y eliminación de metadatos EXIF con Pillow.
 - [x] **Hardening OWASP:** Saneamiento Stored XSS con `nh3`, mitigación de CSWSH en ASGI, Rate Limiting en Nginx y purga de secretos.
 - [x] **Zero-Downtime SSL Readiness:** Nginx configurado con ACME challenge webroot, servicio Certbot en Docker Compose y plantilla de producción lista.
-- [x] **Suite de Tests Exhaustiva:** 129 tests automatizados ejecutados en ~4.5s con 100% de éxito.
+- [x] **Suite de Tests Exhaustiva:** 135 tests automatizados ejecutados en ~4.5s con 100% de éxito.
+- [x] **Defensa en Profundidad y Rate Limiting:** Doble barrera Nginx (`auth_limit`, `api_limit`) + Throttling en DRF (`AnonRateThrottle`, `UserRateThrottle`).
+- [x] **Control de Acceso Anti-IDOR/BOLA:** Rechazo terminante con `HTTP 403 Forbidden` en Chat API y verificación estricta de autoría en Biblioteca, Posts y Eventos.
+- [x] **Rotación Zero-Downtime de Secretos:** Soporte nativo para `SECRET_KEY_FALLBACKS` con validación defensiva en arranque de producción.
+- [x] **Páginas de Error Corporativas Resilientes:** 404 y 403 tematizadas, y página 500 autocontenida inmune a caídas de base de datos.
+- [x] **Footer Botánico de Alto Contraste:** Rediseño arquitectónico (`.footer-hubs`) con anclaje visual verde bosque y accesibilidad WCAG AAA.
 
 ---
 

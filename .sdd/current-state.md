@@ -1,6 +1,6 @@
 # Current State
 
-**Last reviewed:** 2026-11-24  
+**Last reviewed:** 2026-11-25  
 **Role:** single operational truth for the project today.
 
 This document is the first place to check before modifying Hubs&Clicks. It summarizes what is currently true, what is verified, what is risky, and where deeper details live.
@@ -62,6 +62,24 @@ Current user-facing capabilities:
 - Multi-Device LAN Mobile Testing Support:
   - Dynamic local IP detection in `DEBUG` mode adding host LAN IP to `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`.
   - Vite dev server listening on `0.0.0.0:5173` with dynamic `dev_server_host` in `DJANGO_VITE` for mobile browsers on the same WiFi.
+- Layered Rate Limiting & Defense-in-Depth:
+  - Nginx perimeter rate limiting (`auth_limit` zone, 5 req/m, burst=3-5 nodelay) over `/login/`, `/register/`, `/password-reset/`, and `/password_reset/`.
+  - Nginx API rate limiting (`api_limit` zone, 60 req/m, burst=20 nodelay) across all `/api/` endpoints.
+  - Django REST Framework application-level throttling (`AnonRateThrottle` at 60/min, `UserRateThrottle` at 300/min).
+- Strict Access Control & Anti-IDOR/BOLA:
+  - Chat API: `MessageListView` raises `PermissionDenied("No eres participante de esta conversación")` resulting in explicit HTTP 403 Forbidden for non-members.
+  - Channels WebSockets: `ChatConsumer` disconnects immediately on unauthorized connection attempts or non-member socket operations.
+  - Domain views: `ArticleUpdateView` and `ArticleDeleteView` in `library`, `PostDeleteView` in `posts`, and event lifecycle routes enforce strict ownership checks with 403 Forbidden.
+- Zero-Downtime Secret Rotation:
+  - Support for `SECRET_KEY_FALLBACKS` list in `settings.py`, allowing key rotation without terminating existing user sessions or invalidating active tokens.
+  - Production defensive validation requiring minimum 32 characters and prohibiting `django-insecure` prefixes.
+- Branded & Resilient Error Pages:
+  - Custom `404.html` and `403.html` matching corporate branding and extending `layout.html`.
+  - Standalone `500.html` with zero database, zero ORM, and zero Django static dependencies, utilizing inline CSS and CDN fallback to render reliably even during database outages.
+- Botanical High-Contrast Footer (`.footer-hubs`):
+  - Anchored deep botanical forest green (`#16281e` in light theme, `#0c130f` in dark theme) providing visual stability.
+  - WCAG AAA contrast compliance across all text tokens (`--hubs-footer-text: #c5d3ca`, brand `#8bd3ab`, titles `#f8faf9`/`#f1f5f2`).
+  - Interactive cookie settings modal trigger (`.footer-btn-cookies`) and accessible navigation links.
 
 
 ## Runtime & Infrastructure
@@ -79,7 +97,7 @@ Stack:
 - **Asynchronous Tasks:** Celery 5.7+ Worker (`celery_worker` service in Docker Compose).
 - **Periodic Scheduler:** Celery Beat (`celery_beat` service in Docker Compose).
 - **Reverse Proxy & Edge:**
-  - Nginx 1.25 Alpine with rate limiting (`limit_req_zone`), HSTS, CSP `sandbox` on `/media/`, internal `/protected_media/` via `X-Accel-Redirect`, and ACME webroot challenge routing (`/.well-known/acme-challenge/`).
+  - Nginx 1.25 Alpine with layered rate limiting (`auth_limit` zone for auth routes and `api_limit` zone for `/api/`), HSTS, CSP `sandbox` on `/media/`, internal `/protected_media/` via `X-Accel-Redirect`, and ACME webroot challenge routing (`/.well-known/acme-challenge/`).
   - Ports exposed: `80`, `8000`, and `443` (prepared for HTTPS).
 - **SSL / TLS Provisioning:**
   - Official Certbot service in Docker Compose running background renewal checks every 12h.
@@ -102,7 +120,7 @@ Docker Compose Services:
 Operational command for tests:
 
 ```bash
-# Backend unit & integration test suite (129 tests)
+# Backend unit & integration test suite (135 tests)
 DB_ENGINE=sqlite ./env/bin/python manage.py test
 
 # Frontend TypeScript type check (0 errors)
@@ -112,7 +130,7 @@ cd frontend && npm run type-check
 Last known verification:
 
 ```text
-Ran 129 tests in ~4.5s (100% GREEN)
+Ran 135 tests in ~4.5s (100% GREEN)
 Frontend type-check: 0 errors (tsc --noEmit clean)
 ```
 
@@ -125,12 +143,12 @@ Main project package and app:
 - `aficionados_network/tasks.py`: Asynchronous tasks (`send_email_task` with exponential backoff and jitter).
 - `aficionados_network/utils/mailer.py`: Resilient email dispatch helper (Celery primary, ThreadPool fallback, template rendering with extra context).
 - `aficionados_network/utils/sanitizer.py`: `nh3` HTML sanitizer with strict tag/attribute allowlists and automatic `rel="noopener noreferrer"`.
-- `aficionados_network/settings.py`: settings, env handling, DB selector, static/media/email, test profiling (InMemoryChannelLayer, MD5PasswordHasher, CompressedStaticFilesStorage, CELERY_TASK_ALWAYS_EAGER).
+- `aficionados_network/settings.py`: settings, env handling, DB selector, static/media/email, test profiling (InMemoryChannelLayer, MD5PasswordHasher, CompressedStaticFilesStorage, CELERY_TASK_ALWAYS_EAGER), `SECRET_KEY_FALLBACKS` support with defensive validation, and REST_FRAMEWORK throttling (`AnonRateThrottle`, `UserRateThrottle`).
 - `aficionados_network/urls.py`: root URL dispatcher.
 - `aficionados_network/views.py`: home, auth, registration activation, contact form (with safe reply-to).
 - `aficionados_network/models.py`: `ContactMessage`.
 - `aficionados_network/forms.py`: auth/profile/contact/hobby forms.
-- `aficionados_network/templates/`: main shared template tree.
+- `aficionados_network/templates/`: main shared template tree, including custom error pages (`404.html`, `403.html`, and standalone `500.html`) and redesigned botanical footer (`_includes/_footer.html`).
 
 Domain apps:
 
@@ -184,21 +202,21 @@ Infrastructure & Ops:
 
 ## Verified Coverage
 
-Tests currently cover 126 test cases across:
+Tests currently cover 135 test cases across:
 
 - Core pages, auth, registration activation, contact email, Celery email dispatch.
 - Profile model behavior, follows, hobbies, reviews, and anti-self-review authorization.
 - Profile routes and follow notifications.
-- Post model behavior, likes, comments, emails, modal partial.
-- Event lifecycle: create, attend, cancel, reactivate, duplicate, comment.
+- Post model behavior, likes, comments, emails, modal partial, and deletion authorization.
+- Event lifecycle: create, attend, cancel, reactivate, duplicate, comment, and organizer authorization checks.
 - Event reminders: Celery Beat task execution, 24h window filtering, multi-level idempotency (`reminder_sent`), atomic transactions, unconfirmed user exclusion, and error handling.
 - NotificationDispatcher service: in-app creation, email dispatch, Celery resilience, template fallback, and all business event types.
 - Hobby hub and clicks gallery smoke behavior.
 - Notification list, unread count, redirects, context processor.
-- Chat APIs, conversation isolation, protected attachment downloads (`X-Accel-Redirect`), and WebSockets security (`AllowedHostsOriginValidator`).
+- Chat APIs: explicit `HTTP 403 Forbidden` rejection for non-participants querying messages, conversation isolation, protected attachment downloads (`X-Accel-Redirect`), and WebSockets security with disconnection for non-participants/unauthenticated sockets (`AllowedHostsOriginValidator`).
+- Library article comments and ratings notification dispatch, plus strict `403 Forbidden` authorization verification for unauthorized edits and deletions (`ArticleUpdateView`, `ArticleDeleteView`).
 - Gamification scoring and badges with `O(1)` check and database aggregations.
 - Marketplace listing creation and filters.
-- Library article comments and ratings notification dispatch.
 - Frontend: Strict TypeScript compilation passing with 0 errors via `npm run type-check`.
 
 

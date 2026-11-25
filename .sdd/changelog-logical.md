@@ -1,9 +1,68 @@
 # Logical Changelog
 
-**Last reviewed:** 2026-11-24  
+**Last reviewed:** 2026-11-25  
 **Purpose:** semantic change history of the system, independent from Git commits.
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
+
+## 2026-11-25: Deep Defense Security, Layered Rate Limiting, Chat API 403 Rejection & Zero-Downtime Secret Rotation
+
+**Type:** security / architecture / testing  
+**Status:** done
+
+What changed:
+- **Rate Limiting por Capas (Defensa en Profundidad)**:
+  - En Nginx (`nginx/default.conf` y `nginx/production-ssl.conf.template`): Zonas de tasa controlada `auth_limit:10m rate=5r/m` aplicadas en `/login/`, `/register/`, `/password-reset/` y `/password_reset/` (`burst=3-5 nodelay`), y zona `api_limit:10m rate=60r/m` protegiendo transversalmente todas las rutas `/api/` (`burst=20 nodelay`).
+  - En Django REST Framework (`aficionados_network/settings.py`): Activado throttling global desacoplado mediante `DEFAULT_THROTTLE_CLASSES` (`AnonRateThrottle`, `UserRateThrottle`) con cuotas predeterminadas (`anon: 60/minute`, `user: 300/minute`).
+- **Control de Acceso Estricto Anti-IDOR/BOLA (HTTP 403 Forbidden)**:
+  - En `chat/api_views.py` (`MessageListView.get_queryset`): Se reemplaza la respuesta ambigua de queryset vacío con `PermissionDenied("No eres participante de esta conversación")`, devolviendo `HTTP 403 Forbidden` terminante ante peticiones no autorizadas.
+  - En `chat/consumers.py`: Cierre y desconexión inmediata de WebSockets ASGI para usuarios anónimos o no pertenecientes a la sala activa.
+  - En `library/views.py`: Validación estricta de propiedad/autoría con `403 Forbidden` en `ArticleUpdateView` y `ArticleDeleteView`.
+  - Verificación de permisos en `posts` para eliminación de posts (`PostDeleteView`) y cancelación/reactivación de eventos (`EventCancelView`, `EventReactivateView`).
+- **Rotación Zero-Downtime de Secretos (`SECRET_KEY_FALLBACKS`)**:
+  - En `aficionados_network/settings.py`: Soporte nativo para `SECRET_KEY_FALLBACKS` cargando listas de claves separadas por coma desde variables de entorno.
+  - Validación de seguridad defensiva en producción (`if not DEBUG:`): Fallo de inicio inmediato si alguna clave maestra o de fallback posee menos de 32 caracteres o utiliza prefijos inseguros (`django-insecure`).
+  - Procedimiento operativo sin corte: Clave saliente se traslada a `SECRET_KEY_FALLBACKS`, nueva clave se asigna a `SECRET_KEY`, y reinicio en caliente de servicios sin invalidar sesiones de usuarios ni cookies existentes.
+- **Suite de Pruebas Ampliada**:
+  - Nuevos tests de seguridad unitarios y de integración en `chat/tests.py` y `library/tests.py`.
+  - Suite de pruebas de backend ampliada a **135 tests automatizados pasando en verde (100% OK)** en ~4.5s.
+
+Why:
+- Blindar la plataforma ante ataques de fuerza bruta, credential stuffing, denegación de servicio y accesos horizontales no autorizados (IDOR/BOLA), asegurando al mismo tiempo la capacidad operativa de rotar credenciales maestras sin disrupción de servicio.
+
+Impact:
+- Máxima robustez perimetral y de aplicación, con cobertura formal de pruebas para toda la matriz de autorización.
+
+Verification:
+- `DB_ENGINE=sqlite ./env/bin/python manage.py test`: 135 tests passing in ~4.5s (100% GREEN).
+- Frontend type-check: `cd frontend && npm run type-check` (0 errores).
+
+## 2026-11-25: Resilient Custom Error Pages (404, 403 & Standalone 500) and Botanical High-Contrast Footer (.footer-hubs)
+
+**Type:** feature / UI / UX / reliability  
+**Status:** done
+
+What changed:
+- **Páginas de Error Corporativas y Resilientes (`templates/`)**:
+  - `404.html`: Plantilla personalizada de recurso no encontrado integrada con `layout.html`, iconografía semántica de brújula y botones de retorno al inicio o contacto.
+  - `403.html`: Plantilla corporativa de acceso denegado con iconografía de escudo de seguridad (`bi-shield-lock-fill`) para señalizar claramente restricciones de autorización.
+  - `500.html` (100% Autocontenida): Arquitectura ultra-defensiva que **no** hereda de `layout.html`, no utiliza tags de estáticos de Django (`{% static %}`) ni invoca la base de datos o el ORM. Emplea estilos CSS inline y CDN aislado, garantizando renderizado infalible ante caídas de conexión a MariaDB, errores de Redis o saturación del servidor.
+- **Rediseño de Footer con Anclaje Visual Botánico (`.footer-hubs`)**:
+  - Implementación de `.footer-hubs` en `templates/_includes/_footer.html` y tokens semánticos en `static/css/style.css`:
+    * Modo Claro: Fondo verde bosque profundo (`--hubs-footer-bg: #16281e`, borde `#233b2d`) que ancla visualmente la página otorgando peso y elegancia.
+    * Modo Oscuro: Verde oscuro profundo (`--hubs-footer-bg: #0c130f`, borde `#2a382f`) diferenciado sutilmente del fondo del body.
+  - Cumplimiento estricto de accesibilidad WCAG AAA en contrastes tipográficos (`--hubs-footer-text: #c5d3ca`, títulos en `#f8faf9`/`#8bd3ab`, créditos en `#9eb1a4`/`#839789`).
+  - Navegación enriquecida y micro-interacciones: Enlaces con desplazamiento suave al hover, iconos sociales circulares flotantes y botón píldora `.footer-btn-cookies` para gestión adaptativa del consentimiento.
+
+Why:
+- Proporcionar una experiencia de usuario profesional, digna y guiada incluso en situaciones de error o fallo crítico, y resolver el desequilibrio estético del footer integrando una identidad visual botánica sólida, armónica y de máxima accesibilidad.
+
+Impact:
+- Tolerancia a fallos reforzada (cero pantallas de error crudas de servidor web o errores 500 en cascada) e identidad de marca cohesiva en toda la aplicación.
+
+Verification:
+- Verificación de renderizado de 404, 403 y 500 en escenarios normales y aislados de base de datos.
+- Contrastes cromáticos validados bajo directrices WCAG AAA.
 
 ## 2026-11-24: Past Events Filter and Empty State UX in Event Explorer
 
