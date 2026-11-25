@@ -494,33 +494,154 @@ h1, h2 { text-shadow: none; }
 }
 
 /* ============================================================
-   8. FOOTER Y OTROS
+   8. FOOTER BOTÁNICO Y ELEMENTOS AUXILIARES
+   Identidad Verde Botánica ("Oliva & Bambú")
    ============================================================ */
-footer {
+:root, [data-bs-theme="light"] {
+    /* Modo Claro: Fondo verde botánico profundo/bosque elegante (#16281e) que ancla visualmente */
+    --hubs-footer-bg: #16281e;
+    --hubs-footer-border: #233b2d;
+    --hubs-footer-title: #f8faf9;
+    --hubs-footer-brand: #8bd3ab;
+    --hubs-footer-text: #c5d3ca;
+    --hubs-footer-muted: #9eb1a4;
+    --hubs-footer-link: #c5d3ca;
+    --hubs-footer-link-hover: #8bd3ab;
+    --hubs-footer-hr: rgba(255, 255, 255, 0.12);
+    --hubs-footer-btn-border: #3b5745;
+    --hubs-footer-btn-text: #c5d3ca;
+    --hubs-footer-btn-hover-bg: #233b2d;
+    --hubs-footer-btn-hover-text: #ffffff;
+}
+
+[data-bs-theme="dark"] {
+    /* Modo Oscuro: Verde oscuro profundo (#0c130f) diferenciado del body (#121614) con borde superior nítido */
+    --hubs-footer-bg: #0c130f;
+    --hubs-footer-border: #2a382f;
+    --hubs-footer-title: #f1f5f2;
+    --hubs-footer-brand: #6eb98f;
+    --hubs-footer-text: #b8c7bd;
+    --hubs-footer-muted: #839789;
+    --hubs-footer-link: #b8c7bd;
+    --hubs-footer-link-hover: #92d1ad;
+    --hubs-footer-hr: rgba(255, 255, 255, 0.08);
+    --hubs-footer-btn-border: #2a382f;
+    --hubs-footer-btn-text: #b8c7bd;
+    --hubs-footer-btn-hover-bg: #1e2b22;
+    --hubs-footer-btn-hover-text: #ffffff;
+}
+
+.footer-hubs {
     flex-shrink: 0;
-    background-color: white;
-    border-top: 1px solid var(--hubs-border);
-    padding: 2rem 0;
+    background-color: var(--hubs-footer-bg);
+    border-top: 1px solid var(--hubs-footer-border);
+    color: var(--hubs-footer-text);
+    margin-top: auto;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Fallback para tags footer genéricos */
+footer:not(.footer-hubs) {
+    flex-shrink: 0;
+    background-color: var(--hubs-footer-bg);
+    border-top: 1px solid var(--hubs-footer-border);
+    color: var(--hubs-footer-text);
     margin-top: auto;
 }
 
-/* Efecto hover para enlaces del footer */
-footer a {
-    transition: color 0.3s ease-in-out, transform 0.2s ease;
+.footer-hubs .footer-brand-title {
+    color: var(--hubs-footer-brand);
+    letter-spacing: -0.01em;
+}
+
+.footer-hubs .footer-heading {
+    color: var(--hubs-footer-title);
+    letter-spacing: 0.04em;
+    font-size: 0.95rem;
+}
+
+.footer-hubs .footer-description {
+    color: var(--hubs-footer-text);
+    line-height: 1.6;
+}
+
+.footer-hubs .footer-link {
+    color: var(--hubs-footer-link);
+    text-decoration: none;
+    transition: color 0.25s ease, transform 0.2s ease;
     display: inline-block;
 }
 
 @media (hover: hover) {
-    footer a:hover {
-        color: #20c997; /* Verde claro / Teal brillante para fondo oscuro */
-        transform: translateX(3px); /* Pequeño desplazamiento a la derecha */
+    .footer-hubs .footer-link:hover {
+        color: var(--hubs-footer-link-hover);
+        transform: translateX(3px);
     }
 }
 
-/* Efecto al hacer click (active) */
-footer a:active {
-    color: #198754; /* Verde un poco más oscuro al presionar */
-    transform: scale(0.95) translateX(3px); /* Efecto de hundimiento rápido */
+.footer-hubs .footer-link:active {
+    color: var(--hubs-footer-link-hover);
+    transform: scale(0.98) translateX(2px);
+}
+
+.footer-hubs .footer-social-link {
+    color: var(--hubs-footer-text);
+    font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--hubs-footer-border);
+    transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
+    text-decoration: none;
+}
+
+@media (hover: hover) {
+    .footer-hubs .footer-social-link:hover {
+        color: var(--hubs-footer-link-hover);
+        background-color: rgba(255, 255, 255, 0.12);
+        border-color: var(--hubs-footer-link-hover);
+        transform: translateY(-2px);
+    }
+}
+
+.footer-hubs .footer-social-link:active {
+    transform: scale(0.92);
+}
+
+.footer-hubs .footer-btn-cookies {
+    background-color: transparent;
+    color: var(--hubs-footer-btn-text);
+    border: 1px solid var(--hubs-footer-btn-border);
+    border-radius: 50rem;
+    padding: 0.35rem 0.95rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+@media (hover: hover) {
+    .footer-hubs .footer-btn-cookies:hover {
+        background-color: var(--hubs-footer-btn-hover-bg);
+        color: var(--hubs-footer-btn-hover-text);
+        border-color: var(--hubs-footer-link-hover);
+        transform: translateY(-1px);
+    }
+}
+
+.footer-hubs .footer-divider {
+    border: none;
+    height: 1px;
+    background-color: var(--hubs-footer-hr);
+    opacity: 1;
+}
+
+.footer-hubs .footer-copyright,
+.footer-hubs .footer-credits {
+    color: var(--hubs-footer-muted);
 }
 
 .back-to-top {
