@@ -36,6 +36,10 @@ def send_email_task(
     logger.info(
         f"[Celery] Enviando correo a {recipient_email} - Intento {self.request.retries + 1}/5"
     )
+    from aficionados_network.utils.site import build_absolute_url
+    if action_url:
+        action_url = build_absolute_url(action_url)
+
     context = {
         "recipient_name": recipient_username,
         "message_body": message_body,

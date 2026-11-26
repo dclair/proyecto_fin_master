@@ -118,6 +118,20 @@ if HAS_WHITENOISE:
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 SITE_ID = int(os.getenv("SITE_ID", "1"))
+SITE_DOMAIN = os.getenv("SITE_DOMAIN", os.getenv("DOMAIN", "")).strip()
+SITE_NAME = os.getenv("SITE_NAME", "Hubs & Clicks").strip()
+SITE_URL = os.getenv("SITE_URL", os.getenv("BASE_URL", "")).strip()
+SITE_PROTOCOL = os.getenv(
+    "SITE_PROTOCOL",
+    "https"
+    if (
+        env_bool("SECURE_SSL_REDIRECT", False)
+        or (not DEBUG and env_bool("SECURE_HSTS_SECONDS", False))
+        or (SITE_URL and SITE_URL.startswith("https://"))
+    )
+    else "http",
+).strip()
+
 
 ROOT_URLCONF = "aficionados_network.urls"
 

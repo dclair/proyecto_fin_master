@@ -82,13 +82,9 @@ def send_welcome_email_on_activation(sender, instance, created, **kwargs):
     if not created and hasattr(instance, '_old_is_active'):
         if not instance._old_is_active and instance.is_active:
             # ¡El usuario fue activado por un admin!
-            from django.contrib.sites.models import Site
             from aficionados_network.utils.mailer import send_hubs_email_async
-            try:
-                current_site = Site.objects.get_current()
-                domain = current_site.domain
-            except Exception:
-                domain = "localhost:8000"
+            from aficionados_network.utils.site import build_absolute_url
+            from django.urls import reverse
 
             mail_subject = "¡Bienvenido a Hubs & Clicks! Tu cuenta ha sido activada"
             message_body = (
@@ -97,7 +93,11 @@ def send_welcome_email_on_activation(sender, instance, created, **kwargs):
                 f"Ya puedes iniciar sesión en la plataforma para descubrir y conectar con la comunidad, "
                 f"participar en quedadas, compartir tus clicks y disfrutar de todos los recursos."
             )
-            action_url = f"http://{domain}/login/"
+            try:
+                login_path = reverse("login")
+            except Exception:
+                login_path = "/login/"
+            action_url = build_absolute_url(login_path)
 
             try:
                 send_hubs_email_async(

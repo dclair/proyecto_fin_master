@@ -30,6 +30,10 @@ def _send_hubs_email_sync(
     extra_context=None,
 ):
     try:
+        from aficionados_network.utils.site import build_absolute_url
+        if action_url:
+            action_url = build_absolute_url(action_url)
+
         context = {
             "recipient_name": recipient_username,
             "message_body": message_body,
