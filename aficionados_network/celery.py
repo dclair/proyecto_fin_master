@@ -19,6 +19,10 @@ app.conf.beat_schedule = {
         'task': 'posts.tasks.send_event_reminders_task',
         'schedule': crontab(hour=8, minute=0),
     },
+    'clear-expired-sessions-daily-at-3am': {
+        'task': 'aficionados_network.tasks.clear_expired_sessions_task',
+        'schedule': crontab(hour=3, minute=0),
+    },
 }
 
 

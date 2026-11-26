@@ -5,6 +5,7 @@ from email.mime.image import MIMEImage
 from celery import shared_task
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
+from django.core.management import call_command
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
@@ -75,6 +76,32 @@ def send_email_task(
     email.send(fail_silently=False)
     logger.info(f"[Celery] Correo enviado exitosamente a {recipient_email}")
     return f"Sent to {recipient_email}"
+
+
+@shared_task(
+    bind=True,
+    max_retries=3,
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_backoff_max=300,
+    retry_jitter=True,
+)
+def clear_expired_sessions_task(self):
+    """
+    Tarea periódica de mantenimiento en Celery Beat para eliminar sesiones
+    expiradas de la base de datos (django_session) mediante el comando clearsessions.
+    """
+    logger.info("[Celery Beat] Iniciando limpieza periódica de sesiones expiradas...")
+    try:
+        call_command("clearsessions")
+        logger.info("[Celery Beat] Limpieza periódica de sesiones expiradas completada con éxito.")
+        return "Expired sessions cleaned successfully"
+    except Exception as exc:
+        logger.error(
+            f"[Celery Beat] Error durante la ejecución de clearsessions: {exc}",
+            exc_info=True,
+        )
+        raise exc
 
 
 # Exponer la tarea de recordatorio de eventos para conveniencia e interoperabilidad
