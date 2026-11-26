@@ -4,6 +4,10 @@
 
 {% block head_title %}Editar Perfil - {{ user.username }}{% endblock %}
 
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+{% endblock extra_css %}
+
 {% block content %}
 <div class="container py-5">
   <div class="row g-4">
@@ -162,17 +166,17 @@
           >
             {% csrf_token %}
             <div class="mb-3">
-              <label class="form-label small text-body">¿Cuál es tu pasión?</label>
-              <select name="hobby" class="form-select form-select-sm" required>
-                <option value="">Selecciona...</option>
+              <label for="id_hobby" class="form-label small text-body">¿Cuál es tu pasión?</label>
+              <select name="hobby" id="id_hobby" class="form-select form-select-sm" required>
+                <option value="">Selecciona o escribe para buscar...</option>
                 {% for hobby in all_hobbies %}
                 <option value="{{ hobby.id }}">{{ hobby.name }}</option>
                 {% endfor %}
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label small text-body">Tu nivel</label>
-              <select name="level" class="form-select form-select-sm">
+              <label for="id_level" class="form-label small text-body">Tu nivel</label>
+              <select name="level" id="id_level" class="form-select form-select-sm">
                 <option value="beginner">Principiante</option>
                 <option value="intermediate">Intermedio</option>
                 <option value="advanced">Avanzado</option>
@@ -191,13 +195,44 @@
       </div>
     </div>
   </div>
-  {% endblock %} 
+</div>
+{% endblock %} 
   
-  {% block extra_js %} 
-  <!-- TinyMCE CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
-  <script>
-    function initBioTinyMCE() {
+{% block extra_js %} 
+<!-- TinyMCE CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+<!-- TomSelect CDN -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+<script>
+  function initHobbyTomSelect() {
+      const selectEl = document.getElementById("id_hobby");
+      if (selectEl && window.TomSelect && !selectEl.tomselect) {
+          new TomSelect(selectEl, {
+              create: false,
+              plugins: ['clear_button'],
+              sortField: {
+                  field: "text",
+                  direction: "asc"
+              },
+              placeholder: "Escribe para buscar o seleccionar terapia...",
+              maxOptions: 100,
+              render: {
+                  no_results: function(data, escape) {
+                      return '<div class="no-results p-2 text-muted small">No se encontró ninguna terapia con ese nombre.</div>';
+                  }
+              }
+          });
+      }
+  }
+
+  if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initHobbyTomSelect);
+  } else {
+      initHobbyTomSelect();
+  }
+
+  function initBioTinyMCE() {
       const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
       tinymce.init({
         selector: '#id_bio',
@@ -283,4 +318,3 @@
     }
   </script>
   {% endblock %}
-</div>
