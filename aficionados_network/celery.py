@@ -23,6 +23,10 @@ app.conf.beat_schedule = {
         'task': 'aficionados_network.tasks.clear_expired_sessions_task',
         'schedule': crontab(hour=3, minute=0),
     },
+    'manage-marketplace-lifecycle-daily-at-4am': {
+        'task': 'marketplace.tasks.manage_marketplace_lifecycle_task',
+        'schedule': crontab(hour=4, minute=0),
+    },
 }
 
 

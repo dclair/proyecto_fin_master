@@ -65,6 +65,7 @@ class Listing(models.Model):
     
     created_at = models.DateTimeField('fecha de publicación', auto_now_add=True)
     updated_at = models.DateTimeField('última actualización', auto_now=True)
+    expiration_warning_sent = models.BooleanField(default=False, verbose_name="Aviso de caducidad enviado")
 
     class Meta:
         verbose_name = 'anuncio'
@@ -82,13 +83,6 @@ class Listing(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.image and os.path.isfile(self.image.path):
-            os.remove(self.image.path)
-        if self.video and os.path.isfile(self.video.path):
-            os.remove(self.video.path)
-        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} - {self.get_listing_type_display()}"
