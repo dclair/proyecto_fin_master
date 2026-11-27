@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from celery.schedules import crontab
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 
 from aficionados_network.celery import app as celery_app
@@ -17,6 +18,7 @@ from aficionados_network.tasks import (
 )
 
 DiskUsageResult = namedtuple("DiskUsageResult", ["total", "used", "free"])
+User = get_user_model()
 
 
 @override_settings(DEBUG=True, SECURE_SSL_REDIRECT=False)
@@ -151,6 +153,171 @@ class MaintenanceTasksTests(TestCase):
         with patch("shutil.disk_usage", side_effect=OSError("Disk access failure")):
             with self.assertRaises(OSError):
                 check_disk_usage_task()
+
+    def test_check_disk_usage_normal_threshold_does_not_dispatch_emails(self):
+        """
+        Verifica que cuando el uso de disco es normal (< 75%), NO se despachan correos
+        electrónicos a superusuarios.
+        """
+        User.objects.create_superuser(
+            username="admin_normal",
+            email="admin_normal@example.com",
+            password="SuperPassword123!",
+        )
+        mock_usage = DiskUsageResult(total=1000, used=500, free=500)  # 50.0%
+        with patch("shutil.disk_usage", return_value=mock_usage):
+            with patch("aficionados_network.tasks.send_hubs_email_async") as mock_mailer:
+                res = check_disk_usage_task()
+                self.assertEqual(res["percent_used"], 50.0)
+                mock_mailer.assert_not_called()
+
+    def test_check_disk_usage_warning_threshold_dispatches_warning_email(self):
+        """
+        Verifica que con uso >= 75% y < 90%, se despache correo con asunto '[AVISO]...'
+        únicamente a superusuarios activos con email configurado.
+        """
+        # Superusuario activo con email -> Debe recibir correo
+        User.objects.create_superuser(
+            username="admin_active",
+            email="admin_active@example.com",
+            password="SuperPassword123!",
+        )
+        # Superusuario inactivo con email -> NO debe recibir correo
+        User.objects.create_superuser(
+            username="admin_inactive",
+            email="admin_inactive@example.com",
+            password="SuperPassword123!",
+            is_active=False,
+        )
+        # Superusuario activo sin email -> NO debe recibir correo
+        User.objects.create_superuser(
+            username="admin_no_email",
+            email="",
+            password="SuperPassword123!",
+        )
+        # Usuario normal (no superusuario) -> NO debe recibir correo
+        User.objects.create_user(
+            username="normal_user",
+            email="normal@example.com",
+            password="UserPassword123!",
+        )
+
+        mock_usage = DiskUsageResult(total=1000, used=800, free=200)  # 80.0%
+        with patch("shutil.disk_usage", return_value=mock_usage):
+            with patch("aficionados_network.tasks.send_hubs_email_async") as mock_mailer:
+                res = check_disk_usage_task()
+                self.assertEqual(res["percent_used"], 80.0)
+                mock_mailer.assert_called_once()
+
+                args, kwargs = mock_mailer.call_args
+                expected_subject = "[AVISO] Espacio en disco al 80.0% en Hubs & Clicks"
+                self.assertEqual(kwargs.get("subject"), expected_subject)
+                self.assertEqual(kwargs.get("recipient"), "admin_active@example.com")
+                self.assertEqual(kwargs.get("action_url"), "/admin/")
+
+                body = kwargs.get("message_body", "")
+                self.assertIn("WARNING", body)
+                self.assertIn("80.0%", body)
+                self.assertIn("Espacio usado:", body)
+                self.assertIn("Espacio libre:", body)
+                self.assertIn("Ruta del sistema verificada:", body)
+                self.assertIn("docker system prune", body)
+                self.assertIn("MariaDB", body)
+
+    def test_check_disk_usage_critical_threshold_dispatches_critical_email(self):
+        """
+        Verifica que con uso >= 90%, se despache correo con asunto '[ALERTA CRÍTICA]...'
+        a todos los superusuarios activos.
+        """
+        User.objects.create_superuser(
+            username="admin1",
+            email="admin1@example.com",
+            password="SuperPassword123!",
+        )
+        User.objects.create_superuser(
+            username="admin2",
+            email="admin2@example.com",
+            password="SuperPassword123!",
+        )
+
+        mock_usage = DiskUsageResult(total=1000, used=950, free=50)  # 95.0%
+        with patch("shutil.disk_usage", return_value=mock_usage):
+            with patch("aficionados_network.tasks.send_hubs_email_async") as mock_mailer:
+                res = check_disk_usage_task()
+                self.assertEqual(res["percent_used"], 95.0)
+                self.assertEqual(mock_mailer.call_count, 2)
+
+                dispatched_emails = [call.kwargs.get("recipient") for call in mock_mailer.call_args_list]
+                self.assertCountEqual(dispatched_emails, ["admin1@example.com", "admin2@example.com"])
+
+                for call in mock_mailer.call_args_list:
+                    kwargs = call.kwargs
+                    expected_subject = "[ALERTA CRÍTICA] Espacio en disco al 95.0% en Hubs & Clicks"
+                    self.assertEqual(kwargs.get("subject"), expected_subject)
+                    body = kwargs.get("message_body", "")
+                    self.assertIn("CRITICAL", body)
+                    self.assertIn("95.0%", body)
+                    self.assertIn("docker system prune", body)
+                    self.assertIn("MariaDB", body)
+
+    def test_check_disk_usage_no_superusers_fallback_to_settings_admins(self):
+        """
+        Verifica que si no existen superusuarios activos en base de datos,
+        se use settings.ADMINS como fallback para el despacho de alertas.
+        """
+        User.objects.filter(is_superuser=True).delete()
+
+        mock_usage = DiskUsageResult(total=1000, used=850, free=150)  # 85.0%
+        with override_settings(ADMINS=[("SysAdmin", "sysadmin@example.com")]):
+            with patch("shutil.disk_usage", return_value=mock_usage):
+                with patch("aficionados_network.tasks.send_hubs_email_async") as mock_mailer:
+                    res = check_disk_usage_task()
+                    self.assertEqual(res["percent_used"], 85.0)
+                    mock_mailer.assert_called_once()
+                    self.assertEqual(mock_mailer.call_args.kwargs.get("recipient"), "sysadmin@example.com")
+                    self.assertEqual(
+                        mock_mailer.call_args.kwargs.get("subject"),
+                        "[AVISO] Espacio en disco al 85.0% en Hubs & Clicks",
+                    )
+
+    def test_check_disk_usage_no_superusers_no_admins_handled_cleanly(self):
+        """
+        Verifica que si no hay superusuarios ni settings.ADMINS configurados,
+        la tarea maneje la situación limpiamente sin lanzar excepciones.
+        """
+        User.objects.filter(is_superuser=True).delete()
+
+        mock_usage = DiskUsageResult(total=1000, used=920, free=80)  # 92.0%
+        with override_settings(ADMINS=[]):
+            with patch("shutil.disk_usage", return_value=mock_usage):
+                with patch("aficionados_network.tasks.send_hubs_email_async") as mock_mailer:
+                    res = check_disk_usage_task()
+                    self.assertEqual(res["percent_used"], 92.0)
+                    mock_mailer.assert_not_called()
+
+    def test_check_disk_usage_email_failure_does_not_break_task(self):
+        """
+        Verifica el manejo defensivo de excepciones: si el envío de correo falla,
+        se registra el error defensivamente pero la tarea continúa y retorna estadísticas.
+        """
+        User.objects.create_superuser(
+            username="admin_fail",
+            email="admin_fail@example.com",
+            password="SuperPassword123!",
+        )
+        mock_usage = DiskUsageResult(total=1000, used=800, free=200)
+        with patch("shutil.disk_usage", return_value=mock_usage):
+            with patch(
+                "aficionados_network.tasks.send_hubs_email_async",
+                side_effect=Exception("SMTP Connection timed out"),
+            ):
+                with self.assertLogs("aficionados_network.tasks", level="ERROR") as cm:
+                    res = check_disk_usage_task()
+                    self.assertEqual(res["percent_used"], 80.0)
+                    self.assertTrue(
+                        any("Error al despachar correos de alerta" in msg for msg in cm.output),
+                        "Debe registrar log de error defensivo al fallar el envío de correo.",
+                    )
 
     def test_beat_schedule_maintenance_tasks_configuration(self):
         """

@@ -12,6 +12,8 @@ from django.core.management import call_command
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
+from aficionados_network.utils.mailer import send_hubs_email_async
+
 logger = logging.getLogger(__name__)
 
 
@@ -204,6 +206,70 @@ def check_disk_usage_task(self):
             logger.warning(f"HIGH DISK USAGE: {log_msg}")
         else:
             logger.info(f"NORMAL DISK USAGE: {log_msg}")
+
+        # Despacho automático de correos a superusuarios ante umbral WARNING (>= 75%) o CRITICAL (>= 90%)
+        if percent_used >= 75:
+            try:
+                from django.contrib.auth import get_user_model
+
+                User = get_user_model()
+                admin_emails = list(
+                    User.objects.filter(is_superuser=True, is_active=True)
+                    .exclude(email="")
+                    .values_list("email", flat=True)
+                )
+
+                if not admin_emails:
+                    admin_emails = [
+                        email
+                        for _, email in getattr(settings, "ADMINS", [])
+                        if email and email.strip()
+                    ]
+
+                admin_emails = list(dict.fromkeys(admin_emails))
+
+                if not admin_emails:
+                    logger.warning(
+                        "[Disk Monitor] Uso de disco elevado pero no se encontraron superusuarios "
+                        "activos ni correos en settings.ADMINS para despachar la alerta."
+                    )
+                else:
+                    if percent_used >= 90:
+                        severity = "CRITICAL"
+                        subject = (
+                            f"[ALERTA CRÍTICA] Espacio en disco al {percent_used:.1f}% en Hubs & Clicks"
+                        )
+                    else:
+                        severity = "WARNING"
+                        subject = (
+                            f"[AVISO] Espacio en disco al {percent_used:.1f}% en Hubs & Clicks"
+                        )
+
+                    message_body = (
+                        f"Nivel de alerta: {severity}\n"
+                        f"Porcentaje de ocupación: {percent_used:.1f}%\n"
+                        f"Espacio usado: {used_gb:.2f} GB\n"
+                        f"Espacio libre: {free_gb:.2f} GB\n"
+                        f"Espacio total: {total_gb:.2f} GB\n"
+                        f"Ruta del sistema verificada: {base_dir}\n\n"
+                        f"Acciones sugeridas de mitigación:\n"
+                        f"- Purgar imágenes y contenedores dangling de Docker (`docker system prune -f`).\n"
+                        f"- Revisar y rotar backups antiguos del sistema.\n"
+                        f"- Inspeccionar almacenamiento y logs en MariaDB."
+                    )
+
+                    for email in admin_emails:
+                        send_hubs_email_async(
+                            subject=subject,
+                            recipient=email,
+                            message_body=message_body,
+                            action_url="/admin/",
+                        )
+            except Exception as mail_err:
+                logger.error(
+                    f"[Disk Monitor] Error al despachar correos de alerta de espacio en disco: {mail_err}",
+                    exc_info=True,
+                )
 
         return {
             "total_bytes": usage.total,
