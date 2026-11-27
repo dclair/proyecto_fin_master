@@ -23,9 +23,21 @@ app.conf.beat_schedule = {
         'task': 'aficionados_network.tasks.clear_expired_sessions_task',
         'schedule': crontab(hour=3, minute=0),
     },
+    'clean-old-read-notifications-daily-at-3-30am': {
+        'task': 'notifications.tasks.clean_old_read_notifications_task',
+        'schedule': crontab(hour=3, minute=30),
+    },
     'manage-marketplace-lifecycle-daily-at-4am': {
         'task': 'marketplace.tasks.manage_marketplace_lifecycle_task',
         'schedule': crontab(hour=4, minute=0),
+    },
+    'clean-temp-media-daily-at-4-30am': {
+        'task': 'aficionados_network.tasks.clean_temp_media_files_task',
+        'schedule': crontab(hour=4, minute=30),
+    },
+    'check-disk-usage-daily-at-5am': {
+        'task': 'aficionados_network.tasks.check_disk_usage_task',
+        'schedule': crontab(hour=5, minute=0),
     },
 }
 
@@ -33,4 +45,3 @@ app.conf.beat_schedule = {
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')
-

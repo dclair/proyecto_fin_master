@@ -1,6 +1,9 @@
 import logging
 import os
+import shutil
+import time
 from email.mime.image import MIMEImage
+from pathlib import Path
 
 from celery import shared_task
 from django.conf import settings
@@ -38,6 +41,7 @@ def send_email_task(
         f"[Celery] Enviando correo a {recipient_email} - Intento {self.request.retries + 1}/5"
     )
     from aficionados_network.utils.site import build_absolute_url
+
     if action_url:
         action_url = build_absolute_url(action_url)
 
@@ -94,7 +98,9 @@ def clear_expired_sessions_task(self):
     logger.info("[Celery Beat] Iniciando limpieza periódica de sesiones expiradas...")
     try:
         call_command("clearsessions")
-        logger.info("[Celery Beat] Limpieza periódica de sesiones expiradas completada con éxito.")
+        logger.info(
+            "[Celery Beat] Limpieza periódica de sesiones expiradas completada con éxito."
+        )
         return "Expired sessions cleaned successfully"
     except Exception as exc:
         logger.error(
@@ -104,6 +110,114 @@ def clear_expired_sessions_task(self):
         raise exc
 
 
+@shared_task(
+    bind=True,
+    max_retries=3,
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+)
+def clean_temp_media_files_task(self, max_age_hours=48):
+    """
+    Tarea periódica de mantenimiento para eliminar archivos temporales huérfanos
+    en MEDIA_ROOT / 'temp' con más de max_age_hours horas de antigüedad (por defecto 48h).
+    Bajo ninguna circunstancia toca otros directorios de MEDIA_ROOT.
+    """
+    media_root = Path(settings.MEDIA_ROOT).resolve()
+    temp_dir = (media_root / "temp").resolve()
+
+    # Seguridad estricta: verificar que temp_dir reside dentro de media_root
+    try:
+        temp_dir.relative_to(media_root)
+    except ValueError:
+        logger.error(
+            f"[Celery Beat] Ruta de temp_dir insegura o fuera de media_root: {temp_dir}"
+        )
+        return "Invalid temp directory path"
+
+    if not temp_dir.exists() or not temp_dir.is_dir():
+        logger.info(
+            f"[Celery Beat] Directorio temporal {temp_dir} no existe. Nada que limpiar."
+        )
+        return "Temp directory does not exist"
+
+    now = time.time()
+    cutoff_time = now - (max_age_hours * 3600)
+    deleted_files_count = 0
+
+    logger.info(
+        f"[Celery Beat] Iniciando limpieza de archivos temporales en {temp_dir} (> {max_age_hours} horas)..."
+    )
+
+    for item in temp_dir.rglob("*"):
+        try:
+            # Asegurar que cada archivo resuelto pertenece estrictamente a temp_dir
+            resolved_item = item.resolve()
+            resolved_item.relative_to(temp_dir)
+
+            if item.is_file():
+                stat = item.stat()
+                if stat.st_mtime < cutoff_time:
+                    item.unlink()
+                    deleted_files_count += 1
+                    logger.debug(f"[Celery Beat] Archivo temporal eliminado: {item}")
+        except Exception as file_err:
+            logger.warning(
+                f"[Celery Beat] Error al procesar o eliminar archivo temporal {item}: {file_err}"
+            )
+
+    logger.info(
+        f"[Celery Beat] Limpieza de temporales completada. Archivos eliminados: {deleted_files_count}"
+    )
+    return f"Cleaned {deleted_files_count} temporary media files"
+
+
+@shared_task(
+    bind=True,
+    max_retries=3,
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+)
+def check_disk_usage_task(self):
+    """
+    Tarea periódica de monitoreo del espacio en disco usando shutil.disk_usage(settings.BASE_DIR).
+    Registra:
+      - Log WARNING al superar el 75% de ocupación.
+      - Log CRITICAL al superar el 90% de ocupación.
+    """
+    base_dir = str(settings.BASE_DIR)
+    logger.info(f"[Celery Beat] Verificando uso de disco en {base_dir}...")
+    try:
+        usage = shutil.disk_usage(base_dir)
+        total_gb = usage.total / (1024**3)
+        used_gb = usage.used / (1024**3)
+        free_gb = usage.free / (1024**3)
+        percent_used = (usage.used / usage.total) * 100 if usage.total > 0 else 0.0
+
+        log_msg = (
+            f"[Disk Monitor] Uso de disco: {percent_used:.2f}% "
+            f"({used_gb:.2f} GB usado / {total_gb:.2f} GB total, {free_gb:.2f} GB libre) en {base_dir}"
+        )
+
+        if percent_used >= 90:
+            logger.critical(f"CRITICAL DISK USAGE: {log_msg}")
+        elif percent_used >= 75:
+            logger.warning(f"HIGH DISK USAGE: {log_msg}")
+        else:
+            logger.info(f"NORMAL DISK USAGE: {log_msg}")
+
+        return {
+            "total_bytes": usage.total,
+            "used_bytes": usage.used,
+            "free_bytes": usage.free,
+            "percent_used": round(percent_used, 2),
+        }
+    except Exception as exc:
+        logger.error(
+            f"[Celery Beat] Error al chequear uso de disco en {base_dir}: {exc}",
+            exc_info=True,
+        )
+        raise exc
+
+
 # Exponer la tarea de recordatorio de eventos para conveniencia e interoperabilidad
 from posts.tasks import send_event_reminders_task  # noqa: E402, F401
-

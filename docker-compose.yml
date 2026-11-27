@@ -12,6 +12,11 @@ services:
     depends_on:
       - db
       - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   db:
     image: mariadb:10.11
@@ -23,10 +28,20 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-tu_password_seguro}
     volumes:
       - db_data:/var/lib/mysql
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7-alpine
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   celery_worker:
     build: .
@@ -40,6 +55,11 @@ services:
     depends_on:
       - db
       - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   celery_beat:
     build: .
@@ -52,6 +72,11 @@ services:
     depends_on:
       - db
       - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
     image: nginx:1.25-alpine
@@ -68,6 +93,11 @@ services:
       - certbot_conf:/etc/letsencrypt
     depends_on:
       - web
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   certbot:
     image: certbot/certbot:latest
@@ -76,6 +106,11 @@ services:
       - certbot_www:/var/www/certbot
       - certbot_conf:/etc/letsencrypt
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   static_volume:
