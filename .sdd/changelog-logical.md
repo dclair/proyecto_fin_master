@@ -1,9 +1,85 @@
 # Logical Changelog
 
-**Last reviewed:** 2026-11-25  
+**Last reviewed:** 2026-11-27  
 **Purpose:** semantic change history of the system, independent from Git commits.
 
 This log records meaningful product/architecture/testing changes. Use it to understand how the system evolved and what behavior changed.
+
+## 2026-11-27: Automated Ops Maintenance, Docker Log Rotation, Chunked Notification Purging & Proactive Superuser Disk Alerts
+
+**Type:** architecture / ops / feature / testing  
+**Status:** done
+
+What changed:
+- **Alerta Proactiva por Email a Superusuarios ante Alto Uso de Disco (`aficionados_network/tasks.py`)**:
+  - `check_disk_usage_task` evalúa el porcentaje de ocupación del disco en el sistema de archivos del proyecto.
+  - Al superar el 75% (WARNING) o el 90% (CRITICAL), localiza dinámicamente a todos los superusuarios activos con email (`User.objects.filter(is_superuser=True, is_active=True)`) con fallback a `settings.ADMINS`.
+  - Despacha correos HTML corporativos asíncronos (`send_hubs_email_async`) con métricas precisas (severidad, %, GB usados/libres/totales, ruta base) y sugerencias operativas de mitigación (`docker system prune -f`, rotación de backups, inspección de MariaDB), enlazando con botón directo al `/admin/`.
+  - Manejo defensivo de excepciones para evitar que fallos de SMTP interrumpan el monitoreo.
+- **Rotación Estricta de Logs de Docker (`docker-compose.yml`)**:
+  - Configuración del driver `json-file` con `max-size: "10m"` y `max-file: "3"` en los 7 servicios (`web`, `db`, `redis`, `celery_worker`, `celery_beat`, `nginx`, `certbot`).
+  - Límite físico infranqueable de 30 MB por servicio y 210 MB total para toda la infraestructura en producción.
+- **Purga Conservadora de Notificaciones Leídas (`notifications/tasks.py`)**:
+  - Tarea `clean_old_read_notifications_task` ejecutada en Celery Beat a las 03:30 AM.
+  - Criterio riguroso: solo elimina `is_read=True` creadas hace más de 90 días.
+  - Preservación incondicional de notificaciones no leídas (`is_read=False`) sin importar su antigüedad.
+  - Borrado por lotes defensivo (chunking de 500 registros) evitando locks masivos en tablas e índices InnoDB de MariaDB.
+- **Limpieza Defensiva de Archivos Temporales (`aficionados_network/tasks.py`)**:
+  - Tarea `clean_temp_media_files_task` a las 04:30 AM eliminando archivos en `MEDIA_ROOT/temp/` con más de 48h de antigüedad.
+  - Validación estricta con `Path.resolve().relative_to(media_root)` impidiendo manipulaciones o borrados fuera del directorio temporal.
+- **Automatización del Ciclo de Vida del Mercadillo (`marketplace/`)**:
+  - Campo booleano `expiration_warning_sent` en el modelo `Listing` (`migration 0005_listing_expiration_warning_sent`).
+  - Ventana de advertencia previa idempotente entre los 83 y 90 días en `manage_marketplace_lifecycle.py` notificando al vendedor 7 días antes de la caducidad y marcando `expiration_warning_sent=True`.
+  - Hard delete definitivo a los 90 días de antigüedad (`created_at <= now - 90d`).
+  - Señal Django `post_delete` en `marketplace/signals.py` que destruye físicamente del almacenamiento los archivos `image` y `video` asociados (`default_storage.delete()`), evitando media huérfana tanto en purgas automáticas como en borrados manuales de usuarios.
+  - Tarea periódica `manage_marketplace_lifecycle_task` en Celery Beat a las 04:00 AM, con soporte para flag `--dry-run`.
+- **Suite de Pruebas Ampliada a 173 Tests**:
+  - Cobertura de pruebas completa en `marketplace/tests/test_lifecycle.py`, `notifications/tests/test_tasks.py` y `aficionados_network/tests/test_maintenance_tasks.py`.
+  - 173 tests pasando al 100% en verde en ~5.0s.
+
+Why:
+- Blindar la infraestructura de producción contra saturación de disco por logs descontrolados, optimizar el rendimiento de la base de datos MariaDB evitando table locks, erradicar archivos multimedia huérfanos y alertar automáticamente a los administradores antes de cualquier caída de servicio.
+
+Impact:
+- Operación 100% autónoma y desatendida del servidor, catálogo del mercadillo limpio y actualizado, y monitoreo preventivo de salud de almacenamiento.
+
+Verification:
+- `DB_ENGINE=sqlite ./env/bin/python manage.py test`: 173 tests pasando en ~5.0s (100% GREEN).
+- Simulación de umbrales del 75% y 90% con verificación de despacho de alertas por correo en mocks.
+
+## 2026-11-26: Canonical Site Domain Resolution, Strict 1-Hour Rolling Session Security & Accessible Profile TomSelect
+
+**Type:** feature / security / UI / bug fix / testing  
+**Status:** done
+
+What changed:
+- **Resolución Inteligente de Dominios en Emails y Prevención de example.com**:
+  - Módulo centralizado `aficionados_network/utils/site.py` con `get_site_domain()`, `get_site_protocol()`, `get_base_url()`, y `build_absolute_url(path)`.
+  - Jerarquía defensiva: `SITE_DOMAIN` -> `SITE_URL` -> `ALLOWED_HOSTS` no comodín -> DB `django_site` (descartando `example.com`) -> fallback local `127.0.0.1:8000`.
+  - Variables declaradas en `settings.py`, `.env.example` y `.env.prod.example`: `SITE_DOMAIN`, `SITE_URL`, `SITE_NAME`, `SITE_PROTOCOL`.
+  - Migración de datos `profiles/migrations/0012_update_site_domain.py` que actualiza automáticamente el registro ID 1 de `django_site` al migrar.
+  - Comando de gestión `python manage.py update_site [--domain DOMAIN] [--name NAME] [--site-id SITE_ID]`.
+  - Conversión automática de enlaces en `send_email_task` y `send_welcome_email_on_activation` garantizando URLs canónicas en todos los correos transaccionales.
+- **Política Estricta de Seguridad de Sesión (1 Hora Rolling Timeout)**:
+  - En `settings.py`: `SESSION_COOKIE_AGE = 3600`, `SESSION_SAVE_EVERY_REQUEST = True` (rolling renewal), `SESSION_EXPIRE_AT_BROWSER_CLOSE = True`, y `SESSION_COOKIE_HTTPONLY = True`.
+  - Tarea periódica `clear_expired_sessions_task` en `aficionados_network/tasks.py` programada diariamente a las 03:00 AM en Celery Beat ejecutando `clearsessions`.
+  - Expiración formal tras 60 minutos de inactividad con redirección 302 a `/login/` y revocación de sesión.
+- **Selector de Terapias con TomSelect en Edición de Perfil (`profiles/templates/profiles/profile_edit.html`)**:
+  - Sustitución del `<select>` nativo estático por **TomSelect 2.2.2** con búsqueda en vivo, ordenación alfabética ascendente automática (`sortField: text, asc`), botón de borrado rápido (`clear_button`), y renderizado accesible de mensajes vacíos.
+  - Sincronización cromática con temas claro y oscuro (`[data-bs-theme="dark"]`).
+- **Nuevas Suites de Pruebas Unitarias e Integración**:
+  - `aficionados_network/tests/test_site_and_activation_email.py`: Verificación de dominios, protocolos y construcción de URLs en activación.
+  - `aficionados_network/tests/test_session_timeout.py`: Verificación de parámetros, expiración por inactividad, rolling renewal, purga de sesiones expiradas y Celery Beat schedule.
+
+Why:
+- Eliminar enlaces rotos o con `example.com` en correos de activación de cuenta y notificaciones, reforzar la seguridad de sesiones de terapeutas según directrices OWASP ASVS, y agilizar la selección de pasiones en perfiles de usuario.
+
+Impact:
+- Enlaces de activación fiables, protección contra secuestro de sesiones en terminales desatendidos y UX enriquecida en la edición de perfiles.
+
+Verification:
+- Tests unitarios y de integración pasando al 100% con aceleración en memoria.
+- Validación de redirección 302 a `/login/` ante expiración de sesión.
 
 ## 2026-11-25: Deep Defense Security, Layered Rate Limiting, Chat API 403 Rejection & Zero-Downtime Secret Rotation
 

@@ -1,6 +1,6 @@
 # Architecture Map
 
-**Last reviewed:** 2026-06-01  
+**Last reviewed:** 2026-11-27  
 **Purpose:** compact map of modules, responsibilities, and relationships.
 
 ## System Shape
@@ -113,11 +113,35 @@ Key flows:
 - Notification list.
 - Unread count context and endpoint.
 - Smart redirect to post, event, profile, or fallback list.
+- `clean_old_read_notifications_task`: Nocturnal conservative purge (03:30 AM) of read notifications (> 90 days) in 500-record chunks.
 
 Relations:
 
 - Links to `User`, `posts.Posts`, `posts.Comment`, `posts.Event`, and `profiles.Review`.
 - Context processor is globally available to templates.
+
+### `marketplace`
+
+Owns therapeutic equipment, room rentals, and professional services exchange.
+
+Key model:
+
+- `Listing` (with `expiration_warning_sent` boolean tracker).
+
+Key flows:
+
+- Marketplace listing creation, detail, edit, search, and category filtering.
+- Seller reviews and 1-on-1 private chat integration.
+- 90-Day Lifecycle Automation (`manage_marketplace_lifecycle_task` daily at 04:00 AM):
+  * Idempotent warning email to seller at 83 days (7 days before expiration).
+  * Automated hard delete at 90 days.
+  * Physical media cleanup: `post_delete` signal destroys associated image and video files from disk storage.
+
+Relations:
+
+- `Listing.seller -> auth.User`.
+- `Listing.category -> profiles.Hobby`.
+- Connects to `chat.Conversation` for private transactions.
 
 ## Core Model Relationships
 
@@ -254,7 +278,17 @@ Interactions create `Notification` rows. The header can display unread count thr
 
 ### Emails
 
-Important interactions use branded HTML email templates and CID logos. Tests use locmem email backend.
+Important interactions use branded HTML email templates and CID logos. Dynamic absolute URL resolution is orchestrated via `aficionados_network/utils/site.py` (`SITE_DOMAIN`, `SITE_URL`) preventing `example.com` in email links. Tests use locmem email backend.
+
+### Nocturnal Maintenance & Proactive Infrastructure Monitoring (Celery Beat)
+
+Staggered automated maintenance executed daily in production:
+- 03:00 AM: `clear_expired_sessions_task` (purges expired Django sessions via `clearsessions`).
+- 03:30 AM: `clean_old_read_notifications_task` (conservative purge of read notifications > 90d in 500-record chunks to protect InnoDB).
+- 04:00 AM: `manage_marketplace_lifecycle_task` (83d warning, 90d hard delete + physical media removal).
+- 04:30 AM: `clean_temp_media_files_task` (removes orphaned `media/temp/` files > 48h).
+- 05:00 AM: `check_disk_usage_task` (monitors disk space and sends proactive alert emails to superusers at >= 75% and >= 90%).
+- 08:00 AM: `send_event_reminders_task` (24h event reminders with strict idempotency).
 
 ## Areas To Handle Carefully
 
@@ -263,6 +297,8 @@ Important interactions use branded HTML email templates and CID logos. Tests use
 - Signal behavior during fixture loading.
 - Runtime-only attributes such as `is_match`.
 - Upload cleanup and media paths.
-- Email template paths.
+- Email template paths and domain canonical resolution.
 - MySQL vs SQLite behavior.
-- **Soft Delete Pattern**: Core models (`Posts`, `Event`, `Hobby`) inherit from `SoftDeleteModel`. Deletions flag `is_active=False` rather than DB removal. Use `all_objects` manager to bypass active-only filtering if necessary. Foreign keys use `PROTECT` instead of `CASCADE` to preserve history.
+- **Soft Delete vs. Hard Delete Patterns**:
+  * Core social models (`Posts`, `Event`, `Hobby`) inherit from `SoftDeleteModel` (flagging `is_active=False` with `PROTECT` on foreign keys).
+  * `Marketplace.Listing` uses a scheduled **Hard Delete** at 90 days with physical storage file cleanup via `post_delete` signal to prevent storage bloating.

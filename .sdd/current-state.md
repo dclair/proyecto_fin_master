@@ -1,6 +1,6 @@
 # Current State
 
-**Last reviewed:** 2026-11-25  
+**Last reviewed:** 2026-11-27  
 **Role:** single operational truth for the project today.
 
 This document is the first place to check before modifying Hubs&Clicks. It summarizes what is currently true, what is verified, what is risky, and where deeper details live.
@@ -16,7 +16,7 @@ Current user-facing capabilities:
 - Bimodal Home Architecture:
   - For visitors: Conversion hero with value proposition, double CTA (*"Unirme a la Comunidad"* / *"Explorar Terapias"*), 3 social proof badges (Verified Community, Clinical Library, Meetups/Workshops), and ecosystem illustration.
   - For authenticated members: Welcome Cockpit with personalized avatar greeting (*"¡Hola de nuevo, [Nombre]! 👋"*), activity pulse, and quick content creation shortcuts.
-- Edit profile data: avatar, bio (with TinyMCE rich text and local image upload), birth date, location, website, identity fields.
+- Edit profile data: avatar, bio (with TinyMCE rich text and local image upload), birth date, location, website, identity fields, and searchable TomSelect hobby/therapy selector with live filtering and alphabetical sorting.
 - Add hobbies to profile with experience levels.
 - Follow and unfollow other profiles with dynamic follower/following counters.
 - Create multi-content posts (Clicks): combines non-exclusive photo, video, generic external link, and attached PDF document (up to 10MB).
@@ -80,6 +80,23 @@ Current user-facing capabilities:
   - Anchored deep botanical forest green (`#16281e` in light theme, `#0c130f` in dark theme) providing visual stability.
   - WCAG AAA contrast compliance across all text tokens (`--hubs-footer-text: #c5d3ca`, brand `#8bd3ab`, titles `#f8faf9`/`#f1f5f2`).
   - Interactive cookie settings modal trigger (`.footer-btn-cookies`) and accessible navigation links.
+- Strict 1-Hour Rolling Session Security & Inactivity Expiration:
+  - `SESSION_COOKIE_AGE = 3600` (1 hora) y `SESSION_SAVE_EVERY_REQUEST = True` (renovación continua con actividad del usuario).
+  - Cierre inmediato al cerrar navegador (`SESSION_EXPIRE_AT_BROWSER_CLOSE = True`) y protección HttpOnly.
+  - Expiración estricta tras 60 minutos de inactividad con redirección 302 a `/login/` y revocación de autenticación.
+  - Tarea nocturna Celery Beat `clear_expired_sessions_task` diaria a las 03:00 AM ejecutando `clearsessions`.
+- Intelligent Domain Resolution & example.com Prevention:
+  - Constructor canónico de URLs (`aficionados_network/utils/site.py`) que resuelve jerárquicamente `SITE_DOMAIN`, `SITE_URL` o `ALLOWED_HOSTS` para todos los correos transaccionales, señales de bienvenida (`send_welcome_email_on_activation`) y tareas asíncronas de Celery.
+  - Migración de datos `profiles/migrations/0012_update_site_domain.py` y comando de gestión `update_site` desterrando el registro residual `example.com`.
+- Automated Marketplace 90-Day Lifecycle & Media Cleanup:
+  - Ventana de advertencia previa e idempotente a los 83 días (7 días antes de expirar) con bandera de seguimiento en base de datos (`expiration_warning_sent`).
+  - Hard delete definitivo de anuncios a los 90 días ejecutado en Celery Beat a las 04:00 AM (`manage_marketplace_lifecycle_task`).
+  - Señal Django `post_delete` en `marketplace/signals.py` que destruye físicamente del almacenamiento (`default_storage.delete()`) los archivos de imagen y video asociados al borrarse un anuncio (por mantenimiento o acción manual del usuario).
+- Conservative Ops Maintenance & Proactive Disk Monitoring:
+  - Rotación transversal de logs de Docker (`10m` x 3 archivos en los 7 servicios) con un límite estricto de 30 MB por contenedor y 210 MB para todo el clúster.
+  - Purga conservadora de notificaciones leídas (`is_read=True`) con más de 90 días a las 03:30 AM en lotes defensivos de 500 registros (chunking) para proteger InnoDB, preservando incondicionalmente las no leídas.
+  - Limpieza de archivos temporales huérfanos en `MEDIA_ROOT/temp/` (> 48h) a las 04:30 AM con verificación de límites de ruta.
+  - Monitor proactivo de disco en Celery Beat a las 05:00 AM con alerta por correo electrónico a todos los superusuarios activos (y fallback a `settings.ADMINS`) ante umbrales de WARNING (>= 75%) y CRITICAL (>= 90%).
 
 
 ## Runtime & Infrastructure
@@ -95,7 +112,17 @@ Stack:
   - PyMySQL fallback configured for pure-Python database compatibility.
 - **Cache & Broker:** Redis 7 Alpine.
 - **Asynchronous Tasks:** Celery 5.7+ Worker (`celery_worker` service in Docker Compose).
-- **Periodic Scheduler:** Celery Beat (`celery_beat` service in Docker Compose).
+- **Periodic Scheduler:** Celery Beat (`celery_beat` service in Docker Compose) orquestando el cronograma nocturno completo de mantenimiento y recordatorios matutinos:
+
+  | Horario (UTC) | Tarea | Propósito / Características |
+  | :--- | :--- | :--- |
+  | **03:00 AM** | `aficionados_network.tasks.clear_expired_sessions_task` | Limpieza de sesiones expiradas en `django_session` vía `clearsessions` con autoretry. |
+  | **03:30 AM** | `notifications.tasks.clean_old_read_notifications_task` | Purga conservadora de notificaciones leídas (`is_read=True`) > 90 días en lotes de 500 registros para proteger InnoDB. Preserva no leídas. |
+  | **04:00 AM** | `marketplace.tasks.manage_marketplace_lifecycle_task` | Ciclo de vida del mercadillo: aviso a vendedores a los 83 días (idempotente) y hard delete a los 90 días con borrado físico de fotos y videos. |
+  | **04:30 AM** | `aficionados_network.tasks.clean_temp_media_files_task` | Limpieza defensiva de archivos temporales huérfanos en `MEDIA_ROOT/temp/` con más de 48h de antigüedad. |
+  | **05:00 AM** | `aficionados_network.tasks.check_disk_usage_task` | Monitor de uso de disco en el sistema de archivos con despacho automático de correos a superusuarios ante umbrales del 75% (Warning) y 90% (Critical). |
+  | **08:00 AM** | `posts.tasks.send_event_reminders_task` | Despacho de recordatorios 24h para eventos futuros con idempotencia multinivel (`reminder_sent`). |
+
 - **Reverse Proxy & Edge:**
   - Nginx 1.25 Alpine with layered rate limiting (`auth_limit` zone for auth routes and `api_limit` zone for `/api/`), HSTS, CSP `sandbox` on `/media/`, internal `/protected_media/` via `X-Accel-Redirect`, and ACME webroot challenge routing (`/.well-known/acme-challenge/`).
   - Ports exposed: `80`, `8000`, and `443` (prepared for HTTPS).
@@ -117,10 +144,12 @@ Docker Compose Services:
 - `nginx`: Nginx 1.25 Alpine (`ports: 80, 8000, 443`, depends on `web`).
 - `certbot`: `certbot/certbot:latest` daemon with shared volumes `certbot_www` and `certbot_conf`.
 
+*Política de Rotación de Logs de Docker:* Los 7 servicios integran rotación estricta de logs con driver `json-file` (`max-size: "10m"`, `max-file: "3"`), limitando el espacio de logs a un máximo absoluto de 30 MB por contenedor y 210 MB para todo el clúster.
+
 Operational command for tests:
 
 ```bash
-# Backend unit & integration test suite (135 tests)
+# Backend unit & integration test suite (173 tests)
 DB_ENGINE=sqlite ./env/bin/python manage.py test
 
 # Frontend TypeScript type check (0 errors)
@@ -130,7 +159,7 @@ cd frontend && npm run type-check
 Last known verification:
 
 ```text
-Ran 135 tests in ~4.5s (100% GREEN)
+Ran 173 tests in ~5.0s (100% GREEN)
 Frontend type-check: 0 errors (tsc --noEmit clean)
 ```
 
@@ -139,11 +168,12 @@ Frontend type-check: 0 errors (tsc --noEmit clean)
 
 Main project package and app:
 
-- `aficionados_network/celery.py`: Celery app initialization, beat schedule definition (`posts.tasks.send_event_reminders_task` daily at 8:00 AM), and task discovery.
-- `aficionados_network/tasks.py`: Asynchronous tasks (`send_email_task` with exponential backoff and jitter).
+- `aficionados_network/celery.py`: Celery app initialization, beat schedule definition (staggered nightly maintenance tasks 03:00-05:00 AM and `send_event_reminders_task` daily at 08:00 AM), and task discovery.
+- `aficionados_network/tasks.py`: Asynchronous tasks (`send_email_task` with exponential backoff and jitter), and maintenance tasks: `clear_expired_sessions_task` (03:00 AM), `clean_temp_media_files_task` (04:30 AM), `check_disk_usage_task` (05:00 AM with active email dispatch to superusers at >= 75% and >= 90%).
+- `aficionados_network/utils/site.py`: Intelligent site domain resolution, base URL calculation, and canonical absolute URL construction (`build_absolute_url`, `get_site_domain`, `get_site_protocol`, `get_base_url`).
 - `aficionados_network/utils/mailer.py`: Resilient email dispatch helper (Celery primary, ThreadPool fallback, template rendering with extra context).
 - `aficionados_network/utils/sanitizer.py`: `nh3` HTML sanitizer with strict tag/attribute allowlists and automatic `rel="noopener noreferrer"`.
-- `aficionados_network/settings.py`: settings, env handling, DB selector, static/media/email, test profiling (InMemoryChannelLayer, MD5PasswordHasher, CompressedStaticFilesStorage, CELERY_TASK_ALWAYS_EAGER), `SECRET_KEY_FALLBACKS` support with defensive validation, and REST_FRAMEWORK throttling (`AnonRateThrottle`, `UserRateThrottle`).
+- `aficionados_network/settings.py`: settings, env handling (`SITE_DOMAIN`, `SITE_URL`, `SITE_NAME`, `SITE_PROTOCOL`), DB selector, static/media/email, test profiling (InMemoryChannelLayer, MD5PasswordHasher, CompressedStaticFilesStorage, CELERY_TASK_ALWAYS_EAGER), `SECRET_KEY_FALLBACKS` support with defensive validation, and REST_FRAMEWORK throttling (`AnonRateThrottle`, `UserRateThrottle`).
 - `aficionados_network/urls.py`: root URL dispatcher.
 - `aficionados_network/views.py`: home, auth, registration activation, contact form (with safe reply-to).
 - `aficionados_network/models.py`: `ContactMessage`.
@@ -152,17 +182,24 @@ Main project package and app:
 
 Domain apps:
 
-- `profiles/`: profiles, hobbies, follows, reviews, profile routes, profile signals.
-  - Recent migration: `0011_alter_hobby_options`.
+- `profiles/`: profiles, hobbies, follows, reviews, profile routes, profile signals (`send_welcome_email_on_activation` with canonical URL resolution).
+  - `profiles/templates/profiles/profile_edit.html`: Profile editing with TinyMCE bio and TomSelect searchable hobby selector.
+  - `profiles/management/commands/update_site.py`: Management command to update site domain and name in `django.contrib.sites`.
+  - Recent migrations: `0011_alter_hobby_options`, `0012_update_site_domain` (purges default `example.com`).
 - `posts/`: Clicks, comments, Eventos, event comments, event routes, likes, attendance, hub/gallery flows.
-  - `posts/tasks.py`: `send_event_reminders_task` with multi-level idempotency and atomic transactions.
+  - `posts/tasks.py`: `send_event_reminders_task` with multi-level idempotency and atomic transactions (scheduled at 08:00 AM).
   - Recent migration: `0023_eventattendance_reminder_sent_and_more` (adds `reminder_sent`, `reminder_sent_at`, and compound index).
 - `notifications/`: notification model, follow signal, unread context, list and redirect routes.
   - `notifications/services.py`: `NotificationDispatcher` centralizing dispatch for all business domains.
+  - `notifications/tasks.py`: `clean_old_read_notifications_task` running at 03:30 AM with 500-record chunking to protect InnoDB while preserving unread notifications.
   - Recent migrations: `0007_notification_article_and_more`, `0008_alter_notification_notification_type`.
 - `chat/`: Models (`Conversation`, `Message`, `GroupJoinRequest`), DRF API views, Channels WebSockets consumers, protected attachment endpoints (`ProtectedAttachmentDownloadView`), and magic bytes / EXIF validation.
 - `gamification/`: Badges, levels, and user progression calculations with `O(1)` caching and direct database aggregations.
 - `marketplace/`: Listings, categories, and marketplace interactions with open-redirect mitigation.
+  - `marketplace/signals.py`: `post_delete` signal listener physically destroying associated `image` and `video` files upon listing deletion.
+  - `marketplace/tasks.py`: `manage_marketplace_lifecycle_task` scheduled daily at 04:00 AM.
+  - `marketplace/management/commands/manage_marketplace_lifecycle.py`: Lifecycle management command with `--dry-run` flag, 83-90 day warning window, and 90-day hard delete.
+  - Recent migration: `0005_listing_expiration_warning_sent` (tracks courtesy notification state).
 - `library/`: Articles, clinical cases, and knowledge repository with TinyMCE and HTML entity sanitization.
 
 Frontend module:
@@ -182,7 +219,7 @@ Frontend module:
 
 Infrastructure & Ops:
 
-- `docker-compose.yml`: Multi-container production topology (web, db, redis, celery_worker, celery_beat, nginx, certbot).
+- `docker-compose.yml`: Multi-container production topology (web, db, redis, celery_worker, celery_beat, nginx, certbot) with strict log rotation policy (`max-size: "10m"`, `max-file: "3"` across all 7 services).
 - `nginx/default.conf`: Current active Nginx configuration with Rate Limiting, `X-Accel-Redirect`, and ACME webroot routing.
 - `nginx/production-ssl.conf.template`: Declarative SSL/TLS configuration template for production deployment with `envsubst`.
 - `docs/runbook-ssl.md`: Step-by-step Zero-Downtime SSL deployment runbook.
@@ -191,6 +228,11 @@ Infrastructure & Ops:
 ## Active Truths
 
 - The app is server-rendered Django, with an embedded React 19 chat module in strict TypeScript.
+- Site domain resolution is managed via `aficionados_network/utils/site.py`, driven by `SITE_DOMAIN`, `SITE_URL`, `SITE_NAME`, and `SITE_PROTOCOL`, ensuring zero `example.com` leakage in transactional emails and tasks.
+- Session security enforces a 1-hour rolling timeout (`SESSION_COOKIE_AGE = 3600`, `SESSION_SAVE_EVERY_REQUEST = True`), expiring at browser close and cleaned nightly by Celery Beat at 03:00 AM (`clear_expired_sessions_task`).
+- Celery Beat coordinates a 6-phase schedule: 03:00 AM sessions, 03:30 AM read notifications (chunking 500), 04:00 AM marketplace lifecycle, 04:30 AM temp media, 05:00 AM disk monitoring, and 08:00 AM event reminders.
+- Marketplace listings follow a strict 90-day lifecycle: sellers receive an idempotent warning at 83 days (`expiration_warning_sent=True`), listings > 90 days undergo hard delete, and physical media is immediately deleted from disk via `post_delete` signal.
+- Docker containers in `docker-compose.yml` enforce a strict `10m` x 3 log rotation policy, preventing host disk saturation.
 - `posts` owns both social posts and event workflows, as well as the 24h event reminder task (`posts.tasks.send_event_reminders_task`).
 - `profiles.Hobby` is the shared category model for posts, events, and user interests.
 - `profiles.UserHobby` stores a user's level per hobby and powers match/mentor logic.
@@ -202,14 +244,18 @@ Infrastructure & Ops:
 
 ## Verified Coverage
 
-Tests currently cover 135 test cases across:
+Tests currently cover 173 test cases across:
 
 - Core pages, auth, registration activation, contact email, Celery email dispatch.
+- Site and domain canonical resolution + activation emails without example.com (`test_site_and_activation_email.py`).
+- Session security, 1-hour rolling timeout, 60min inactivity expiration redirect, and Celery Beat clearsessions (`test_session_timeout.py`).
 - Profile model behavior, follows, hobbies, reviews, and anti-self-review authorization.
 - Profile routes and follow notifications.
 - Post model behavior, likes, comments, emails, modal partial, and deletion authorization.
 - Event lifecycle: create, attend, cancel, reactivate, duplicate, comment, and organizer authorization checks.
 - Event reminders: Celery Beat task execution, 24h window filtering, multi-level idempotency (`reminder_sent`), atomic transactions, unconfirmed user exclusion, and error handling.
+- Marketplace lifecycle: 83-day warning idempotency, 90-day hard delete, physical file deletion via post_delete signal, `--dry-run` flag, and Celery task (`test_lifecycle.py`).
+- Maintenance tasks: notification purge chunking (500), temp media cleanup (> 48h), disk monitor, and proactive email alerts to superusers (75% / 90%) (`test_tasks.py`, `test_maintenance_tasks.py`).
 - NotificationDispatcher service: in-app creation, email dispatch, Celery resilience, template fallback, and all business event types.
 - Hobby hub and clicks gallery smoke behavior.
 - Notification list, unread count, redirects, context processor.

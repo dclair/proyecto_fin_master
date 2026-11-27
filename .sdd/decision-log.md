@@ -1,6 +1,6 @@
 # Decision Log
 
-**Last reviewed:** 2026-11-25  
+**Last reviewed:** 2026-11-27  
 **Purpose:** record important technical/product decisions and why they were made.
 
 This is not a commit log. It captures decisions that future developers and AI agents should understand before changing direction.
@@ -561,7 +561,7 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 - Seguridad perimetral robusta en Nginx combinada con throttling granular en la capa de aplicación.
 - Garantía de cero brechas de autorización entre usuarios y 135 tests pasando al 100% en verde.
 
-## D-032: Páginas de Error Corporativas Resilientes (404, 403 y 500 Autocontenida) y Rediseño de Footer Botánico (.footer-hubs)
+## D-031b: Páginas de Error Corporativas Resilientes (404, 403 y 500 Autocontenida) y Rediseño de Footer Botánico (.footer-hubs)
 
 **Date:** 2026-11-25  
 **Decision:**
@@ -582,4 +582,190 @@ env DB_ENGINE=sqlite DEBUG=True ./env/bin/python manage.py test --verbosity 1
 **Implications:**
 - Renderizado de errores resiliente a prueba de fallos de infraestructura.
 - Identidad visual armónica y accesible en el cierre de todas las vistas.
+
+## D-032: Resolución de Dominios en Emails y Prevención de example.com
+
+**Date:** 2026-11-26  
+**Contexto:**  
+En Django, el framework `django.contrib.sites` inicializa la base de datos con un registro predeterminado con ID=1 asociado al dominio placeholder `example.com`. En la plataforma Hubs&Clicks, múltiples servicios y procesos asíncronos en segundo plano (señal de activación de cuenta en `profiles.signals`, despacho de notificaciones en `aficionados_network.tasks`, y recordatorios de eventos en `posts.tasks`) construyen enlaces absolutos de acción (ej. botones de login o enlaces a eventos) fuera del ciclo de vida de una petición HTTP activa (`request`). En entornos de desarrollo, staging o despliegues limpios de producción donde el administrador no hubiera editado manualmente la fila en el panel de administración, los correos salientes despachaban enlaces rotos apuntando a `http://example.com/login/`, provocando confusión en los usuarios e impidiendo la activación de cuentas.
+
+**Decisión:**  
+Implementar un motor de resolución inteligente y canónica de URLs en `aficionados_network/utils/site.py` respaldado por variables de entorno explícitas y migraciones automatizadas:
+1. **Jerarquía Defensiva de Resolución (`get_site_domain`):**
+   - Prioridad 1: Variable de entorno `SITE_DOMAIN` (o alias `DOMAIN`).
+   - Prioridad 2: Hostname extraído de la variable de entorno `SITE_URL` (o alias `BASE_URL`).
+   - Prioridad 3: Primer host no comodín ni local configurado en `ALLOWED_HOSTS` (descartando `*`, `localhost`, `127.0.0.1`, `testserver`).
+   - Prioridad 4: Dominio del sitio activo en base de datos (`Site.objects.get_current().domain`), ignorándolo estrictamente si es `example.com`.
+   - Prioridad 5: Fallback de desarrollo local seguro (`127.0.0.1:8000` o `localhost:8000`).
+2. **Construcción Canónica de URLs (`build_absolute_url`):**
+   - Resuelve el protocolo seguro (`https` si `SECURE_SSL_REDIRECT=True`, `SECURE_HSTS_SECONDS` activo, o `SITE_URL` comienza por `https://`; `http` en desarrollo).
+   - Ensambla cualquier ruta relativa asegurando la presencia de slash inicial y respetando URLs que ya sean absolutas (`http://` o `https://`).
+3. **Automatización en Base de Datos y CLI:**
+   - Migración de datos `profiles/migrations/0012_update_site_domain.py` que actualiza automáticamente el registro ID 1 de `django_site` al migrar la base de datos, desterrando `example.com`.
+   - Comando de administración `python manage.py update_site [--domain DOMAIN] [--name NAME] [--site-id SITE_ID]`.
+4. **Integración en Despacho:**
+   - Normalización automática en `send_email_task` convirtiendo `action_url` mediante `build_absolute_url(action_url)`.
+   - Inyección en `profiles.signals.send_welcome_email_on_activation` resolviendo dinámicamente `build_absolute_url(reverse('login'))`.
+5. **Configuración Declarativa:**
+   - Adición de `SITE_DOMAIN`, `SITE_URL` y `SITE_NAME` a `.env.example`, `.env.prod.example` y `aficionados_network/settings.py`.
+
+**Consecuencias:**  
+- Garantía del 100% de que ningún correo transaccional de la plataforma contendrá enlaces con `example.com`.
+- Desacoplamiento total del contexto HTTP: los workers de Celery resuelven rutas canónicas absolutas con idéntica fidelidad que las vistas web.
+- Configuración declarativa e inmutable mediante variables de entorno en despliegues con Docker Compose.
+
+**Alternativas consideradas:**  
+- *Configuración manual desde `/admin/sites/site/`:* Descartada por ser propensa a omisiones humanas en nuevos despliegues, entornos de integración continua o recreación de bases de datos.
+- *Propagar `request.build_absolute_uri()` como argumento en cada función:* Descartada porque los eventos de negocio disparados por señales o tareas de Celery Beat no cuentan con un objeto `request` en su contexto de ejecución.
+
+## D-033: Política de Expiración de Sesiones por Inactividad (1 Hora) y Purgado Nocturno
+
+**Date:** 2026-11-26  
+**Contexto:**  
+La configuración por defecto de sesiones de Django mantiene las cookies válidas durante 2 semanas (`SESSION_COOKIE_AGE = 1209600`) y no limpia automáticamente los registros caducados en la tabla `django_session` de MariaDB. En una red privada para terapeutas y profesionales de la salud donde se gestionan casos clínicos, datos de contacto sensibles y chats privados, las sesiones prolongadas en terminales de trabajo o dispositivos compartidos suponen un riesgo directo de secuestro de sesión (Session Hijacking) y fuga de información privada. Adicionalmente, el almacenamiento perpetuo de sesiones acumulaba miles de filas huérfanas en la base de datos sin mantenimiento programado.
+
+**Decisión:**  
+Implementar una política estricta de seguridad de sesiones con rolling timeout y purga periódica en Celery Beat:
+1. **Política de Sesión Estricta a 1 Hora (`settings.py`):**
+   - `SESSION_COOKIE_AGE = 3600` (1 hora).
+   - `SESSION_SAVE_EVERY_REQUEST = True` (Rolling timeout): cada interacción legítima y activa del usuario renueva la validez de la sesión por 60 minutos adicionales, evitando desconexiones molestas mientras el usuario trabaja activamente.
+   - `SESSION_EXPIRE_AT_BROWSER_CLOSE = True`: invalidación inmediata al cerrar la ventana o sesión de navegación.
+   - `SESSION_COOKIE_HTTPONLY = True`: mitigación de lectura de cookies desde scripts maliciosos (XSS).
+2. **Tarea de Mantenimiento Celery Beat (`clear_expired_sessions_task`):**
+   - Registrada en `aficionados_network/celery.py` (`beat_schedule`) para ejecutarse diariamente a las **03:00 AM** (`crontab(hour=3, minute=0)`).
+   - Ejecuta `django.core.management.call_command("clearsessions")` con política de reintentos exponenciales con jitter (`max_retries=3`, `autoretry_for=(Exception,)`).
+   - Elimina físicamente de `django_session` únicamente las filas con `expire_date < now()`, preservando intactas las sesiones activas.
+3. **Validación Exhaustiva de Seguridad:**
+   - Suite de pruebas dedicada en `aficionados_network/tests/test_session_timeout.py` verificando:
+     * Parámetros de configuración en `settings`.
+     * Registro exacto en `beat_schedule`.
+     * Renovación continua del TTL de sesión ante peticiones sucesivas.
+     * Expiración estricta tras 60 minutos de inactividad con redirección HTTP 302 a `/login/` y revocación de autenticación (`request.user.is_authenticated == False`).
+     * Limpieza de base de datos selectiva y propagación de excepciones para reintento de Celery.
+
+**Consecuencias:**  
+- Alineación con los estándares OWASP ASVS (Application Security Verification Standard) para aplicaciones con datos sensibles.
+- Cero sesiones inactivas zombis abiertas en estaciones de trabajo desatendidas.
+- La tabla `django_session` se mantiene permanentemente compacta, rápida y optimizada en MariaDB.
+
+**Alternativas consideradas:**  
+- *Timeout fijo absoluto (sin rolling timeout):* Descartada porque expulsaría de forma abrupta a terapeutas mientras redactan artículos clínicos extensos o durante sesiones prolongadas de mensajería.
+- *Ejecutar clearsessions vía Cron del sistema operativo anfitrión:* Descartada para mantener toda la orquestación de tareas periódicas encapsulada y portable dentro de la infraestructura Dockerizada del proyecto.
+
+## D-034: Ciclo de Vida del Mercadillo e Idempotencia con Limpieza Física de Media
+
+**Date:** 2026-11-27  
+**Contexto:**  
+El Mercadillo (`marketplace`) permite a los terapeutas publicar material terapéutico, camillas, equipamiento o alquiler de salas. Con el transcurso del tiempo, los anuncios completados u olvidados permanecían indefinidamente en la plataforma, degradando la calidad del catálogo. El comando de mantenimiento original presentaba serias debilidades de diseño:
+1. Su filtro de advertencia se limitaba rígidamente a anuncios creados entre el día 83 y 84; si el servidor se reiniciaba o la tarea no corría un día específico, los anuncios quedaban fuera de la ventana y nunca recibían aviso previo.
+2. Carecía de idempotencia: ejecuciones repetidas el mismo día podían spamear múltiples correos al vendedor.
+3. Al eliminar el registro de la base de datos a los 90 días, los archivos adjuntos (`image` y `video`) permanecían como archivos huérfanos en `media/marketplace/listings/`, provocando un consumo desmedido de almacenamiento en disco.
+
+**Decisión:**  
+Diseñar un ciclo de vida desatendido, seguro e idempotente para el mercadillo:
+1. **Control de Estado de Aviso en Modelo:**
+   - Migración `marketplace/migrations/0005_listing_expiration_warning_sent.py` incorporando el campo booleano indexado `expiration_warning_sent` (por defecto `False`).
+2. **Ventana de Aviso Idempotente (83 a 90 días):**
+   - En `manage_marketplace_lifecycle.py`, filtra anuncios con `created_at <= now - 83d` y `created_at > now - 90d` donde `expiration_warning_sent=False`.
+   - Despacha correo corporativo notificando al vendedor que dispone de 7 días antes de la retirada definitiva, y marca atómicamente `expiration_warning_sent=True`.
+3. **Hard Delete a los 90 Días (`created_at <= now - 90d`):**
+   - Eliminación definitiva del registro en base de datos.
+4. **Destrucción Física de Archivos Multimedia (Señal `post_delete`):**
+   - En `marketplace/signals.py`, conectar un receptor a la señal `post_delete` de `Listing` que inspecciona y elimina físicamente los archivos de imagen y video asociados mediante `default_storage.delete()`.
+   - Actúa tanto en la purga automática como cuando el usuario elimina manualmente su anuncio desde la interfaz web.
+5. **Programación en Celery Beat:**
+   - Tarea `manage_marketplace_lifecycle_task` en `marketplace/tasks.py` registrada en `beat_schedule` para ejecutarse diariamente a las **04:00 AM** (`crontab(hour=4, minute=0)`).
+   - Soporte para parámetro `--dry-run` para auditorías manuales o simulaciones seguras sin alterar datos.
+6. **Cobertura de Pruebas Automatizadas:**
+   - Tests en `marketplace/tests/test_lifecycle.py` validando la idempotencia del envío, el borrado físico de archivos con `default_storage`, el hard delete a los 90 días, el flag `--dry-run` y la configuración de Celery Beat.
+
+**Consecuencias:**  
+- El catálogo del mercadillo permanece actualizado, relevante y libre de ofertas abandonadas.
+- Los vendedores reciben exactamente una advertencia 7 días antes del vencimiento.
+- Cero acumulación de archivos multimedia huérfanos en disco al eliminarse los anuncios.
+
+**Alternativas consideradas:**  
+- *Soft Delete (`is_active = False`):* Descartada porque preservaría indefinidamente los archivos multimedia pesados (imágenes de alta resolución y videos MP4) en el disco del servidor, desaprovechando el objetivo de optimización de almacenamiento.
+- *Ejecución bajo demanda en peticiones web:* Descartada por penalizar la latencia del usuario final con operaciones pesadas de E/S en disco y envíos de correo.
+
+## D-035: Política de Mantenimiento Conservador de Producción y Rotación de Logs de Docker
+
+**Date:** 2026-11-27  
+**Contexto:**  
+En un entorno productivo de larga duración en la nube, la degradación de recursos no supervisada es la causa raíz de incidentes de estabilidad:
+1. **Logs de Docker Descontrolados:** Por defecto, el driver `json-file` de Docker no restringe el crecimiento de los archivos de log en `/var/lib/docker/containers/*/*.log`, alcanzando decenas de gigabytes y saturando la partición raíz del sistema operativo.
+2. **Crecimiento de Tablas Transaccionales de Notificaciones:** En Hubs&Clicks, cada like, comentario, follow o recordatorio genera registros en `Notification`. Las notificaciones antiguas ya leídas permanecían en MariaDB indefinidamente, aumentando el tamaño de los índices InnoDB y degradando el rendimiento de las consultas frecuentes.
+3. **Fugas de Archivos Temporales en `media/temp/`:** Cargas incompletas o procesamientos cancelados de archivos adjuntos dejan ficheros temporales huérfanos en el disco.
+
+**Decisión:**  
+Establecer una política de mantenimiento preventivo, conservador y de impacto cero en producción:
+1. **Rotación Estricta de Logs de Docker en los 7 Servicios:**
+   - En `docker-compose.yml`, configurar de forma transversal en `web`, `db`, `redis`, `celery_worker`, `celery_beat`, `nginx` y `certbot`:
+     ```yaml
+     logging:
+       driver: "json-file"
+       options:
+         max-size: "10m"
+         max-file: "3"
+     ```
+   - Cada contenedor tiene un tope físico improrrogable de 30 MB (máximo absoluto de 210 MB para todo el clúster de la aplicación).
+2. **Purga Conservadora de Notificaciones Leídas (`clean_old_read_notifications_task`):**
+   - Ubicada en `notifications/tasks.py` y programada a las **03:30 AM** (`crontab(hour=3, minute=30)`).
+   - Criterio de selección estricto: `is_read=True` y `created_at < now - 90d`.
+   - **Preservación Incondicional de No Leídas:** Las notificaciones pendientes de lectura (`is_read=False`) NUNCA se eliminan, garantizando que el usuario no pierda avisos de negocio relevantes.
+   - **Borrado por Lotes Defensivo (Chunking 500):** Se ejecuta en fragmentos de 500 registros con pausas de seguridad, evitando bloqueos de tabla prolongados (*table lock / gap locks* de InnoDB) o saturación del buffer pool de MariaDB.
+3. **Limpieza Defensiva de Archivos Temporales (`clean_temp_media_files_task`):**
+   - Ubicada en `aficionados_network/tasks.py` y programada a las **04:30 AM** (`crontab(hour=4, minute=30)`).
+   - Elimina archivos en `MEDIA_ROOT/temp` con más de 48 horas de antigüedad.
+   - Verificación estricta de límites de ruta (`Path.resolve().relative_to(media_root)`), asegurando que ninguna operación de borrado pueda escapar del subdirectorio temporal.
+4. **Monitorización de Disco a las 05:00 AM (`check_disk_usage_task`):**
+   - Tarea periódica en Celery Beat para registrar el estado de ocupación del disco en el log operativo.
+
+**Consecuencias:**  
+- El almacenamiento de logs de Docker queda rígidamente acotado y no puede provocar caídas por falta de espacio en disco.
+- La tabla `Notification` mantiene un tamaño predecible y óptimo para consultas rápidas en la cabecera del portal.
+- El directorio temporal se depura de forma automática y segura sin riesgo de borrar archivos de producción.
+
+**Alternativas consideradas:**  
+- *Borrado masivo con un único `Notification.objects.filter(...).delete()`:* Descartada porque un DELETE masivo de miles de filas bloquea la tabla en MariaDB, degrada drásticamente la latencia de las vistas de usuario y satura el log de transacciones (undo/redo logs).
+- *Purgar notificaciones independientemente de si fueron leídas:* Descartada por ser una violación de los requisitos de producto: un terapeuta que regresa tras una ausencia prolongada debe encontrar sus notificaciones pendientes intactas.
+
+## D-036: Monitor Proactivo de Almacenamiento en Disco con Despacho de Correo Activo a Superusuarios
+
+**Date:** 2026-11-27  
+**Contexto:**  
+A pesar de contar con rotación de logs de Docker y tareas de limpieza periódica nocturna, servidores de producción autónomos pueden experimentar picos imprevistos de almacenamiento (ej. acumulación de copias de seguridad de base de datos, proliferación de archivos en staging o imágenes no podadas de Docker). La tarea `check_disk_usage_task` únicamente emitía mensajes de registro (`logger.warning` o `logger.error`) en la salida estándar de Celery Beat. En un despliegue en producción sin un operador conectado al terminal de logs las 24 horas, una degradación progresiva de disco pasaría inadvertida hasta provocar la caída del motor MariaDB o la corrupción de transacciones.
+
+**Decisión:**  
+Dotar a `check_disk_usage_task` de un mecanismo de alerta activa, temprana y desatendida mediante correo electrónico corporativo:
+1. **Umbrales Semánticos de Alerta:**
+   - **WARNING (>= 75%):** Nivel de advertencia temprana. Notifica con suficiente antelación para realizar tareas preventivas.
+     * Asunto: `[AVISO] Espacio en disco al {percent_used:.1f}% en Hubs & Clicks`
+   - **CRITICAL (>= 90%):** Nivel de riesgo inminente.
+     * Asunto: `[ALERTA CRÍTICA] Espacio en disco al {percent_used:.1f}% en Hubs & Clicks`
+2. **Selección Inteligente y Resiliente de Destinatarios:**
+   - Consulta dinámica a la base de datos: `User.objects.filter(is_superuser=True, is_active=True).exclude(email="")`.
+   - Fallback de contingencia: si no existen superusuarios activos en base de datos o no tienen email configurado, recurre a las direcciones declaradas en `settings.ADMINS`.
+   - Deduplicación estricta de remitentes mediante `dict.fromkeys(admin_emails)`.
+3. **Cuerpo de Alerta Forense y Guiado Operativo:**
+   - Incluye nivel de severidad, porcentaje exacto de ocupación, espacio usado, libre y total en Gigabytes, y ruta base inspeccionada.
+   - Proporciona un checklist de acciones inmediatas de mitigación:
+     * Purgar imágenes y contenedores dangling (`docker system prune -f`).
+     * Revisar y rotar backups antiguos del sistema.
+     * Inspeccionar almacenamiento y logs en MariaDB.
+   - Enlace directo con botón al panel de administración `/admin/`.
+4. **Manejo Defensivo de Fallos de Envío:**
+   - La lógica de despacho está encapsulada en un bloque `try/except Exception` que registra cualquier eventualidad a nivel `ERROR` sin propagar excepciones que interrumpan la recolección de estadísticas ni la finalización exitosa de la tarea Celery.
+5. **Verificación Automatizada:**
+   - Batería de pruebas en `aficionados_network/tests/test_maintenance_tasks.py` simulando umbrales de 95% (alerta crítica a múltiples superusuarios), 85% (alerta warning con fallback a `settings.ADMINS`), manejo limpio cuando no hay destinatarios, y tolerancia a fallos del servidor SMTP.
+
+**Consecuencias:**  
+- Supervisión proactiva y automática de la infraestructura física del servidor.
+- Notificación inmediata a los administradores antes de que la saturación de disco alcance niveles destructivos.
+- Cero costes adicionales en servicios SaaS externos de monitorización.
+
+**Alternativas consideradas:**  
+- *Alertas vía Webhook de Discord/Slack/Telegram:* Consideradas como futuras extensiones opcionales; el canal de correo corporativo ya está plenamente integrado, probado y garantiza la entrega directa a los administradores del sistema.
+- *Agente de monitorización en el host (ej. Prometheus / Grafana / Zabbix):* Descartada por introducir complejidad operativa excesiva y requerimientos de memoria desproporcionados para la arquitectura actual de la aplicación.
+
 

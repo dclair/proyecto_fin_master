@@ -51,6 +51,13 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
   - Soporte nativo y dinámico en `settings.py` para listas de claves de respaldo mediante la variable de entorno `SECRET_KEY_FALLBACKS`.
   - **Procedimiento de Rotación sin Disrupción:** Permite actualizar `SECRET_KEY` trasladando la clave saliente a `SECRET_KEY_FALLBACKS` y reiniciando contenedores (`docker compose restart web celery_worker celery_beat`). Las sesiones activas y tokens previamente emitidos continúan siendo válidos transparentemente sin forzar cierres de sesión masivos ni invalidar cookies de navegación.
   - **Validación Defensiva en Producción:** Comprobación estricta al iniciar el servidor en producción (`if not DEBUG:`) exigiendo que todas las claves maestras y fallbacks cuenten con un mínimo de 32 caracteres y prohibiendo prefijos triviales de desarrollo (`django-insecure`).
+- **Política Estricta de Sesión (1 Hora Rolling Timeout) y Purgado Nocturno:**
+  - `SESSION_COOKIE_AGE = 3600` (1 hora) con `SESSION_SAVE_EVERY_REQUEST = True` (renovación continua del TTL ante cada petición activa del terapeuta), `SESSION_EXPIRE_AT_BROWSER_CLOSE = True` e invalidación inmediata de cookies con `HttpOnly`.
+  - Expiración formal tras 60 minutos continuos de inactividad con redirección HTTP 302 a `/login/`.
+  - Tarea periódica de Celery Beat a las 03:00 AM (`clear_expired_sessions_task`) ejecutando `clearsessions` con reintentos exponenciales para mantener compacta la tabla `django_session` en MariaDB.
+- **Resolución Inteligente de Dominio en Emails (Anti-example.com):**
+  - Módulo centralizado `aficionados_network/utils/site.py` (`build_absolute_url`, `get_site_domain`) que resuelve canónicamente URLs absolutas para todos los correos transaccionales, señales de bienvenida (`send_welcome_email_on_activation`) y tareas de fondo de Celery, desterrando de forma definitiva el dominio placeholder `example.com`.
+  - Configuración declarativa mediante `SITE_DOMAIN`, `SITE_URL`, `SITE_NAME` y `SITE_PROTOCOL`, migración de datos `profiles/migrations/0012_update_site_domain.py` y comando CLI `update_site`.
 - **Saneamiento Anti-XSS (Doble Barrera):** Motor de sanitización con `nh3` en métodos `save()` de modelos (`Article`, `Event`, `Profile`) con listas blancas rigurosas de etiquetas HTML seguras, y filtro de plantilla personalizado `|sanitize_html`.
 - **Zero-Downtime SSL/TLS Readiness:**
   - Infraestructura preparada para aprovisionar certificados Let's Encrypt mediante el protocolo **ACME Webroot** (`/.well-known/acme-challenge/`), compartiendo volúmenes entre Nginx y Certbot en Docker Compose.
@@ -61,9 +68,15 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
 
 ### 5. Directorio de Terapeutas, Mercadillo y Biblioteca Clínica
 - **Comunidad de Profesionales:** Exploración fluida mediante scroll infinito (HTMX) y búsqueda multi-campo. Privacidad de contacto (teléfono, email, dirección) reservada a miembros registrados.
+- **Selector Accesible de Terapias con TomSelect:** Integración en la edición de perfil (`profile_edit.html`) de TomSelect 2.2.2 con filtrado en tiempo real, ordenación alfabética ascendente automática (`sortField: text, asc`), botón de borrado y compatibilidad total con temas claro/oscuro.
 - **Canal Oficial "Ágora" (`slug="agora"`):** Categoría institucional reservada exclusivamente para directiva (`is_staff`) blindada transversalmente en Posts, Biblioteca Clínica y Anuncios del Mercadillo, asignada automáticamente a todos los usuarios registrados y fijada prioritariamente al inicio de los feeds de la plataforma.
 - **Biblioteca de Casos Clínicos y Artículos:** Publicaciones de divulgación técnica con editor enriquecido TinyMCE, extracción y decodificación universal de entidades HTML (`plain_text_summary`), y sistema de comentarios y valoraciones integrado con el `NotificationDispatcher`.
-- **Mercadillo de Profesionales:** Directorio de compra, venta, alquiler e intercambio de material y espacios terapéuticos, con enlaces directos a salas de chat privadas y sistema de valoraciones (reviews de 1 a 5 estrellas).
+- **Mercadillo con Ciclo de Vida Automatizado (90 Días) y Limpieza de Media:**
+  - Directorio de compra, venta, alquiler e intercambio con enlaces directos a chat privado y reviews entre terapeutas.
+  - **Aviso Preventivo Idempotente (83 Días):** Alerta por correo 7 días antes de la caducidad rastreada en el modelo (`expiration_warning_sent=True`) para permitir la renovación del anuncio.
+  - **Hard Delete a los 90 Días:** Eliminación definitiva desatendida vía Celery Beat a las 04:00 AM (`manage_marketplace_lifecycle_task`).
+  - **Destrucción Física de Archivos en Disco:** Señal `post_delete` en `marketplace/signals.py` que purga físicamente los archivos de fotos y videos asociados en el almacenamiento (`default_storage.delete()`) tanto en eliminaciones automáticas como manuales.
+  - Soporte de simulación segura mediante el flag `--dry-run`.
 
 ### 6. Sistema de Temas Unificado (Light & Dark) y Contraste Semántico (WCAG AA/AAA) 🎨
 - **Jerarquía Tonal Semántica Bootstrap 5.3:** Tokens semánticos estandarizados (`--bs-body-bg`, `--bs-card-bg`, `--bs-tertiary-bg`, `--bs-body-color`, `--bs-border-color`) eliminando clases rígidas como `bg-white`, `bg-light` y `text-dark` en más de 35 templates Django.
@@ -88,6 +101,23 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
   - **403 (`403.html`):** Página corporativa de acceso denegado con iconografía de blindaje (`bi-shield-lock-fill`) para señalizar claramente restricciones de autorización.
   - **500 Autocontenida (`500.html`):** Plantilla de arquitectura ultra-defensiva que **no** hereda de `layout.html`, no utiliza tags estáticos (`{% static %}`) ni realiza consultas a base de datos u ORM. Utiliza estilos inline y CDN aislado, garantizando renderizado infalible ante caídas de la base de datos MariaDB o saturación del servidor.
 
+### 8. Mantenimiento Autónomo de Producción y Monitoreo Proactivo de Infraestructura ⚙️
+- **Cronograma Nocturno Celery Beat Escalonado (03:00 - 05:00 AM):**
+  | Horario (UTC) | Tarea | Acción de Mantenimiento |
+  | :--- | :--- | :--- |
+  | **03:00 AM** | `clear_expired_sessions_task` | Purgado de sesiones expiradas en `django_session` vía `clearsessions` con reintentos exponenciales. |
+  | **03:30 AM** | `clean_old_read_notifications_task` | Purga conservadora de notificaciones leídas (`is_read=True`) > 90 días en lotes de 500 registros para proteger InnoDB en MariaDB. Preserva incondicionalmente no leídas. |
+  | **04:00 AM** | `manage_marketplace_lifecycle_task` | Ciclo de vida del mercadillo: advertencia a los 83 días (idempotente) y hard delete a los 90 días con borrado físico de fotos y videos vía `post_delete`. |
+  | **04:30 AM** | `clean_temp_media_files_task` | Limpieza segura de archivos huérfanos en `MEDIA_ROOT/temp/` (> 48h) con verificación estricta de rutas relativas. |
+  | **05:00 AM** | `check_disk_usage_task` | Inspección de espacio en disco en el sistema de archivos con despacho automático de correos a superusuarios ante umbrales de alerta. |
+  | **08:00 AM** | `send_event_reminders_task` | Envío de recordatorios 24h a participantes de eventos con garantía zero-duplicates (`reminder_sent`). |
+- **Alertas Proactivas por Correo ante Saturación de Disco:**
+  - Despacho automático de correo HTML con métricas a todos los superusuarios activos (con fallback a `settings.ADMINS`) ante umbrales del **75% (WARNING)** y **90% (CRITICAL)**.
+  - El reporte incluye desglose en Gigabytes (usado, libre y total), severidad, ruta verificada y checklist de acciones de mitigación recomendadas (`docker system prune -f`, rotar backups, inspeccionar MariaDB) con enlace directo al `/admin/`.
+- **Rotación Estricta de Logs de Docker:**
+  - Configuración del driver `json-file` con `max-size: "10m"` y `max-file: "3"` en los 7 servicios del clúster (`web`, `db`, `redis`, `celery_worker`, `celery_beat`, `nginx`, `certbot`).
+  - Límite físico absoluto de 30 MB por servicio y 210 MB para toda la infraestructura en producción, eliminando el riesgo de desbordamiento de disco por logs.
+
 ---
 
 ## 💻 Stack Tecnológico
@@ -99,13 +129,13 @@ Hubs&Clicks es una plataforma web de carácter privado, diseñada para conectar 
 | **Base de Datos** | MariaDB 10.11 / SQLite 3 | MariaDB en producción con charset `utf8mb4`; SQLite para desarrollo local y tests rápidos en memoria. |
 | **Broker & Caché** | Redis 7 Alpine | Canal de transporte para Django Channels y broker/backend de Celery. |
 | **Tareas Asíncronas** | Celery 5.7+ Worker | Encolado de emails corporativos y notificaciones pesadas con reintentos exponenciales. |
-| **Programador Periódico** | Celery Beat | Ejecución programada de recordatorios de eventos 24h a las 08:00 AM. |
+| **Programador Periódico** | Celery Beat | Orquestación escalonada de 6 tareas nocturnas de mantenimiento (sesiones, notificaciones, mercadillo, temporales, monitor de disco) y recordatorios matutinos. |
 | **Proxy & Servidor Web** | Nginx 1.25 Alpine | Reverse proxy, terminación SSL/TLS, Rate Limiting por capas, CSP Sandbox y `X-Accel-Redirect`. |
 | **Certificados SSL** | Certbot (Let's Encrypt) | Emisión y renovación automática de certificados SSL/TLS con Zero-Downtime Webroot. |
 | **Frontend Chat** | React 19, TypeScript 5+, Vite 8 | Módulo de chat en tiempo real 100% tipado, empaquetado como bundle optimizado. |
 | **Frontend Web** | Bootstrap 5.3, HTMX, Vanilla JS | Renderizado server-side accesible, scroll infinito y modo oscuro armonizado. |
 | **Seguridad & Media** | `nh3`, Pillow 10+ | Sanitización estricta de HTML, validación binaria EXIF y defensa en profundidad. |
-| **Calidad & Testing** | Django Test Runner, TypeScript Compiler | 135 tests unitarios/integración en ~4.5s (100% GREEN) + `tsc --noEmit`. |
+| **Calidad & Testing** | Django Test Runner, TypeScript Compiler | 173 tests unitarios/integración en ~5.0s (100% GREEN) + `tsc --noEmit`. |
 
 ---
 
@@ -119,10 +149,13 @@ services:
   db:            # MariaDB 10.11 con almacenamiento persistente en 'db_data'
   redis:         # Redis 7 Alpine para Channels y Celery
   celery_worker: # Worker Celery para tareas de email y notificaciones
-  celery_beat:   # Programador Celery Beat para recordatorios de eventos 24h
+  celery_beat:   # Programador Celery Beat para ciclo de vida y tareas de mantenimiento
   nginx:         # Proxy inverso Nginx 1.25 (puertos 80, 8000, 443) con X-Accel-Redirect
   certbot:       # Cliente ACME para emisión y renovación automática cada 12h
 ```
+
+> [!NOTE]
+> **Política de Rotación de Logs de Docker:** Todos los servicios (los 7 contenedores) integran de forma nativa la directiva de logging con driver `json-file` (`max-size: "10m"`, `max-file: "3"`), limitando el espacio de logs a un tope estricto de 30 MB por servicio y un máximo de 210 MB para toda la infraestructura en producción, previniendo saturaciones catastróficas de disco.
 
 ---
 
@@ -211,12 +244,12 @@ El proyecto cuenta con una batería de pruebas rigurosa que cubre modelos, servi
 ### 1. Tests Unitarios y de Integración (Backend)
 Configurados con aceleración en memoria (`MD5PasswordHasher`, `InMemoryChannelLayer`, `CELERY_TASK_ALWAYS_EAGER`):
 ```bash
-# Ejecución con el entorno virtual activo (135 tests)
+# Ejecución con el entorno virtual activo (173 tests)
 DB_ENGINE=sqlite ./env/bin/python manage.py test
 ```
 *Salida esperada:*
 ```text
-Ran 135 tests in ~4.5s
+Ran 173 tests in ~5.0s
 OK
 ```
 
@@ -239,6 +272,24 @@ npm run build
 
 ---
 
+## 🛠️ Comandos de Gestión y Mantenimiento
+
+Para la administración periódica y operativa del sistema en desarrollo y producción:
+
+```bash
+# 1. Actualizar o corregir dominio en django.contrib.sites (desdestierra example.com)
+python manage.py update_site --domain tudominio.com --name "Hubs & Clicks"
+
+# 2. Gestión manual o simulación del ciclo de vida del mercadillo (83d aviso / 90d hard delete)
+python manage.py manage_marketplace_lifecycle --dry-run   # Modo simulación
+python manage.py manage_marketplace_lifecycle             # Ejecución real
+
+# 3. Purgar manualmente sesiones expiradas de la base de datos
+python manage.py clearsessions
+```
+
+---
+
 ## 📱 Acceso Multi-Dispositivo y Testing en Móviles (Red Local)
 
 El proyecto incluye detección automática de la dirección IP local de tu máquina de desarrollo:
@@ -252,7 +303,7 @@ El proyecto incluye detección automática de la dirección IP local de tu máqu
 Para desplegar en servidores de producción (ej. Oracle Cloud, Ubuntu Server):
 
 1. **Configurar `.env.prod`:**
-   Asegurar las credenciales de MariaDB, clave secreta de producción, credenciales de Gmail SMTP (`EMAIL_HOST_PASSWORD`) y hosts permitidos.
+   Asegurar las credenciales de MariaDB, clave secreta de producción, credenciales de Gmail SMTP (`EMAIL_HOST_PASSWORD`), hosts permitidos y configuración del sitio (`SITE_DOMAIN`, `SITE_URL`).
 
 2. **Construir y Levantar Contenedores:**
    ```bash
@@ -274,18 +325,24 @@ Para desplegar en servidores de producción (ej. Oracle Cloud, Ubuntu Server):
 ## 🏆 Roadmap de Madurez Técnica (100% Completado)
 
 - [x] **Arquitectura Asíncrona Resiliente:** Celery 5.7+ con Redis y reintentos exponenciales para emails transaccionales.
-- [x] **Celery Beat Scheduler:** Recordatorios automáticos de eventos 24h a las 08:00 AM con estricta idempotencia multinivel.
+- [x] **Celery Beat Scheduler Escalonado:** 6 tareas programadas cubriendo ciclo de vida del mercadillo, sesiones, notificaciones, temporales, alertas de disco y recordatorios 24h.
 - [x] **Despachador Centralizado (`NotificationDispatcher`):** Servicio orquestador para avisos in-app y alertas por correo en todas las interacciones de negocio.
 - [x] **Frontend 100% Strict TypeScript:** React 19 + TypeScript con tipado riguroso, contratos formales y Capa Anti-Corrupción (`httpClient.ts`).
 - [x] **Seguridad de Archivos y Anti-IDOR:** Bloqueo de acceso directo en Nginx y descarga validada con `X-Accel-Redirect`, comprobación binaria de magic bytes y eliminación de metadatos EXIF con Pillow.
 - [x] **Hardening OWASP:** Saneamiento Stored XSS con `nh3`, mitigación de CSWSH en ASGI, Rate Limiting en Nginx y purga de secretos.
 - [x] **Zero-Downtime SSL Readiness:** Nginx configurado con ACME challenge webroot, servicio Certbot en Docker Compose y plantilla de producción lista.
-- [x] **Suite de Tests Exhaustiva:** 135 tests automatizados ejecutados en ~4.5s con 100% de éxito.
+- [x] **Suite de Tests Exhaustiva:** 173 tests automatizados ejecutados en ~5.0s con 100% de éxito.
 - [x] **Defensa en Profundidad y Rate Limiting:** Doble barrera Nginx (`auth_limit`, `api_limit`) + Throttling en DRF (`AnonRateThrottle`, `UserRateThrottle`).
 - [x] **Control de Acceso Anti-IDOR/BOLA:** Rechazo terminante con `HTTP 403 Forbidden` en Chat API y verificación estricta de autoría en Biblioteca, Posts y Eventos.
 - [x] **Rotación Zero-Downtime de Secretos:** Soporte nativo para `SECRET_KEY_FALLBACKS` con validación defensiva en arranque de producción.
 - [x] **Páginas de Error Corporativas Resilientes:** 404 y 403 tematizadas, y página 500 autocontenida inmune a caídas de base de datos.
 - [x] **Footer Botánico de Alto Contraste:** Rediseño arquitectónico (`.footer-hubs`) con anclaje visual verde bosque y accesibilidad WCAG AAA.
+- [x] **Resolución Inteligente de Dominio en Emails:** Prevención absoluta de `example.com` con `SITE_DOMAIN`, `SITE_URL` y comando `update_site`.
+- [x] **Seguridad de Sesiones y Rolling Timeout 1h:** Inactividad máxima de 60 minutos y purga periódica a las 03:00 AM vía `clearsessions`.
+- [x] **Ciclo de Vida del Mercadillo e Idempotencia:** Hard delete a 90 días, aviso previo a 83 días y purga física de media vía señal `post_delete`.
+- [x] **Rotación Estricta de Logs de Docker:** Límite `10m x 3` (máx. 210 MB) transversal en los 7 contenedores.
+- [x] **Monitoreo Proactivo de Almacenamiento en Disco:** Alertas automáticas por email a superusuarios ante umbrales del 75% (WARNING) y 90% (CRITICAL).
+- [x] **Selector TomSelect Accesible en Perfil:** Búsqueda en vivo y ordenación alfabética en `profile_edit.html`.
 
 ---
 
